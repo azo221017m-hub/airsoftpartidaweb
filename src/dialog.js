@@ -29,6 +29,36 @@ let _stopTyping  = null;
 let _onClose     = null;
 let _initialized = false;
 
+// ── Persistencia "Omitir intro" ──────────────────────────────
+const LS_SEEN_KEY = 'atc_intro_seen';    // el usuario completó el intro
+const LS_SKIP_KEY = 'atc_intro_skip';    // el usuario activó "omitir"
+
+function _introSeen()    { return localStorage.getItem(LS_SEEN_KEY) === '1'; }
+function _introSkip()    { return localStorage.getItem(LS_SKIP_KEY) === '1'; }
+function _markIntroSeen(){ localStorage.setItem(LS_SEEN_KEY, '1'); }
+
+function _syncSkipLabel() {
+  const label = document.getElementById('dialog-skip-label');
+  const check = document.getElementById('dialog-skip-check');
+  if (!label || !check) return;
+  // Solo visible si el intro ya fue visto al menos una vez
+  if (_introSeen()) {
+    label.style.display = 'flex';
+    check.checked = _introSkip();
+  } else {
+    label.style.display = 'none';
+  }
+}
+
+function _bindSkipCheck() {
+  const check = document.getElementById('dialog-skip-check');
+  if (!check || check.dataset.bound) return;
+  check.dataset.bound = '1';
+  check.addEventListener('change', () => {
+    localStorage.setItem(LS_SKIP_KEY, check.checked ? '1' : '0');
+  });
+}
+
 // ── Typewriter ───────────────────────────────────────────────
 const TYPEWRITER_SPEED = 26;
 
@@ -171,6 +201,9 @@ export function showDialog(lines, opts = {}) {
     _initialized = true;
   }
 
+  _bindSkipCheck();
+  _syncSkipLabel();
+
   showLine(0);
 }
 
@@ -203,6 +236,9 @@ export function nextDialog() {
   if (_index < _lines.length) {
     showLine(_index);
   } else {
+    // Llegó al final — marcar intro como visto y sincronizar label
+    _markIntroSeen();
+    _syncSkipLabel();
     closeDialog();
   }
 }
@@ -227,6 +263,9 @@ function _bindEvents() {
 //  "INMORTALES EN EL TABLERO"
 // ════════════════════════════════════════════════════════════
 export function demoDialog() {
+  // Si el usuario ya vio el intro y tiene "Omitir intro" activado, no mostrar
+  if (_introSeen() && _introSkip()) return;
+
   showDialog([
 
     // ── INTRO SISTEMA ────────────────────────────────────
