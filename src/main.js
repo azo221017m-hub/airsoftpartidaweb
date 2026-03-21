@@ -369,10 +369,10 @@ function setupSocket() {
     $('gameover-msg').textContent = msg || `El equipo ${winner.toUpperCase()} ha eliminado a todos los enemigos`;
     $('btn-codigo-negro').style.display = 'none';
 
-    // Botón "Una partida más" visible solo si la serie no terminó
-    $('btn-restart').style.display = seriesWinner ? 'none' : 'inline-block';
-    // Botón "última partida" siempre visible
-    $('btn-last-game').style.display = 'inline-block';
+    // Mostrar "Continuar Partida" solo si la serie aún no ha terminado
+    const seriesComplete = seriesWinner !== null || currentRound >= 3;
+    $('btn-continue-round').style.display = seriesComplete ? 'none' : 'inline-block';
+    $('btn-restart').style.display        = seriesComplete ? 'inline-block' : 'none';
 
     _updateSeriesScoreboard();
     showScreen('gameover-screen');
@@ -901,11 +901,11 @@ function showEliminatedPopup() {
 }
 
 // ─── Game over buttons ────────────────────────────────────────────────────────
-$('btn-restart').addEventListener('click', () => {
-  // Limpiar selección y estado pendiente antes de reiniciar
+
+// "Continuar Partida" → avanza a la siguiente ronda dentro de la serie
+$('btn-continue-round').addEventListener('click', () => {
   selectedUnitId = null;
   pendingAction = null;
-  // Resetear ventajas tácticas para la nueva ronda
   expAccumulated = 0;
   tacticalAdvantages = {
     armor: { unlocked: false, active: false, turnsRemaining: 0 },
@@ -913,24 +913,12 @@ $('btn-restart').addEventListener('click', () => {
     camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
     radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
-
-  // Si la serie está completa (alguien ganó 2), reiniciar serie
-  const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
-  if (seriesWinner || currentRound >= 3) {
-    currentRound = 0;
-    seriesScore = { alpha: 0, bravo: 0 };
-    seriesFirstTeam = null;
-    seriesActive = false;
-    // Mostrar diálogo de nueva serie antes de empezar
-    matchSeriesInfoDialog(() => socket.emit('restart_game'));
-  } else {
-    socket.emit('restart_game');
-  }
+  socket.emit('restart_game');
   showScreen('game-screen');
 });
 
-// "¡Una última partida!" → siempre lanza partida contra IA
-$('btn-last-game').addEventListener('click', () => {
+// "Una Partida mas" → reinicia la serie completa
+$('btn-restart').addEventListener('click', () => {
   selectedUnitId = null;
   pendingAction = null;
   expAccumulated = 0;
@@ -940,20 +928,14 @@ $('btn-last-game').addEventListener('click', () => {
     camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
     radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
-  // Reiniciar serie para la nueva partida IA
   currentRound = 0;
   seriesScore = { alpha: 0, bravo: 0 };
   seriesFirstTeam = null;
   seriesActive = false;
-  // Desconectar socket actual si existía y crear uno nuevo contra IA
-  if (socket) { socket.disconnect(); socket = null; }
-  renderer = null;
-  _gameButtonsInitialized = false;
-  isAIGame = true;
-  // Reconectar y lanzar contra IA
-  socket = io({ transports: ['websocket', 'polling'] });
-  setupSocket();
-  socket.emit('join_ai_game', { playerName: myName || 'Operador', gameLevel });
+  matchSeriesInfoDialog(() => {
+    socket.emit('restart_game');
+    showScreen('game-screen');
+  });
 });
 
 $('btn-lobby').addEventListener('click', () => {

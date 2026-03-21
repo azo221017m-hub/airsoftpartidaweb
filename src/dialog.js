@@ -268,144 +268,84 @@ export function demoDialog() {
 
   showDialog([
 
-    // ── INTRO SISTEMA ────────────────────────────────────
+    // ── INTRO ────────────────────────────────────────────
     {
-      name:  'SISTEMA · AIRSOFT TACTICAL',
-      emoji: '🎮',
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
       side:  'left',
-      theme: 'alpha',
-      text:  '... INICIALIZANDO SISTEMA DE COMBATE ...\nBienvenido, OPERADOR. El tablero de batalla te espera.',
+      theme: 'neutral',
+      text:  'SISTEMA DE COMBATE INICIADO\nBienvenido, OPERADOR. El tablero de batalla te espera.',
     },
     {
-      name:  'SISTEMA · AIRSOFT TACTICAL',
-      emoji: '🎮',
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
       side:  'right',
-      theme: 'alpha',
-      text:  'Temporada 1 — DÍA 0.\nMisión: eliminar a 100 INMORTALES del tablero.',
+      theme: 'neutral',
+      text:  'Temporada 1 — DIA 0\nMision: eliminar a todos los enemigos del tablero.',
     },
 
     // ── LOS INMORTALES ───────────────────────────────────
     {
-      name:  'OCELOT · Líder Unidad Montaña',
-      emoji: '🐆',
-      side:  'left',
-      theme: 'alpha',
-      text:  'Operador... los Inmortales son el mal del airsoft.\nSe han reportado varios en el tablero. No tienen equipo. No tienen honor.',
-    },
-    {
-      name:  'FINER · Líder Unidad Asalto',
-      emoji: '⚔️',
-      side:  'right',
-      theme: 'bravo',
-      text:  '¡Son peligrosos! PS alto y estrategia secreta.\nNo los subestimes, operador.',
-    },
-    {
-      name:  'SISTEMA · AIRSOFT TACTICAL',
-      emoji: '🎮',
-      side:  'left',
-      theme: 'alpha',
-      text:  'Los primeros 50 jugadores que eliminen 100 Inmortales\nrecibirán la insignia ⭐ AIRSOFT TACTICAL CHESS.',
-    },
-
-    // ── SPECTRUM AIRSOFT ─────────────────────────────────
-    {
-      name:  'SPECTRUM AIRSOFT',
+      name:  'OCELOT · Lider Unidad Montana',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'alpha',
-      text:  'Somos SPECTRUM AIRSOFT IXTAPALUCA.\nDos unidades élite. Un solo objetivo: limpiar el tablero.',
+      text:  'Operador... los Inmortales son el mal del airsoft.\nSin equipo. Sin honor. Eliminamos a todos.',
+    },
+    {
+      name:  'FINER · Lider Unidad Asalto',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'bravo',
+      text:  'Son peligrosos. PS alto y estrategia secreta.\nNo los subestimes, operador.',
     },
     {
       name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
-      side:  'right',
-      theme: 'alpha',
-      text:  'Unidad MONTAÑA — terreno difícil.\nUnidad ASALTO — combate directo y contundente.',
-    },
-
-    // ── UNIDAD ASALTO ────────────────────────────────────
-    {
-      name:  'FINER · Líder Unidad Asalto',
-      emoji: '⚔️',
-      side:  'left',
-      theme: 'bravo',
-      text:  'Soy FINER, líder de la Unidad Asalto.\nMi batallón: YUL y YAYO. Entramos primero, salimos últimos.',
-    },
-    {
-      name:  'YUL · Explorador',
-      emoji: '🏃',
-      side:  'right',
-      theme: 'alpha',
-      text:  'YUL — EXPLORADOR\n────────────────\nPS: 2  |  FPS: 1\nAlcance: 3  |  Mov: 4\nRápido. Siempre delante.',
-    },
-    {
-      name:  'YAYO · Francotirador',
-      emoji: '🎯',
-      side:  'left',
-      theme: 'alpha',
-      text:  'YAYO — FRANCOTIRADOR\n────────────────────\nPS: 2  |  FPS: 2\nAlcance: 9  |  Mov: 1\nUn disparo. Una eliminación.',
-    },
-
-    // ── UNIDAD MONTAÑA ───────────────────────────────────
-    {
-      name:  'OCELOT · Líder Unidad Montaña',
-      emoji: '🐆',
-      side:  'right',
-      theme: 'alpha',
-      text:  'OCELOT al frente. Líder de la Unidad Montaña.\nMi batallón: SNIP3R y ANIQUILADOR.',
-    },
-    {
-      name:  'SNIP3R · Francotirador',
-      emoji: '🔭',
       side:  'left',
       theme: 'neutral',
-      text:  'SNIP3R — FRANCOTIRADOR\n──────────────────────\nPS: 2  |  FPS: 2\nAlcance: 9  |  Mov: 1\nSi me ves... ya es demasiado tarde.',
-    },
-    {
-      name:  'ANIQUILADOR · Asalto',
-      emoji: '💥',
-      side:  'right',
-      theme: 'bravo',
-      text:  'ANIQUILADOR — ASALTO\n────────────────────\nPS: 3  |  FPS: 1\nAlcance: 4  |  Mov: 2\nBlindado. Imparable. Listo para el caos.',
+      text:  'Los primeros jugadores que eliminen 100 Inmortales\nrecibirán la insignia AIRSOFT TACTICAL CHESS.',
     },
 
-    // ── REGLAS DE COMBATE ─────────────────────────────────
+    // ── UNIDADES ─────────────────────────────────────────
     {
-      name:  'SISTEMA · REGLAS DE COMBATE',
-      emoji: '📋',
-      side:  'left',
-      theme: 'alpha',
-      text:  'REGLAS:\n• 1 BBs = 1 disparo\n• Inicio: 100 BBs por partida\n• Blindaje (Bln): reduce 0.5 PS de daño',
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'neutral',
+      text:  'Dos unidades elite. Un solo objetivo.\nUnidad MONTANA — Equipo ALPHA\nUnidad ASALTO — Equipo BRAVO',
     },
     {
-      name:  'SISTEMA · REGLAS DE COMBATE',
-      emoji: '📋',
-      side:  'right',
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
       theme: 'alpha',
-      text:  'Observa el tablero.\nMemoriza posiciones. Crea tu estrategia.\nDerrota al contrario... o serás el derrotado.',
+      text:  'EXPLORADORES: rapidos, movimiento 4\nARTILLERIA: resistentes, PS 3\nFRANCOTIRADORES: larga distancia, alcance 9',
+    },
+
+    // ── REGLAS ────────────────────────────────────────────
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'neutral',
+      text:  'REGLAS DE COMBATE:\n1 disparo por turno por unidad\nCobertura reduce dano recibido\nGana quien elimine a todo el equipo rival',
+    },
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  'FORMATO DE SERIE: 3 RONDAS\nGana la serie quien conquiste 2 rondas\nElije tu equipo y entra al combate.',
     },
 
     // ── CIERRE ────────────────────────────────────────────
     {
-      name:  'OCELOT · Líder Unidad Montaña',
-      emoji: '🐆',
-      side:  'left',
-      theme: 'alpha',
-      text:  'Durante nuestros entrenamientos aparecieron los primeros Inmortales.\nNo fue un accidente. Alguien los envió.',
-    },
-    {
-      name:  'FINER · Líder Unidad Asalto',
-      emoji: '⚔️',
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
       side:  'right',
-      theme: 'bravo',
-      text:  '¡100 Inmortales en el tablero, operador!\n¿Estás listo para la cacería?\n¡SPECTRUM no se rinde!',
-    },
-    {
-      name:  'SISTEMA · AIRSOFT TACTICAL',
-      emoji: '🎮',
-      side:  'left',
-      theme: 'alpha',
-      text:  '[ DÍA 0 — MISIÓN INICIADA ]\n\nElige tu equipo. Entra al combate.\n¡El tablero espera, OPERADOR! ☠️',
+      theme: 'neutral',
+      text:  'DIA 0 — MISION INICIADA\n\nElige tu equipo. Entra al combate.\nEl tablero espera, OPERADOR.',
     },
 
   ]);
@@ -447,25 +387,25 @@ export function creditsDialog() {
 export function matchSeriesInfoDialog(onClose) {
   showDialog([
     {
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  '⚔️ FORMATO DE PARTIDA ⚔️\n¡Bienvenidos al campo de batalla!\nSe disputarán 3 RONDAS. Gana la serie quien conquiste 2 rondas.',
+      text:  'FORMATO DE PARTIDA\nBienvenidos al campo de batalla.\nSe disputarán 3 RONDAS. Gana la serie quien conquiste 2 rondas.',
     },
     {
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  '📋 REGLAS DE INICIO:\n• Ronda 1 — inicia al AZAR\n• Ronda 2 — inicia el otro equipo\n• Ronda 3 — inicia quien tenga más PS total en sus unidades',
+      text:  'REGLAS DE INICIO:\n- Ronda 1: inicia al AZAR\n- Ronda 2: inicia el otro equipo\n- Ronda 3: inicia quien tenga más PS total en sus unidades',
     },
     {
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  '🏆 Gana la SERIE quien gane 2 de 3 rondas.\n\n¡Estrategia, trabajo en equipo y puntería!\n¡Prepárense, operadores!',
+      text:  'Gana la SERIE quien gane 2 de 3 rondas.\n\nEstrategia, trabajo en equipo y puntería.\nPrepárense, operadores.',
     },
   ], { onClose });
 }
@@ -480,23 +420,24 @@ export function matchSeriesInfoDialog(onClose) {
  * @param {Function} onClose
  */
 export function roundStartDialog(roundNum, startingTeam, reason, onClose) {
-  const teamLabel = startingTeam === 'alpha' ? 'EQUIPO ALPHA ⚡' : 'EQUIPO BRAVO 🔴';
+  // alpha = Montaña, bravo = Asalto
+  const teamLabel = startingTeam === 'alpha' ? 'MONTANA ⚡' : 'ASALTO 🔴';
   const teamTheme = startingTeam === 'alpha' ? 'alpha' : 'bravo';
 
   showDialog([
     {
-      name:  `SPECTRUM AIRSOFT · ÁRBITRO`,
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  `🎯 RONDA ${roundNum} DE 3\n\n${reason}`,
+      text:  `RONDA ${roundNum} DE 3\n\n${reason}`,
     },
     {
-      name:  `SPECTRUM AIRSOFT · ÁRBITRO`,
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: teamTheme,
-      text:  `▶ INICIA: ${teamLabel}\n\n¡Preparen sus unidades!\nLa cuenta regresiva está por comenzar...`,
+      text:  `INICIA: UNIDAD ${teamLabel}\n\nPreparen sus unidades.\nLa cuenta regresiva esta por comenzar...`,
     },
   ], { onClose });
 }
@@ -595,43 +536,44 @@ export function showCountdownOverlay(onDone) {
  * @param {Function} onClose
  */
 export function gameOverRoundDialog(winnerTeam, winnerName, roundNum, seriesScore, onClose) {
-  const teamLabel  = winnerTeam === 'alpha' ? 'ALPHA ⚡' : 'BRAVO 🔴';
-  const teamTheme  = winnerTeam === 'alpha' ? 'alpha' : 'bravo';
+  // alpha = Montana, bravo = Asalto
+  const teamLabel    = winnerTeam === 'alpha' ? 'MONTANA ⚡' : 'ASALTO 🔴';
+  const teamTheme    = winnerTeam === 'alpha' ? 'alpha' : 'bravo';
   const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
 
   const lines = [
     {
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: teamTheme,
-      text:  `🏁 ¡JUEGO!  ¡JUEGO!\n\nRonda ${roundNum} terminada.\n${teamLabel} ha ganado esta ronda.`,
+      text:  `JUEGO!  JUEGO!\n\nRonda ${roundNum} terminada.\nUnidad ${teamLabel} gana esta ronda.`,
     },
     {
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  `📊 MARCADOR DE LA SERIE:\n   ALPHA ⚡ ${seriesScore.alpha} — ${seriesScore.bravo} 🔴 BRAVO`,
+      text:  `MARCADOR DE LA SERIE:\n   MONTANA ⚡ ${seriesScore.alpha}  —  ${seriesScore.bravo} 🔴 ASALTO`,
     },
   ];
 
   if (seriesWinner) {
-    const sLabel = seriesWinner === 'alpha' ? 'EQUIPO ALPHA ⚡' : 'EQUIPO BRAVO 🔴';
+    const sLabel = seriesWinner === 'alpha' ? 'UNIDAD MONTANA ⚡' : 'UNIDAD ASALTO 🔴';
     lines.push({
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: seriesWinner === 'alpha' ? 'alpha' : 'bravo',
-      text:  `🏆 ¡¡¡${sLabel} GANA LA SERIE!!!\n\n¡Felicidades ${winnerName}!\n¡Gran combate, operadores!`,
+      text:  `${sLabel} GANA LA SERIE!\n\nFelicidades ${winnerName}!\nGran combate, operadores.`,
     });
   } else {
     lines.push({
-      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  `⚔️ ¡La serie continúa!\nPrepárense para la Ronda ${roundNum + 1}.\n¡No hay descanso en el campo de batalla!`,
+      text:  `La serie continua.\nPrepárense para la Ronda ${roundNum + 1}.\nNo hay descanso en el campo de batalla.`,
     });
   }
 
