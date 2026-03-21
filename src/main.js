@@ -391,7 +391,7 @@ function confirmCoordAction() {
   });
 
   // Flash the target cell
-  renderer.addFlash(xy.x, xy.y, pendingAction === 'shoot' ? '#ff4e4e' : '#00f5ff', 500);
+  renderer.addFlash(xy.x, xy.y, pendingAction === 'shoot' ? '#ff4e4e' : '#AAFF00', 500);
 
   // Clear after action
   pendingAction = null;

@@ -1,8 +1,8 @@
 /* ─── ARCADE NEON THEME ─── */
 :root {
-  --alpha-color: #00f5ff;
-  --alpha-dark: #007acc;
-  --alpha-glow: rgba(0, 245, 255, 0.4);
+  --alpha-color: #AAFF00;
+  --alpha-dark: #6B8E23;
+  --alpha-glow: rgba(170, 255, 0, 0.4);
   --bravo-color: #ff4e4e;
   --bravo-dark: #cc1f1f;
   --bravo-glow: rgba(255, 78, 78, 0.4);
@@ -11,8 +11,8 @@
   --bg-dark: #0a0a12;
   --bg-card: #0e1020;
   --bg-panel: #10121e;
-  --border-dim: rgba(100, 120, 200, 0.2);
-  --border-bright: rgba(100, 120, 200, 0.5);
+  --border-dim: rgba(120, 160, 50, 0.2);
+  --border-bright: rgba(120, 160, 50, 0.5);
   --text-dim: #7a8aaa;
   --text-bright: #d0e0ff;
   --font-arcade: 'Courier New', Courier, monospace;
@@ -68,7 +68,7 @@ html, body {
 .btn-action {
   flex: 1; padding: 10px; font-size: 12px;
 }
-.btn-move { background: rgba(0,245,255,0.1); color: var(--alpha-color); border: 1px solid var(--alpha-color); }
+.btn-move { background: rgba(170,255,0,0.1); color: var(--alpha-color); border: 1px solid var(--alpha-color); }
 .btn-move:hover, .btn-move.active { background: var(--alpha-color); color: #000; box-shadow: 0 0 12px var(--alpha-glow); }
 .btn-shoot { background: rgba(255,78,78,0.1); color: var(--bravo-color); border: 1px solid var(--bravo-color); }
 .btn-shoot:hover, .btn-shoot.active { background: var(--bravo-color); color: #fff; box-shadow: 0 0 12px var(--bravo-glow); }
@@ -98,15 +98,25 @@ html, body {
 /* ─── LOBBY ─── */
 #lobby-screen {
   align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at center, #0d0d2a 0%, #050510 100%);
-  overflow-y: auto;
+  background: url('./spectrumTexcoco.png') no-repeat center center / cover;
+  overflow-y: auto; flex-direction: column;
 }
 .lobby-container {
   display: flex; flex-direction: column; align-items: center; gap: 24px;
-  padding: 40px 20px; max-width: 560px; width: 100%;
+  padding: 40px 20px; max-width: 960px; width: 100%;
+}
+.lobby-content {
+  display: flex; gap: 24px; width: 100%; align-items: center;
+  justify-content: center;
+}
+.lobby-footer {
+  margin-top: auto; padding: 16px; text-align: center;
+  font-size: 12px; letter-spacing: 2px; color: var(--alpha-color);
+  text-shadow: 0 0 10px var(--alpha-glow);
+  width: 100%;
 }
 .logo-area { text-align: center; }
-.logo-icon { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(0,245,255,0.8)); }
+.logo-icon { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(170,255,0,0.8)); }
 .logo-title {
   font-size: clamp(28px, 6vw, 42px); letter-spacing: 6px;
   color: var(--text-bright); text-shadow: 0 0 20px var(--alpha-glow);
@@ -121,8 +131,8 @@ html, body {
 
 .lobby-card {
   background: var(--bg-card); border: 1px solid var(--border-bright);
-  border-radius: 6px; padding: 28px; width: 100%;
-  box-shadow: 0 0 30px rgba(0,100,200,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+  border-radius: 6px; padding: 28px; flex: 1; min-width: 280px; max-width: 400px;
+  box-shadow: 0 0 30px rgba(100,150,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .card-title {
   font-size: 16px; letter-spacing: 3px; color: var(--alpha-color);
@@ -144,7 +154,7 @@ html, body {
   outline: none; border-color: var(--alpha-color);
   box-shadow: 0 0 10px var(--alpha-glow);
 }
-.form-group input::placeholder { color: rgba(0,245,255,0.3); }
+.form-group input::placeholder { color: rgba(170,255,0,0.3); }
 
 #join-btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
 
@@ -163,7 +173,7 @@ html, body {
 
 .lobby-instructions {
   background: var(--bg-panel); border: 1px solid var(--border-dim);
-  border-radius: 6px; padding: 20px; width: 100%;
+  border-radius: 6px; padding: 20px; flex: 1; min-width: 280px; max-width: 400px;
 }
 .lobby-instructions h3 {
   font-size: 13px; letter-spacing: 2px; color: var(--neutral);
@@ -262,14 +272,14 @@ html, body {
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
 .timer-ring { width: 50px; height: 50px; transform: rotate(-90deg); }
-.timer-ring-bg { fill: none; stroke: rgba(100,120,200,0.2); stroke-width: 3; }
+.timer-ring-bg { fill: none; stroke: rgba(120,160,50,0.2); stroke-width: 3; }
 .timer-ring-fill { fill: none; stroke: var(--neutral); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 125.6; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
 .timer-ring-fill.urgent { stroke: var(--bravo-color); }
 
 .hud-current-team {
   font-size: 10px; letter-spacing: 3px; padding: 2px 10px; border-radius: 2px;
 }
-.hud-current-team.team-alpha { color: var(--alpha-color); background: rgba(0,245,255,0.1); border: 1px solid var(--alpha-color); }
+.hud-current-team.team-alpha { color: var(--alpha-color); background: rgba(170,255,0,0.1); border: 1px solid var(--alpha-color); }
 .hud-current-team.team-bravo { color: var(--bravo-color); background: rgba(255,78,78,0.1); border: 1px solid var(--bravo-color); }
 
 /* ─── GAME MAIN ─── */
@@ -299,8 +309,8 @@ html, body {
   border-radius: 4px; padding: 8px 10px; cursor: pointer;
   transition: all 0.15s; position: relative;
 }
-.unit-card:hover { border-color: var(--alpha-color); background: rgba(0,245,255,0.05); }
-.unit-card.selected { border-color: var(--alpha-color); background: rgba(0,245,255,0.1); box-shadow: 0 0 10px var(--alpha-glow); }
+.unit-card:hover { border-color: var(--alpha-color); background: rgba(170,255,0,0.05); }
+.unit-card.selected { border-color: var(--alpha-color); background: rgba(170,255,0,0.1); box-shadow: 0 0 10px var(--alpha-glow); }
 .unit-card.acted { opacity: 0.5; }
 .unit-card.dead { opacity: 0.25; cursor: not-allowed; }
 .unit-card.not-my-turn { cursor: not-allowed; }
@@ -371,7 +381,7 @@ html, body {
 #game-canvas {
   display: block; cursor: crosshair;
   border: 1px solid var(--border-bright);
-  box-shadow: 0 0 20px rgba(0,100,200,0.3), inset 0 0 40px rgba(0,0,0,0.5);
+  box-shadow: 0 0 20px rgba(100,150,0,0.3), inset 0 0 40px rgba(0,0,0,0.5);
   image-rendering: pixelated;
 }
 
@@ -440,6 +450,8 @@ html, body {
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .side-panel { width: 180px; }
+  .lobby-content { flex-direction: column; }
+  .lobby-card, .lobby-instructions { max-width: 100%; }
 }
 @media (max-width: 700px) {
   .side-panel { display: none; }
