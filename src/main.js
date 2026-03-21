@@ -158,10 +158,16 @@ function setupSocket() {
     }
   });
 
-  socket.on('state_update', ({ gameState: gs, players: pl }) => {
+  socket.on('state_update', ({ gameState: gs, players: pl, enemyCamouflage }) => {
     const prevState = gameState;
     gameState = gs;
     players = pl;
+    
+    // Guardar estado de camuflaje enemigo
+    if (typeof enemyCamouflage !== 'undefined') {
+      renderer.enemyCamouflage = enemyCamouflage;
+    }
+    
     renderer.updateState(gs);
     renderHUD();
     renderUnitList();
@@ -291,6 +297,14 @@ function initGame() {
 function renderGridLabels() {
   const gs = gameState.gridSize;
   const cs = renderer.cellSize;
+
+  // En Nivel 2, no mostrar coordenadas
+  if (gameLevel === 2) {
+    $('grid-header').innerHTML = '';
+    $('grid-row-labels').innerHTML = '';
+    $('grid-header').style.width = '0px';
+    return;
+  }
 
   // Column labels (1..15)
   const header = $('grid-header');
@@ -736,15 +750,15 @@ function updateExpBar() {
 }
 
 function checkAdvantageUnlocks() {
-  // Al llegar a 250 o más, resetear EXP y permitir desbloqueo
+  // Al llegar a 250 o más, habilitar selección de UNA ventaja
   if (expAccumulated >= 250) {
-    expAccumulated = 0; // Resetear EXP
-    updateExpBar();
+    // NO resetear EXP aquí, se resetea al seleccionar una ventaja
     
     // Permitir desbloquear una ventaja
     renderAdvantages();
     renderAdvantagesHUD();
-    showStatus('¡250 EXP! Ventaja táctica disponible', 'success');
+    showStatus('¡250 EXP! Selecciona UNA ventaja táctica', 'success');
+    addChat('SISTEMA', 'neutral', `⭐ ${expAccumulated}s EXP — ¡Elige una ventaja!`);
   }
 }
 
@@ -840,9 +854,12 @@ function unlockAdvantage(key) {
   if (tacticalAdvantages[key].unlocked) return;
   if (expAccumulated < 250) return;
   
+  const config = ADVANTAGE_CONFIGS[key];
+  
+  // Desbloquear y activar automáticamente
   tacticalAdvantages[key].unlocked = true;
-  tacticalAdvantages[key].active = false;
-  tacticalAdvantages[key].turnsRemaining = 0;
+  tacticalAdvantages[key].active = true;
+  tacticalAdvantages[key].turnsRemaining = config.duration;
   
   // Resetear EXP después de desbloquear
   expAccumulated = 0;
@@ -850,9 +867,10 @@ function unlockAdvantage(key) {
   
   renderAdvantages();
   renderAdvantagesHUD();
-  const config = ADVANTAGE_CONFIGS[key];
-  showStatus(`${config.name} desbloqueado!`, 'success');
-  addChat('SISTEMA', 'neutral', `🎖 Has desbloqueado: ${config.name}`);
+  applyAdvantageEffects();
+  
+  showStatus(`${config.name} activado! (${config.duration} turno${config.duration > 1 ? 's' : ''})`, 'success');
+  addChat('SISTEMA', 'neutral', `🎖 ${config.name} activado por ${config.duration} turno${config.duration > 1 ? 's' : ''}`);
 }
 
 function toggleAdvantage(key) {
@@ -919,5 +937,12 @@ function applyAdvantageEffects() {
   // Actualizar información de unidades si hay scope activo
   if (tacticalAdvantages.scope.active) {
     renderUnitList();
+  }
+  
+  // Sincronizar camuflaje con el servidor
+  if (socket && gameLevel === 2) {
+    socket.emit('update_tactical_advantages', {
+      camouflage: tacticalAdvantages.camouflage.active
+    });
   }
 }
