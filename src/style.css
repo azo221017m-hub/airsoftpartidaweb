@@ -651,7 +651,10 @@ html, body {
   border-color: var(--border-dim); display: flex; flex-direction: column;
   padding: 12px; gap: 10px; overflow-y: auto; overflow-x: hidden;
 }
-.panel-left { border-right: 1px solid var(--border-dim); }
+.panel-left {
+  border-right: 1px solid var(--border-dim);
+  overflow-y: hidden;
+}
 .panel-right { border-left: 1px solid var(--border-dim); }
 
 .panel-title {
@@ -918,30 +921,27 @@ html, body {
 .gameover-msg { color: var(--text-dim); font-size: 13px; letter-spacing: 1px; margin-bottom: 30px; }
 .gameover-buttons { display: flex; gap: 16px; justify-content: center; }
 
-/* ─── BOTÓN CÓDIGO NEGRO FIJO ─── */
+/* ─── BOTÓN CÓDIGO NEGRO ─── */
 .btn-codigo-negro-fixed {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
+  margin-top: auto;
+  width: 100%;
   background: rgba(20, 0, 0, 0.93);
   color: var(--bravo-color);
   border: 1px solid var(--bravo-color);
   box-shadow: 0 0 14px var(--bravo-glow);
   font-size: 11px;
-  padding: 7px 20px;
+  padding: 9px 12px;
   letter-spacing: 2px;
   opacity: 0.65;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .btn-codigo-negro-fixed:hover {
   opacity: 1;
   background: var(--bravo-color);
   color: #fff;
   box-shadow: 0 0 28px var(--bravo-glow);
-  transform: translateX(-50%) scale(1.04);
 }
 
 /* ─── HIGHLIGHT ANIMATIONS ─── */
