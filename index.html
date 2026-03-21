@@ -34,10 +34,12 @@
       <span class="btn-icon">🎮</span> 3,2,1...JUEGO!!
     </button>
     
-    <!-- Footer -->
+    <!-- Footer créditos -->
     <div class="lobby-footer">
       Hecho por soldado.420 - SpectrumAirsoft
     </div>
+    <!-- Versión — esquina inferior izquierda -->
+    <div class="lobby-version">v26-IA.03.420</div>
 
     <!-- Modal con información del juego -->
     <div id="game-modal" class="game-modal">
@@ -46,8 +48,10 @@
         
         <!-- Logo en el modal -->
         <div class="logo-area">
-          <div class="logo-icon">🎯</div>
-          <h1 class="logo-title">AIRSOFT<span class="logo-accent">TACTICAL</span></h1>
+          <div class="logo-icon">
+            <img src="/spectrumTexcoco.png" alt="Spectrum Airsoft" class="modal-logo-img" />
+          </div>
+          <h1 class="logo-title">AIRSOFT<span class="logo-accent">TACTICAL CHESS</span></h1>
           <p class="logo-sub">JUEGO TÁCTICO MULTIJUGADOR POR COORDENADAS</p>
           <div class="scanline-bar"></div>
         </div>
@@ -78,15 +82,15 @@
                 <div class="instructions-grid">
                   <div class="inst-item">
                     <span class="inst-icon">⚔</span>
-                    <span>Heavy: 3HP, Rango mov.2, Disparo.4</span>
+                    <span>ASALTO: PS:3, Mov:2, Alcance:4</span>
                   </div>
                   <div class="inst-item">
                     <span class="inst-icon">🏃</span>
-                    <span>Scout: 2HP, Rango mov.4, Disparo.3</span>
+                    <span>EXPLORADOR: PS:2, Mov:4, Alcance:3</span>
                   </div>
                   <div class="inst-item">
-                    <span class="inst-icon">🎯</span>
-                    <span>Sniper: 2HP, Rango mov.1, Disparo.9</span>
+                    <span class="inst-icon">🔭</span>
+                    <span>FRANCOTIRADOR: PS:2, Mov:1, Alcance:9</span>
                   </div>
                   <div class="inst-item">
                     <span class="inst-icon">🧱</span>
@@ -270,13 +274,21 @@
   <!-- GAME OVER SCREEN -->
   <div id="gameover-screen" class="screen">
     <div class="gameover-container">
-      <div class="gameover-icon" id="gameover-icon">🏆</div>
-      <h1 class="gameover-title" id="gameover-title">VICTORIA</h1>
-      <h2 class="gameover-team" id="gameover-team">EQUIPO ALPHA</h2>
-      <p class="gameover-msg" id="gameover-msg"></p>
-      <div class="gameover-buttons">
-        <button id="btn-restart" class="btn btn-primary">🔄 Sólo una partida más</button>
-        <button id="btn-lobby" class="btn btn-secondary">🏠 Base Comando</button>
+      <!-- Imagen izquierda -->
+      <div class="gameover-side-img">
+        <img src="/spectrumTexcoco.png" alt="Spectrum Airsoft" class="gameover-spectrum-img" />
+        <div class="gameover-spectrum-scanlines"></div>
+      </div>
+      <!-- Contenido central -->
+      <div class="gameover-content">
+        <div class="gameover-icon" id="gameover-icon">🏆</div>
+        <h1 class="gameover-title" id="gameover-title">VICTORIA</h1>
+        <h2 class="gameover-team" id="gameover-team">EQUIPO ALPHA</h2>
+        <p class="gameover-msg" id="gameover-msg"></p>
+        <div class="gameover-buttons">
+          <button id="btn-restart" class="btn btn-primary">🔄 Sólo una partida más</button>
+          <button id="btn-lobby" class="btn btn-secondary">🏠 Base Comando</button>
+        </div>
       </div>
     </div>
   </div>

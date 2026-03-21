@@ -10,6 +10,8 @@
  *   theme  : 'alpha'|'bravo'|'neutral'
  */
 
+import { startDialogMusic, stopDialogMusic } from './sounds.js';
+
 // ── Referencias DOM ──────────────────────────────────────────
 const overlay   = () => document.getElementById('dialog-overlay');
 const textEl    = () => document.getElementById('dialog-text');
@@ -138,6 +140,7 @@ export function showDialog(lines, opts = {}) {
   if (!ov) return;
 
   ov.style.display = 'flex';
+  startDialogMusic();
 
   if (!_initialized) {
     _bindEvents();
@@ -157,6 +160,7 @@ export function closeDialog() {
   _lines = [];
   _index = 0;
   _typing = false;
+  stopDialogMusic();
   if (_onClose) { _onClose(); _onClose = null; }
 }
 

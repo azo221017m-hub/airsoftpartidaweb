@@ -67,3 +67,76 @@ export function playTimerUrgent() {
 export function playSelect() {
   playTone(700, 'sine', 0.05, 0.1);
 }
+
+// ── MÚSICA DE SISTEMA — Durante diálogos ──────────────────────
+let _dialogMusicNodes = [];
+let _dialogMusicPlaying = false;
+
+export function startDialogMusic() {
+  if (_dialogMusicPlaying) return;
+  _dialogMusicPlaying = true;
+
+  try {
+    const ac = getCtx();
+
+    // Loop principal: patrón de pulso ambiental de sistema
+    function scheduleLoop() {
+      if (!_dialogMusicPlaying) return;
+
+      // Bajo pulso ambiental (pad)
+      const padFreqs = [110, 138, 110, 123];
+      padFreqs.forEach((freq, i) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const t = ac.currentTime + i * 0.8;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.04, t + 0.3);
+        gain.gain.linearRampToValueAtTime(0, t + 0.75);
+        osc.start(t); osc.stop(t + 0.8);
+        _dialogMusicNodes.push(osc);
+      });
+
+      // Arpeggio de sistema (beeps cortos estilo terminal)
+      const arpFreqs = [440, 554, 659, 554];
+      arpFreqs.forEach((freq, i) => {
+        const osc  = ac.createOscillator();
+        const gain = ac.createGain();
+        osc.connect(gain); gain.connect(ac.destination);
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        const t = ac.currentTime + 0.2 + i * 0.55;
+        gain.gain.setValueAtTime(0.03, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.start(t); osc.stop(t + 0.15);
+        _dialogMusicNodes.push(osc);
+      });
+
+      // Pulso de "radar" cada ciclo
+      const radar = ac.createOscillator();
+      const radarGain = ac.createGain();
+      radar.connect(radarGain); radarGain.connect(ac.destination);
+      radar.type = 'sine';
+      radar.frequency.value = 880;
+      const rt = ac.currentTime + 2.0;
+      radarGain.gain.setValueAtTime(0.05, rt);
+      radarGain.gain.exponentialRampToValueAtTime(0.001, rt + 0.08);
+      radar.start(rt); radar.stop(rt + 0.1);
+      _dialogMusicNodes.push(radar);
+
+      // Repetir cada 3.2 segundos
+      const loopTimer = setTimeout(scheduleLoop, 3200);
+      _dialogMusicNodes.push({ stop: () => clearTimeout(loopTimer) });
+    }
+
+    scheduleLoop();
+  } catch (e) { /* silence */ }
+}
+
+export function stopDialogMusic() {
+  _dialogMusicPlaying = false;
+  _dialogMusicNodes.forEach(n => { try { if (n.stop) n.stop(); } catch(e){} });
+  _dialogMusicNodes = [];
+}
