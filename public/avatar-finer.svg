@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" width="128" height="128">
+
+  <!-- ── CASCO NEGRO TÁCTICO ── -->
+  <rect x="7"  y="0"  width="18" height="2"  fill="#22223a"/>
+  <rect x="5"  y="2"  width="22" height="3"  fill="#1a1a2e"/>
+  <rect x="4"  y="4"  width="24" height="2"  fill="#10101e"/>
+  <rect x="3"  y="6"  width="26" height="2"  fill="#08080f"/>
+
+  <!-- ── CARA DELGADA (piel morena oscura) ── -->
+  <rect x="8"  y="8"  width="16" height="14" fill="#8b5e3c"/>
+  <rect x="8"  y="8"  width="2"  height="14" fill="#6e4a2e"/>
+  <rect x="22" y="8"  width="2"  height="14" fill="#6e4a2e"/>
+  <!-- mejillas hundidas -->
+  <rect x="8"  y="14" width="2"  height="4"  fill="#5c3c22"/>
+  <rect x="22" y="14" width="2"  height="4"  fill="#5c3c22"/>
+
+  <!-- ── OJOS NEUTROS (café oscuro, serios) ── -->
+  <rect x="10" y="11" width="4"  height="2"  fill="#4a2e14"/>
+  <rect x="18" y="11" width="4"  height="2"  fill="#4a2e14"/>
+  <!-- pupilas -->
+  <rect x="11" y="11" width="2"  height="2"  fill="#1a0e06"/>
+  <rect x="19" y="11" width="2"  height="2"  fill="#1a0e06"/>
+  <!-- brillo natural -->
+  <rect x="12" y="11" width="1"  height="1"  fill="#c8a070"/>
+  <rect x="20" y="11" width="1"  height="1"  fill="#c8a070"/>
+  <!-- cejas gruesas fruncidas -->
+  <rect x="10" y="10" width="4"  height="1"  fill="#1a0a00"/>
+  <rect x="18" y="10" width="4"  height="1"  fill="#1a0a00"/>
+  <!-- ceño fruncido centro -->
+  <rect x="14" y="10" width="4"  height="1"  fill="#2a1a08"/>
+
+  <!-- ── NARIZ DELGADA ── -->
+  <rect x="15" y="13" width="2"  height="3"  fill="#6e4a2e"/>
+  <rect x="14" y="15" width="4"  height="1"  fill="#5c3c22"/>
+
+  <!-- ── BOCA (apretada, gesto duro) ── -->
+  <rect x="13" y="17" width="6"  height="1"  fill="#3a1a0a"/>
+  <rect x="12" y="18" width="8"  height="1"  fill="#4a2a18"/>
+
+  <!-- ── BARBA DE CANDADO ── -->
+  <rect x="8"  y="14" width="2"  height="8"  fill="#0e0806"/>
+  <rect x="22" y="14" width="2"  height="8"  fill="#0e0806"/>
+  <!-- bigote fino -->
+  <rect x="12" y="16" width="8"  height="1"  fill="#0e0806"/>
+  <!-- chin / candado inferior -->
+  <rect x="11" y="19" width="10" height="2"  fill="#0e0806"/>
+  <rect x="12" y="21" width="8"  height="1"  fill="#1a100a"/>
+  <!-- línea mandíbula -->
+  <rect x="9"  y="22" width="14" height="1"  fill="#0e0806"/>
+  <!-- gap mejillas (candado real) -->
+  <rect x="10" y="14" width="2"  height="5"  fill="#8b5e3c"/>
+  <rect x="20" y="14" width="2"  height="5"  fill="#8b5e3c"/>
+
+  <!-- ── CUELLO DELGADO ── -->
+  <rect x="12" y="22" width="8"  height="3"  fill="#8b5e3c"/>
+  <rect x="12" y="24" width="8"  height="1"  fill="#6e4a2e"/>
+
+  <!-- ── UNIFORME NEGRO / HOMBROS ── -->
+  <rect x="5"  y="25" width="22" height="7"  fill="#1a1a2e"/>
+  <!-- parche rojo izquierdo -->
+  <rect x="6"  y="27" width="5"  height="3"  fill="#8b0000"/>
+  <rect x="7"  y="27" width="3"  height="1"  fill="#cc2020"/>
+  <!-- insignia plateada derecha -->
+  <rect x="21" y="27" width="5"  height="3"  fill="#333355"/>
+  <rect x="22" y="28" width="3"  height="1"  fill="#8888cc"/>
+
+  <!-- ── GOGGLES EN CASCO (neutros, sin LED) ── -->
+  <rect x="4"  y="5"  width="7"  height="3"  fill="#0a0a2a"/>
+  <rect x="5"  y="6"  width="5"  height="2"  fill="#111133"/>
+  <rect x="21" y="5"  width="7"  height="3"  fill="#0a0a2a"/>
+  <rect x="22" y="6"  width="5"  height="2"  fill="#111133"/>
+  <rect x="11" y="6"  width="10" height="1"  fill="#060610"/>
+
+</svg>

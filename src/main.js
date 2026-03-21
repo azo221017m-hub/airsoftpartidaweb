@@ -63,6 +63,14 @@ let tacticalAdvantages = {
 let lastTurnEndTime = 0;
 let maxActiveAdvantages = 2; // Máximo 2 ventajas activas simultáneamente
 
+// ─── Nombre de equipo para mostrar ──────────────────────────────────────────
+function teamDisplayName(team) {
+  return team === 'alpha' ? 'MONTANA' : 'ASALTO';
+}
+
+// ─── Líder seleccionado ───────────────────────────────────────────────────────
+let selectedLeader = null; // 'ocelot' | 'finer'
+
 // ─── Screens ────────────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -105,6 +113,17 @@ document.addEventListener('keydown', (e) => {
 $('btn-credits').addEventListener('click', () => {
   gameModal.classList.remove('active');
   creditsDialog();
+});
+
+// ─── Selección de Líder en modal ─────────────────────────────────────────────
+['leader-ocelot', 'leader-finer'].forEach(id => {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.leader-option').forEach(o => o.classList.remove('selected-leader'));
+    el.classList.add('selected-leader');
+    selectedLeader = el.dataset.leader;
+  });
 });
 
 // ─── Lobby ──────────────────────────────────────────────────────────────────
@@ -249,11 +268,11 @@ function setupSocket() {
       showCountdownOverlay(() => {
         playMysteriousAmbient();
         if (isAIGame) {
-          showStatus(`¡Ronda ${currentRound}! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
-          addChat('SISTEMA', 'neutral', `🤖 Ronda ${currentRound} — Partida contra IA. ALPHA comienza.`);
+          showStatus(`Ronda ${currentRound} — Eres ${teamDisplayName(myTeam)}`, 'success');
+          addChat('SISTEMA', 'neutral', `Ronda ${currentRound} — Partida contra IA. MONTANA comienza.`);
         } else {
-          showStatus(`¡Ronda ${currentRound}! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
-          addChat('SISTEMA', 'neutral', `🎮 Ronda ${currentRound} iniciada. ${startingTeam.toUpperCase()} comienza.`);
+          showStatus(`Ronda ${currentRound} — Eres ${teamDisplayName(myTeam)}`, 'success');
+          addChat('SISTEMA', 'neutral', `Ronda ${currentRound} iniciada. ${teamDisplayName(startingTeam)} comienza.`);
         }
       });
     });
@@ -333,8 +352,8 @@ function setupSocket() {
     }
     
     clearSelection();
-    showStatus(isMyTurn ? '⚡ ¡ES TU TURNO!' : `Turno del equipo ${currentTeam.toUpperCase()}`, isMyTurn ? 'success' : '');
-    addChat('SISTEMA', 'neutral', `🔄 Turno ${turnNumber} — ${currentTeam.toUpperCase()} actúa`);
+    showStatus(isMyTurn ? 'ES TU TURNO!' : `Turno de ${teamDisplayName(currentTeam)}`, isMyTurn ? 'success' : '');
+    addChat('SISTEMA', 'neutral', `Turno ${turnNumber} — ${teamDisplayName(currentTeam)} actua`);
     renderHUD();
     renderUnitList();
   });
@@ -361,12 +380,11 @@ function setupSocket() {
     const winnerName = players.find(p => p.team === winner)?.name || winner.toUpperCase();
     const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
 
-    // Actualizar pantalla de game over
-    $('gameover-title').textContent = seriesWinner ? '¡¡SERIE GANADA!!' : `RONDA ${currentRound}`;
-    $('gameover-team').textContent = `EQUIPO ${winner.toUpperCase()}: ${winnerName}`;
+    $('gameover-title').textContent = seriesWinner ? 'SERIE GANADA' : `RONDA ${currentRound}`;
+    $('gameover-team').textContent = `${teamDisplayName(winner)}: ${winnerName}`;
     $('gameover-team').className = `gameover-team ${winner}`;
     $('gameover-icon').textContent = winner === myTeam ? '🏆' : '💀';
-    $('gameover-msg').textContent = msg || `El equipo ${winner.toUpperCase()} ha eliminado a todos los enemigos`;
+    $('gameover-msg').textContent = msg || `${teamDisplayName(winner)} ha eliminado a todos los enemigos`;
     $('btn-codigo-negro').style.display = 'none';
 
     // Mostrar "Continuar Partida" solo si la serie aún no ha terminado
@@ -733,10 +751,29 @@ function renderHUD() {
   $('hud-turn').textContent = `TURNO ${turnNumber}`;
 
   const ct = $('hud-current-team');
-  ct.textContent = currentTeam.toUpperCase();
+  ct.textContent = teamDisplayName(currentTeam);
   ct.className = `hud-current-team team-${currentTeam}`;
 
   updateTimer(turnTimeLeft ?? 30);
+
+  // Banderas de victoria de ronda
+  ['alpha', 'bravo'].forEach(team => {
+    const flagsEl = $(`hud-round-flags-${team}`);
+    if (flagsEl) {
+      flagsEl.innerHTML = '';
+      const wins = seriesScore[team] || 0;
+      for (let i = 0; i < wins; i++) {
+        const flag = document.createElement('div');
+        flag.className = 'hud-round-flag';
+        flag.title = `${teamDisplayName(team)} ganó ronda ${i + 1}`;
+        const img = document.createElement('img');
+        img.src = '/spectrumTexcoco.png';
+        img.alt = 'victoria';
+        flag.appendChild(img);
+        flagsEl.appendChild(flag);
+      }
+    }
+  });
 
   ['alpha', 'bravo'].forEach(team => {
     const container = $(`hud-${team}-units`);
@@ -745,7 +782,6 @@ function renderHUD() {
       const el = document.createElement('div');
       el.className = `hud-unit ${unit.hp <= 0 ? 'dead' : ''}`;
       const hpClass = getHpClass(unit.hp, unit.maxHp);
-      // Abreviatura táctica: ART / EXP / FRA
       const abbr = { HEAVY: 'ART', SCOUT: 'EXP', SNIPER: 'FRA' }[unit.type] || unit.type.slice(0,3);
       el.innerHTML = `
         <span class="hud-unit-icon">${getUnitIcon(unit.type)}</span>
@@ -794,15 +830,19 @@ function renderUnitList() {
     card.dataset.unitId = unit.id;
     if (unit.id === selectedUnitId) card.classList.add('selected');
 
+    // Nombre del avatar líder según equipo
+    const avatarName = myTeam === 'alpha' ? 'OCELOT' : 'FINER';
+
     card.innerHTML = `
       <div class="unit-card-header">
         <span class="unit-card-icon">${getUnitIcon(unit.type)}</span>
-        <span class="unit-card-name">${unit.name}</span>
+        <span class="unit-card-name">${getUnitTypeName(unit.type)}</span>
         <span class="unit-card-coord">${xyToCoord(unit.x, unit.y)}</span>
       </div>
+      <div class="unit-card-avatar-name">Lider: ${avatarName}</div>
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
-      ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUÓ</div>' : ''}
-      ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">🪨 EN COBERTURA</div>' : ''}
+      ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
+      ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">En cobertura</div>' : ''}
     `;
 
     if (unit.hp > 0 && !unit.acted && isMyTurn) {
@@ -836,6 +876,17 @@ function addChat(from, team, message) {
   const log = $('chat-log');
   log.appendChild(el);
   log.scrollTop = log.scrollHeight;
+
+  // Leer en voz alta solo mensajes reales de jugadores (no SISTEMA)
+  if (team !== 'neutral' && 'speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(`${from}: ${message}`);
+    utterance.lang = 'es-MX';
+    utterance.rate = 1.05;
+    utterance.pitch = 1;
+    utterance.volume = 0.85;
+    window.speechSynthesis.cancel(); // Cancela el anterior si hay uno
+    window.speechSynthesis.speak(utterance);
+  }
 }
 
 function escapeHtml(str) {

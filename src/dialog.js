@@ -64,6 +64,7 @@ const TYPEWRITER_SPEED = 26;
 
 function typeWrite(el, text, onDone) {
   let i = 0;
+  let buf = '';
   el.textContent = '';
   _typing = true;
 
@@ -78,7 +79,8 @@ function typeWrite(el, text, onDone) {
   function tick() {
     if (cancelled) return;
     if (i < text.length) {
-      el.textContent += text[i++];
+      buf += text[i++];
+      el.textContent = buf;   // escribe el buffer completo (no concatena en el DOM)
       setTimeout(tick, TYPEWRITER_SPEED);
     } else {
       _typing = false;
@@ -274,53 +276,55 @@ export function demoDialog() {
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  'SISTEMA DE COMBATE INICIADO\nBienvenido, OPERADOR. El tablero de batalla te espera.',
+      text:  'SISTEMA DE COMBATE INICIADO\nBienvenido, Operador. El tablero de batalla te espera.\nTemporada 1 — DIA 0.',
     },
     {
       name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  'Temporada 1 — DIA 0\nMision: eliminar a todos los enemigos del tablero.',
+      text:  'Mision: Dos unidades elite se enfrentan en el tablero.\nSolo una puede quedar en pie.\nElije tu equipo y entra al combate.',
+    },
+
+    // ── LIDER MONTANA ────────────────────────────────────
+    {
+      name:  'OCELOT — Lider Unidad Montana',
+      img:   '/avatar-ocelot.svg',
+      side:  'left',
+      theme: 'alpha',
+      text:  'Soy OCELOT, lider de la Unidad Montana.\nOpero en terreno abierto. Mis hombres son rapidos y precisos.\nHabilidad: Vision tactica — veo las debilidades del enemigo.',
+    },
+    {
+      name:  'OCELOT — Lider Unidad Montana',
+      img:   '/avatar-ocelot.svg',
+      side:  'left',
+      theme: 'alpha',
+      text:  'UNIDAD MONTANA — EQUIPO ALPHA\n  Explorador: movimiento 4, rapido y silencioso\n  Artilleria: PS alto, resiste impactos\n  Francotirador: alcance 9, letal a distancia',
+    },
+
+    // ── LIDER ASALTO ─────────────────────────────────────
+    {
+      name:  'FINER — Lider Unidad Asalto',
+      img:   '/avatar-finer.svg',
+      side:  'right',
+      theme: 'bravo',
+      text:  'Soy FINER, lider de la Unidad Asalto.\nAtaco rapido, sin piedad, sin avisar.\nHabilidad: Rompedor — penetro coberturas enemigas.',
+    },
+    {
+      name:  'FINER — Lider Unidad Asalto',
+      img:   '/avatar-finer.svg',
+      side:  'right',
+      theme: 'bravo',
+      text:  'UNIDAD ASALTO — EQUIPO BRAVO\n  Explorador: infiltracion rapida, movimiento 4\n  Artilleria: columna vertebral, PS alto\n  Francotirador: control de zona, alcance 9',
     },
 
     // ── LOS INMORTALES ───────────────────────────────────
     {
-      name:  'OCELOT · Lider Unidad Montana',
-      img:   '/spectrumTexcoco.png',
-      side:  'left',
-      theme: 'alpha',
-      text:  'Operador... los Inmortales son el mal del airsoft.\nSin equipo. Sin honor. Eliminamos a todos.',
-    },
-    {
-      name:  'FINER · Lider Unidad Asalto',
-      img:   '/spectrumTexcoco.png',
-      side:  'right',
-      theme: 'bravo',
-      text:  'Son peligrosos. PS alto y estrategia secreta.\nNo los subestimes, operador.',
-    },
-    {
       name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  'Los primeros jugadores que eliminen 100 Inmortales\nrecibirán la insignia AIRSOFT TACTICAL CHESS.',
-    },
-
-    // ── UNIDADES ─────────────────────────────────────────
-    {
-      name:  'SPECTRUM AIRSOFT',
-      img:   '/spectrumTexcoco.png',
-      side:  'right',
-      theme: 'neutral',
-      text:  'Dos unidades elite. Un solo objetivo.\nUnidad MONTANA — Equipo ALPHA\nUnidad ASALTO — Equipo BRAVO',
-    },
-    {
-      name:  'SPECTRUM AIRSOFT',
-      img:   '/spectrumTexcoco.png',
-      side:  'left',
-      theme: 'alpha',
-      text:  'EXPLORADORES: rapidos, movimiento 4\nARTILLERIA: resistentes, PS 3\nFRANCOTIRADORES: larga distancia, alcance 9',
+      text:  'ADVERTENCIA: Los Inmortales son el enemigo del airsoft.\nSin equipo. Sin honor. Solo eliminaciones.\nLos primeros 100 eliminados valen la insignia AIRSOFT TACTICAL CHESS.',
     },
 
     // ── REGLAS ────────────────────────────────────────────
@@ -329,14 +333,14 @@ export function demoDialog() {
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  'REGLAS DE COMBATE:\n1 disparo por turno por unidad\nCobertura reduce dano recibido\nGana quien elimine a todo el equipo rival',
+      text:  'REGLAS DE COMBATE:\n- 1 disparo por turno por unidad\n- Cobertura reduce el dano recibido\n- Gana quien elimine a todo el equipo rival',
     },
     {
       name:  'SPECTRUM AIRSOFT',
       img:   '/spectrumTexcoco.png',
       side:  'left',
       theme: 'neutral',
-      text:  'FORMATO DE SERIE: 3 RONDAS\nGana la serie quien conquiste 2 rondas\nElije tu equipo y entra al combate.',
+      text:  'FORMATO DE SERIE: 3 RONDAS\n- Gana la serie quien conquiste 2 rondas\n- Ronda 1: inicia al azar\n- Ronda 2: inicia el otro equipo\n- Ronda 3: inicia quien tenga mas PS',
     },
 
     // ── CIERRE ────────────────────────────────────────────
@@ -345,7 +349,7 @@ export function demoDialog() {
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  'DIA 0 — MISION INICIADA\n\nElige tu equipo. Entra al combate.\nEl tablero espera, OPERADOR.',
+      text:  'DIA 0 — MISION INICIADA\n\nElige tu equipo. Entra al combate.\nEl tablero espera, Operador.',
     },
 
   ]);

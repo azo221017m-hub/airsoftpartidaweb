@@ -1032,6 +1032,107 @@ html, body {
   margin-left: 6px;
 }
 
+/* ─── BANDERAS DE VICTORIA DE RONDA EN HUD ─── */
+.hud-round-flags {
+  display: flex;
+  gap: 3px;
+  margin: 2px 0;
+  min-height: 16px;
+}
+.hud-round-flag {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 4px rgba(0,0,0,0.6);
+}
+.hud-round-flag img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+/* ─── SELECTOR DE LÍDER EN MODAL ─── */
+.leader-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 6px;
+}
+.leader-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.35);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.leader-option:hover { background: rgba(255,255,255,0.05); }
+.leader-option.selected-leader.leader-alpha {
+  border-color: var(--alpha-color);
+  background: rgba(170,255,0,0.08);
+  box-shadow: 0 0 14px var(--alpha-glow);
+}
+.leader-option.selected-leader.leader-bravo {
+  border-color: var(--bravo-color);
+  background: rgba(255,78,78,0.08);
+  box-shadow: 0 0 14px var(--bravo-glow);
+}
+.leader-avatar {
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: #0a0a0a;
+}
+.leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.leader-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+.leader-team-tag {
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.alpha-tag { color: var(--alpha-color); }
+.bravo-tag { color: var(--bravo-color); }
+.leader-skill {
+  font-size: 10px;
+  color: rgba(180,200,220,0.65);
+  font-style: italic;
+}
+.leader-vs-divider {
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(200,220,255,0.4);
+  flex-shrink: 0;
+}
+
+/* ─── NOMBRE DEL AVATAR EN FICHA DE UNIDAD ─── */
+.unit-card-avatar-name {
+  font-size: 9px;
+  color: rgba(180,200,180,0.6);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
 /* ─── BOTÓN CÓDIGO NEGRO ─── */
 .btn-codigo-negro-fixed {
   margin-top: auto;
@@ -1172,8 +1273,8 @@ html, body {
 .dialog-char-sprite {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  object-fit: contain;
+  object-position: center center;
   image-rendering: pixelated;
   filter: saturate(1.3) contrast(1.1);
 }
@@ -1270,8 +1371,10 @@ html, body {
   font-size: 13px;
   line-height: 1.75;
   color: var(--text-bright);
-  letter-spacing: 0.5px;
+  letter-spacing: 0;
   min-height: 44px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* Cursor parpadeante al final del texto */
