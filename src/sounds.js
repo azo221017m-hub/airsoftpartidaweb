@@ -40,6 +40,48 @@ export function playEliminate() {
   });
 }
 
+// Sonido misterioso ambiental — partida activa
+export function playMysteriousAmbient() {
+  try {
+    const ac = getCtx();
+    // Tono grave pulsante
+    [0, 1.2, 2.6, 4.1].forEach((delay) => {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(55, ac.currentTime + delay);
+      osc.frequency.linearRampToValueAtTime(48, ac.currentTime + delay + 0.9);
+      gain.gain.setValueAtTime(0, ac.currentTime + delay);
+      gain.gain.linearRampToValueAtTime(0.07, ac.currentTime + delay + 0.2);
+      gain.gain.linearRampToValueAtTime(0, ac.currentTime + delay + 0.9);
+      osc.start(ac.currentTime + delay);
+      osc.stop(ac.currentTime + delay + 1.0);
+    });
+    // Chirrido lejano
+    const osc2 = ac.createOscillator();
+    const g2 = ac.createGain();
+    osc2.connect(g2); g2.connect(ac.destination);
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(220, ac.currentTime + 0.5);
+    osc2.frequency.exponentialRampToValueAtTime(110, ac.currentTime + 2.0);
+    g2.gain.setValueAtTime(0.015, ac.currentTime + 0.5);
+    g2.gain.linearRampToValueAtTime(0, ac.currentTime + 2.5);
+    osc2.start(ac.currentTime + 0.5);
+    osc2.stop(ac.currentTime + 2.6);
+    // Ping de alerta
+    const osc3 = ac.createOscillator();
+    const g3 = ac.createGain();
+    osc3.connect(g3); g3.connect(ac.destination);
+    osc3.type = 'sine';
+    osc3.frequency.value = 880;
+    g3.gain.setValueAtTime(0.06, ac.currentTime + 3.0);
+    g3.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 3.4);
+    osc3.start(ac.currentTime + 3.0);
+    osc3.stop(ac.currentTime + 3.5);
+  } catch(e) {}
+}
+
 export function playMove() {
   playTone(600, 'sine', 0.06, 0.15);
   playTone(800, 'sine', 0.05, 0.05, 0.07);

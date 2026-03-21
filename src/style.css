@@ -1022,30 +1022,45 @@ html, body {
 
 /* ─── HIT POPUP ─── */
 .hit-popup {
-  position: absolute;
+  position: fixed;
   font-size: 32px;
   font-weight: bold;
   color: var(--bravo-color);
   text-shadow: 0 0 15px var(--bravo-glow), 0 0 30px var(--bravo-glow);
   pointer-events: none;
-  z-index: 1000;
+  z-index: 5000;
   animation: hit-float 1s ease-out forwards;
   letter-spacing: 3px;
   font-family: var(--font-arcade);
+  transform: translate(-50%, -50%);
 }
 @keyframes hit-float {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -70%) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -100%) scale(0.8);
-  }
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  50%  { opacity: 1; transform: translate(-50%, -70%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -100%) scale(0.8); }
+}
+
+/* ─── ELIMINATED POPUP ("Muerto ALV") ─── */
+.eliminated-popup {
+  font-size: 28px;
+  color: #fff;
+  text-shadow:
+    0 0 10px var(--bravo-color),
+    0 0 30px var(--bravo-color),
+    0 0 60px rgba(255,78,78,0.6);
+  animation: eliminated-float 2s ease-out forwards;
+  letter-spacing: 2px;
+  background: rgba(80, 0, 0, 0.75);
+  padding: 8px 20px;
+  border: 1px solid var(--bravo-color);
+  border-radius: 4px;
+  box-shadow: 0 0 24px var(--bravo-glow);
+}
+@keyframes eliminated-float {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  60%  { opacity: 1; transform: translate(-50%, -65%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
 }
 
 /* ══════════════════════════════════════════════════════════════

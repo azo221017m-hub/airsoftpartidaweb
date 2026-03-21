@@ -4,7 +4,8 @@ import { io } from 'socket.io-client';
 import { GameRenderer, coordToXY, xyToCoord, buildHpPips, getHpClass } from './game.js';
 import {
   playShoot, playHit, playEliminate, playMove,
-  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect
+  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect,
+  playMysteriousAmbient
 } from './sounds.js';
 import { showDialog, closeDialog, nextDialog, demoDialog } from './dialog.js';
 
@@ -152,6 +153,7 @@ function setupSocket() {
     players = pl;
     initGame();
     showScreen('game-screen');
+    playMysteriousAmbient();
     $('btn-codigo-negro').style.display = 'block';  // Mostrar solo en partida
     if (isAIGame) {
       showStatus(`¡Partida contra IA iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
@@ -195,6 +197,12 @@ function setupSocket() {
       } else {
         playMiss();
       }
+    }
+
+    // Detectar eliminación por mensaje (contiene "eliminad")
+    if (hit && message && message.toLowerCase().includes('eliminad')) {
+      playEliminate();
+      showEliminatedPopup();
     }
 
     // En Nivel 3: solo mostrar movimientos si radar activo y enemigo sin camuflaje
@@ -444,7 +452,7 @@ function selectUnit(unitId) {
   $('selected-unit-info').innerHTML = `
     <b>${unit.name.toUpperCase()}</b> [${unit.id.toUpperCase()}]<br>
     Coord: <b>${xyToCoord(unit.x, unit.y)}</b><br>
-    HP: <b>${unit.hp}/${unit.maxHp}</b><br>
+    HP: <b>${unit.hp}/${unit.maxHp}</b> &nbsp;|&nbsp; FPS: <b>${unit.damage ?? 1}</b><br>
     Mov: <b>${unit.moveRange}</b> | Disparo: <b>${displayShootRange}${shootRangeBonus > 0 ? ' 🔭' : ''}</b><br>
     ${unit.inCover ? '🪨 <b>En cobertura</b>' : ''}
     ${unit.acted ? '<span style="color:#ff4e4e">✓ Ya actuó</span>' : ''}
@@ -732,11 +740,22 @@ function showHitPopup() {
   popup.style.top = `${canvasRect.top + canvasRect.height / 2}px`;
   
   document.body.appendChild(popup);
-  
-  // Remover después de 1 segundo
-  setTimeout(() => {
-    popup.remove();
-  }, 1000);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// Mostrar popup de "Muerto ALV" cuando una unidad es eliminada
+function showEliminatedPopup() {
+  const canvas = $('game-canvas');
+  const canvasRect = canvas.getBoundingClientRect();
+
+  const popup = document.createElement('div');
+  popup.className = 'hit-popup eliminated-popup';
+  popup.textContent = '☠️ Muerto ALV';
+  popup.style.left = `${canvasRect.left + canvasRect.width / 2}px`;
+  popup.style.top = `${canvasRect.top + canvasRect.height / 2 - 40}px`;
+
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 2000);
 }
 
 // ─── Game over buttons ────────────────────────────────────────────────────────
@@ -762,8 +781,10 @@ $('btn-lobby').addEventListener('click', () => {
     camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
     radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
-  $('btn-codigo-negro').style.display = 'none';  // Ocultar al salir al lobby
+  $('btn-codigo-negro').style.display = 'none';
   showScreen('lobby-screen');
+  // Abrir modal automáticamente sin disparar diálogos
+  gameModal.classList.add('active');
 });
 
 // ─── NIVEL 2: Ventajas Tácticas ──────────────────────────────────────────────
