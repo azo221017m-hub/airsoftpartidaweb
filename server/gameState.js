@@ -15,11 +15,9 @@ const OBSTACLES = [
   // Left cover positions
   { x: 3, y: 6, type: 'cover' }, { x: 3, y: 8, type: 'cover' },
   { x: 4, y: 3, type: 'cover' }, { x: 4, y: 11, type: 'cover' },
-  { x: 5, y: 7, type: 'cover' },
   // Right cover positions
   { x: 11, y: 6, type: 'cover' }, { x: 11, y: 8, type: 'cover' },
   { x: 10, y: 3, type: 'cover' }, { x: 10, y: 11, type: 'cover' },
-  { x: 9, y: 7, type: 'cover' },
   // Mid horizontal wall
   { x: 5, y: 7, type: 'wall' }, { x: 6, y: 7, type: 'wall' },
   { x: 8, y: 7, type: 'wall' }, { x: 9, y: 7, type: 'wall' },
@@ -166,7 +164,7 @@ function applyShoot(state, unit, tx, ty) {
 
 function endTurn(state) {
   // Reset acted flags for all units on current team
-  state.units[state.currentTeam].forEach(u => { u.acted = false; u.inCover = u.inCover; });
+  state.units[state.currentTeam].forEach(u => { u.acted = false; });
   state.currentTeam = state.currentTeam === 'alpha' ? 'bravo' : 'alpha';
   if (state.currentTeam === 'alpha') state.turnNumber++;
   state.turnTimeLeft = 30;

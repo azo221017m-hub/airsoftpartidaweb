@@ -4,6 +4,7 @@ const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 const { createGameState, applyMove, applyShoot, endTurn } = require('./gameState');
 
 const app = express();
@@ -14,6 +15,13 @@ const io = new Server(httpServer, {
 
 // Serve built frontend in production
 const distPath = path.join(__dirname, '..', 'dist');
+const staticLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(staticLimiter);
 app.use(express.static(distPath));
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
