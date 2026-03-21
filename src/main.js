@@ -832,9 +832,14 @@ function renderUnitList() {
 
 
 
-  // Asignar el avatar actual de Ocelot a Finer y el de Finer a Ocelot
-  const avatarName = myTeam === 'alpha' ? 'FINER' : 'OCELOT';
-  const avatarSrc = myTeam === 'alpha' ? '/avatar-ocelot.svg' : '/avatar-finer.svg';
+    // Avatar único por tipo de unidad
+    let unitAvatarSrc = '';
+    switch (unit.type) {
+      case 'HEAVY': unitAvatarSrc = '/avatar-artilleria.svg'; break;
+      case 'SCOUT': unitAvatarSrc = '/avatar-explorador.svg'; break;
+      case 'SNIPER': unitAvatarSrc = '/avatar-francotirador.svg'; break;
+      default: unitAvatarSrc = '';
+    }
 
     card.innerHTML = `
       <div class="unit-card-header">
@@ -846,8 +851,7 @@ function renderUnitList() {
         <button class="btn btn-action btn-move btn-action-mini" title="Mover" data-action="move">⇄</button>
         <button class="btn btn-action btn-shoot btn-action-mini" title="Disparar" data-action="shoot">🎯</button>
       </div>
-      <div class="unit-card-avatar-img"><img src="${avatarSrc}" alt="${avatarName}" class="unit-avatar-img" /></div>
-      <div class="unit-card-avatar-name">Lider: ${avatarName}</div>
+      ${unitAvatarSrc ? `<div class=\"unit-card-avatar-img\"><img src=\"${unitAvatarSrc}\" alt=\"${getUnitTypeName(unit.type)}\" class=\"unit-avatar-img\" /></div>` : ''}
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
       ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
       ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">En cobertura</div>' : ''}

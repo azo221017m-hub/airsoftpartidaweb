@@ -716,6 +716,43 @@ html, body {
   text-transform: uppercase;
 }
 
+/* ─── NUEVO PANEL CENTRAL PARA ACCIÓN Y BOTONES ─── */
+.middle-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-width: 260px;
+  max-width: 320px;
+  margin: 0 18px 0 0;
+  gap: 24px;
+}
+
+.middle-panel .action-panel {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1200px) {
+  .middle-panel {
+    min-width: 180px;
+    max-width: 98vw;
+    margin-right: 6px;
+  }
+}
+
+.game-main {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+/* Ajuste para que el panel izquierdo no sea tan ancho */
+.side-panel.panel-left {
+  min-width: 180px;
+  max-width: 240px;
+}
+
 /* ─── BOTONES PRINCIPALES ENTRE PANEL Y TABLERO ─── */
 .board-action-buttons {
   display: flex;
@@ -1267,6 +1304,48 @@ html, body {
   15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
   60%  { opacity: 1; transform: translate(-50%, -65%) scale(1.0); }
   100% { opacity: 0; transform: translate(-50%, -90%) scale(0.9); }
+}
+
+/* ─── AJUSTE DE LAYOUT PARA TRES COLUMNAS ─── */
+.game-main {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: 700px;
+}
+
+.grid-area {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 500px;
+  max-width: 900px;
+  margin: 0 18px 0 0;
+}
+
+.side-panel.panel-right {
+  min-width: 260px;
+  max-width: 340px;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+@media (max-width: 1200px) {
+  .grid-area {
+    min-width: 320px;
+    max-width: 98vw;
+    margin-right: 6px;
+  }
+  .side-panel.panel-right {
+    min-width: 140px;
+    max-width: 98vw;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1902,7 +1981,7 @@ html, body {
   }
 }
 @media (max-width: 700px) {
-  .side-panel { display: none; }
+  /* .side-panel { display: none; }  Eliminado para que siempre se muestre el panel derecho */
   .hud-units { flex-wrap: wrap; }
   .btn-game {
     font-size: 20px;

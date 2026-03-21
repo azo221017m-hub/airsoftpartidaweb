@@ -268,11 +268,15 @@
 
     <!-- MAIN GAME AREA -->
     <div class="game-main">
-      <!-- LEFT PANEL: Unit Controls -->
+      <!-- COLUMNA 1: Unidades -->
       <div class="side-panel panel-left">
         <h3 class="panel-title">🎮 UNIDADES</h3>
         <div id="unit-list" class="unit-list"></div>
+        <div id="tactical-panel" class="tactical-panel" style="display:none"></div>
+      </div>
 
+      <!-- COLUMNA 2: Panel Central (Acción, Botones, Desarrollo) -->
+      <div class="center-panel">
         <div class="action-panel" id="action-panel" style="display:none">
           <h3 class="panel-title">⚡ ACCIÓN</h3>
           <div class="selected-unit-info" id="selected-unit-info"></div>
@@ -289,15 +293,11 @@
             <div class="coord-hint" id="coord-hint"></div>
           </div>
         </div>
-
-        <!-- Botones de acción principales reubicados -->
         <div class="board-action-buttons">
           <button id="btn-end-turn" class="btn btn-end-turn" style="display:none">⏭ TERMINAR TURNO</button>
           <button id="btn-codigo-negro" class="btn btn-codigo-negro-fixed" style="display:none">☠️ CÓDIGO NEGRO</button>
         </div>
-        
-        <!-- Panel de Ventajas Tácticas (Nivel 2) -->
-        <div id="tactical-panel" class="tactical-panel" style="display:none">
+        <div class="tactical-dev-panel">
           <h3 class="panel-title">🎖 DESARROLLO TÁCTICO</h3>
           <div class="exp-bar-container">
             <div class="exp-label">EXP: <span id="exp-current">0</span>/200s</div>
@@ -307,12 +307,10 @@
           </div>
           <div id="tactical-advantages" class="tactical-advantages"></div>
         </div>
-        
         <div id="action-status" class="action-status"></div>
-  <!-- Botón código negro movido arriba -->
       </div>
 
-      <!-- CENTER: Game Grid -->
+      <!-- COLUMNA 3: Tablero -->
       <div class="grid-area">
         <div class="grid-header" id="grid-header"></div>
         <div class="grid-wrapper">
@@ -322,11 +320,10 @@
         <div class="coord-display" id="coord-display">Hover sobre la cuadrícula</div>
       </div>
 
-      <!-- RIGHT PANEL: Log + Chat -->
+      <!-- COLUMNA 4: Registro y Chat -->
       <div class="side-panel panel-right">
         <h3 class="panel-title">📜 REGISTRO</h3>
         <div id="action-log" class="action-log"></div>
-
         <h3 class="panel-title">💬 COMUNICACIONES</h3>
         <div id="chat-log" class="chat-log"></div>
         <div class="chat-input-row">
