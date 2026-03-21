@@ -3,27 +3,31 @@
  * ─────────────────────────────────────────
  * MUESTRA la pantalla si:
  *   • Fecha CDMX >= 21/03/2026
- *   • Hora CDMX < 12:00 p.m. (PRUEBA — cambiar a 22:00 para producción)
+ *   • Hora CDMX < 12:00 p.m. (PRUEBA)
  *
- * OCULTA y nunca vuelve a mostrar si:
- *   • Hora CDMX >= 22:01 (lanzamiento ya ocurrió)
+ * OCULTA y nunca vuelve a mostrar si se cumple CUALQUIERA de:
+ *   • Expiración 1: hora CDMX >= 14:01  (fin ventana de prueba)
+ *   • Expiración 2: hora CDMX >= 22:01  (lanzamiento real ya ocurrió)
  *
- * El contador regresivo apunta a las 12:00 p.m. CDMX del 21/03/2026 (PRUEBA).
- * En producción cambiar EXPIRE_HOUR/EXPIRE_MINUTE a 22 y 1, y
- * TARGET_HOUR/TARGET_MINUTE a 22 y 0.
+ * El contador apunta a las 12:00 p.m. CDMX (PRUEBA).
+ * En producción cambiar TARGET a 22:00 y ajustar expirations según sea necesario.
  */
 
 const CDMX_OFFSET = -6; // UTC-6
 
-// ── Hora objetivo del contador (lo que el contador cuenta hacia abajo) ──
-const TARGET_HOUR   = 12; // PRUEBA: mediodía   → producción: 22
+// ── Hora objetivo del contador ────────────────────────────────
+const TARGET_HOUR   = 12; // PRUEBA: mediodía
 const TARGET_MINUTE = 0;
 
-// ── Hora de expiración definitiva (pantalla desaparece para siempre) ──
-const EXPIRE_HOUR   = 12; // 12:01 CDMX — nunca más se muestra
-const EXPIRE_MINUTE = 1;
+// ── Expiración 1: fin de ventana de prueba ────────────────────
+const EXPIRE1_HOUR   = 14;
+const EXPIRE1_MINUTE = 1;  // >= 14:01 CDMX
 
-// ── Fecha de inicio (la pantalla solo aparece desde este día) ──
+// ── Expiración 2: lanzamiento real ya ocurrió ─────────────────
+const EXPIRE2_HOUR   = 22;
+const EXPIRE2_MINUTE = 1;  // >= 22:01 CDMX
+
+// ── Fecha de inicio ───────────────────────────────────────────
 const LAUNCH_YEAR  = 2026;
 const LAUNCH_MONTH = 3;
 const LAUNCH_DAY   = 21;
@@ -41,8 +45,14 @@ function launchMs(hour, minute) {
   );
 }
 
-const TARGET_MS = launchMs(TARGET_HOUR, TARGET_MINUTE);
-const EXPIRE_MS = launchMs(EXPIRE_HOUR, EXPIRE_MINUTE);
+const TARGET_MS  = launchMs(TARGET_HOUR,  TARGET_MINUTE);
+const EXPIRE1_MS = launchMs(EXPIRE1_HOUR, EXPIRE1_MINUTE);
+const EXPIRE2_MS = launchMs(EXPIRE2_HOUR, EXPIRE2_MINUTE);
+
+// Devuelve true si ALGUNA expiración ya se cumplió
+function isExpired(ms) {
+  return ms >= EXPIRE1_MS || ms >= EXPIRE2_MS;
+}
 
 // ── Lógica principal ─────────────────────────────────────────
 export function initLaunchScreen() {
@@ -53,8 +63,8 @@ export function initLaunchScreen() {
 
   if (!screen || !elH || !elM || !elS) return;
 
-  const cdmx    = nowCDMX();
-  const nowMs   = Date.now();
+  const cdmx  = nowCDMX();
+  const nowMs = Date.now();
 
   // Fecha CDMX como número YYYYMMDD
   const todayNum  = cdmx.getUTCFullYear() * 10000
@@ -62,10 +72,9 @@ export function initLaunchScreen() {
                   + cdmx.getUTCDate();
   const launchNum = LAUNCH_YEAR * 10000 + LAUNCH_MONTH * 100 + LAUNCH_DAY;
 
-  // ── ¿Ya venció definitivamente? (>= 22:01 CDMX) ──────────
-  // Si sí → nunca mostrar, borrar del DOM para no ocupar nada
-  if (nowMs >= EXPIRE_MS) {
-    screen.remove();
+  // ── ¿Ya venció por alguna de las dos expiraciones? ───────
+  if (isExpired(nowMs)) {
+    screen.remove(); // eliminar del DOM para siempre
     return;
   }
 
@@ -73,37 +82,32 @@ export function initLaunchScreen() {
   const dateOk     = todayNum >= launchNum;
   const beforeTime = nowMs < TARGET_MS;
 
-  if (!dateOk || !beforeTime) {
-    // Fuera del rango de muestra (demasiado pronto o ya pasó el target
-    // pero aún no las 22:01) → no mostrar
-    return;
-  }
+  if (!dateOk || !beforeTime) return;
 
   // ── Mostrar pantalla ──────────────────────────────────────
   screen.style.display = 'flex';
 
-  // ── Ticker cada segundo ───────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────
   function pad(n) { return String(Math.max(0, n)).padStart(2, '0'); }
 
   function hideLaunch() {
     screen.style.transition = 'opacity 1.4s ease';
     screen.style.opacity    = '0';
-    setTimeout(() => screen.remove(), 1500); // quita del DOM definitivamente
+    setTimeout(() => screen.remove(), 1500);
   }
 
+  // ── Ticker cada segundo ───────────────────────────────────
   function tick() {
-    const nowNow    = Date.now();
+    const nowNow = Date.now();
 
-    // Si ya pasó la expiración definitiva → fuera
-    if (nowNow >= EXPIRE_MS) {
+    // Verificar ambas expiraciones en cada tick
+    if (isExpired(nowNow)) {
       hideLaunch();
       return;
     }
 
     const remaining = TARGET_MS - nowNow;
-
     if (remaining <= 0) {
-      // El contador llegó a 0 → pantalla de lanzamiento cumplió su función
       hideLaunch();
       return;
     }
