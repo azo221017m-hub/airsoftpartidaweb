@@ -1,6 +1,7 @@
 'use strict';
 
 const GRID_SIZE = 15;
+const MAX_PLACEMENT_ATTEMPTS = 200;
 
 const UNIT_TYPES = {
   HEAVY: { name: 'Heavy', maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, symbol: '⚔' },
@@ -171,4 +172,54 @@ function endTurn(state) {
   return { success: true };
 }
 
-module.exports = { createGameState, applyMove, applyShoot, endTurn, getDistance };
+/**
+ * Create a game state for AI games with randomized unit positions.
+ * Alpha units are placed randomly on the left half (x: 0-6),
+ * Bravo units are placed randomly on the right half (x: 8-14).
+ */
+function createGameStateForAI() {
+  const state = createGameState();
+  randomizeTeamPositions(state, 'alpha', 0, 6);
+  randomizeTeamPositions(state, 'bravo', 8, 14);
+  return state;
+}
+
+function randomizeTeamPositions(state, team, minX, maxX) {
+  const units = state.units[team];
+  const usedPositions = new Set();
+
+  const walls = new Set();
+  for (const obs of state.obstacles) {
+    if (obs.type === 'wall') walls.add(`${obs.x},${obs.y}`);
+  }
+
+  // Reserve positions already used by the other team
+  const otherTeam = team === 'alpha' ? 'bravo' : 'alpha';
+  for (const u of state.units[otherTeam]) {
+    usedPositions.add(`${u.x},${u.y}`);
+  }
+
+  for (const unit of units) {
+    let placed = false;
+    for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
+      const x = minX + Math.floor(Math.random() * (maxX - minX + 1));
+      const y = Math.floor(Math.random() * GRID_SIZE);
+      const key = `${x},${y}`;
+
+      if (!walls.has(key) && !usedPositions.has(key)) {
+        unit.x = x;
+        unit.y = y;
+        const obs = state.obstacles.find(o => o.x === x && o.y === y);
+        unit.inCover = !!(obs && obs.type === 'cover');
+        usedPositions.add(key);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      usedPositions.add(`${unit.x},${unit.y}`);
+    }
+  }
+}
+
+module.exports = { createGameState, createGameStateForAI, applyMove, applyShoot, endTurn, getDistance };

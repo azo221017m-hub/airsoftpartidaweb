@@ -6,7 +6,9 @@ const GRID_SIZE = 15;
 
 /**
  * Run the AI turn for the BRAVO team.
- * Executes actions sequentially with delays for visual feedback.
+ * Mirrors the player's action types (move/shoot) by assigning them to
+ * random AI units with random valid targets.
+ * Remaining units perform random valid actions.
  * @param {object} room - The room object containing gameState
  * @param {string} roomId - The room identifier
  * @param {object} io - Socket.IO server instance
@@ -16,26 +18,28 @@ function runAITurn(room, roomId, io, broadcastState) {
   if (!room || !room.gameState || room.gameState.phase !== 'playing') return;
   if (room.gameState.currentTeam !== 'bravo') return;
 
-  const units = room.gameState.units.bravo.filter(u => u.hp > 0 && !u.acted);
-  if (units.length === 0) {
-    finishAITurn(room, roomId, io, broadcastState);
-    return;
-  }
+  // Read and clear the player's recorded actions for mirroring
+  const playerActions = room.playerActions || [];
+  room.playerActions = [];
 
-  let actionIndex = 0;
+  let stepIndex = 0;
 
-  function processNextUnit() {
+  function processNextStep() {
     if (!room.gameState || room.gameState.phase !== 'playing') return;
     if (room.gameState.currentTeam !== 'bravo') return;
 
     const aliveUnits = room.gameState.units.bravo.filter(u => u.hp > 0 && !u.acted);
-    if (aliveUnits.length === 0 || actionIndex >= units.length) {
+    if (aliveUnits.length === 0) {
       finishAITurn(room, roomId, io, broadcastState);
       return;
     }
 
-    const unit = aliveUnits[0];
-    const action = decideAction(room.gameState, unit);
+    // Pick a random alive unacted AI unit
+    const unit = aliveUnits[Math.floor(Math.random() * aliveUnits.length)];
+
+    // Mirror the player's action type if available, otherwise random
+    const preferredType = stepIndex < playerActions.length ? playerActions[stepIndex].type : null;
+    const action = decideRandomAction(room.gameState, unit, preferredType);
 
     if (action) {
       let result;
@@ -68,12 +72,12 @@ function runAITurn(room, roomId, io, broadcastState) {
       unit.acted = true;
     }
 
-    actionIndex++;
-    setTimeout(processNextUnit, 800);
+    stepIndex++;
+    setTimeout(processNextStep, 800);
   }
 
   // Start AI actions after a brief delay
-  setTimeout(processNextUnit, 1000);
+  setTimeout(processNextStep, 1000);
 }
 
 /**
@@ -92,86 +96,66 @@ function finishAITurn(room, roomId, io, broadcastState) {
 }
 
 /**
- * Decide the best action for an AI unit.
- * Priority: 1) Shoot an enemy in range, 2) Move toward nearest enemy or cover.
+ * Decide a random valid action for an AI unit, optionally preferring
+ * a specific action type (to mirror the player).
+ * @param {object} state - Game state
+ * @param {object} unit - AI unit
+ * @param {string|null} preferredType - 'move', 'shoot', or null
+ * @returns {{type: string, x: number, y: number}|null}
  */
-function decideAction(state, unit) {
-  // Try to shoot first
-  const shootTarget = findBestShootTarget(state, unit);
-  if (shootTarget) {
-    return { type: 'shoot', x: shootTarget.x, y: shootTarget.y };
+function decideRandomAction(state, unit, preferredType) {
+  if (preferredType === 'shoot') {
+    const target = findRandomShootTarget(state, unit);
+    if (target) return { type: 'shoot', x: target.x, y: target.y };
+    // Fall back to move
+    const move = findRandomMoveTarget(state, unit);
+    if (move) return { type: 'move', x: move.x, y: move.y };
+    return null;
   }
 
-  // Try to move toward the nearest enemy or into cover
-  const moveTarget = findBestMoveTarget(state, unit);
-  if (moveTarget) {
-    return { type: 'move', x: moveTarget.x, y: moveTarget.y };
+  if (preferredType === 'move') {
+    const move = findRandomMoveTarget(state, unit);
+    if (move) return { type: 'move', x: move.x, y: move.y };
+    // Fall back to shoot
+    const target = findRandomShootTarget(state, unit);
+    if (target) return { type: 'shoot', x: target.x, y: target.y };
+    return null;
   }
+
+  // No preference: try shoot first (more impactful), then move
+  const target = findRandomShootTarget(state, unit);
+  if (target) return { type: 'shoot', x: target.x, y: target.y };
+
+  const move = findRandomMoveTarget(state, unit);
+  if (move) return { type: 'move', x: move.x, y: move.y };
 
   return null;
 }
 
 /**
- * Find the best enemy to shoot at.
- * Prioritize: lowest HP, then closest distance.
+ * Find a random enemy within shoot range and line-of-sight.
  */
-function findBestShootTarget(state, unit) {
+function findRandomShootTarget(state, unit) {
   const enemies = state.units.alpha.filter(e => e.hp > 0);
-  const targets = [];
+  const validTargets = [];
 
   for (const enemy of enemies) {
     const dist = getDistance(unit.x, unit.y, enemy.x, enemy.y);
     if (dist > unit.shootRange) continue;
     if (!hasLineOfSight(state, unit.x, unit.y, enemy.x, enemy.y)) continue;
-
-    const effectiveDmg = enemy.inCover ? Math.max(0, unit.damage - 1) : unit.damage;
-    const wouldEliminate = enemy.hp <= effectiveDmg;
-
-    targets.push({
-      x: enemy.x,
-      y: enemy.y,
-      hp: enemy.hp,
-      dist,
-      wouldEliminate,
-      effectiveDmg,
-    });
+    validTargets.push({ x: enemy.x, y: enemy.y });
   }
 
-  if (targets.length === 0) return null;
-
-  // Prioritize: eliminations first, then lowest HP, then closest
-  targets.sort((a, b) => {
-    if (a.wouldEliminate !== b.wouldEliminate) return a.wouldEliminate ? -1 : 1;
-    if (a.hp !== b.hp) return a.hp - b.hp;
-    return a.dist - b.dist;
-  });
-
-  return targets[0];
+  if (validTargets.length === 0) return null;
+  return validTargets[Math.floor(Math.random() * validTargets.length)];
 }
 
 /**
- * Find the best cell to move to.
- * Prioritize moving toward enemies, preferring cover positions.
+ * Find a random valid cell to move to.
  */
-function findBestMoveTarget(state, unit) {
-  const enemies = state.units.alpha.filter(e => e.hp > 0);
-  if (enemies.length === 0) return null;
-
-  // Find the nearest enemy
-  let nearestEnemy = null;
-  let nearestDist = Infinity;
-  for (const enemy of enemies) {
-    const dist = getDistance(unit.x, unit.y, enemy.x, enemy.y);
-    if (dist < nearestDist) {
-      nearestDist = dist;
-      nearestEnemy = enemy;
-    }
-  }
-
-  if (!nearestEnemy) return null;
-
-  // Get all valid move cells
+function findRandomMoveTarget(state, unit) {
   const validMoves = [];
+
   for (let x = 0; x < GRID_SIZE; x++) {
     for (let y = 0; y < GRID_SIZE; y++) {
       const dist = getDistance(unit.x, unit.y, x, y);
@@ -183,33 +167,12 @@ function findBestMoveTarget(state, unit) {
       const occupant = getUnitAt(state, x, y);
       if (occupant) continue;
 
-      const distToEnemy = getDistance(x, y, nearestEnemy.x, nearestEnemy.y);
-      const isCover = obs && obs.type === 'cover';
-
-      // Check if moving here would put enemy in shoot range
-      const canShootAfterMove = distToEnemy <= unit.shootRange &&
-        hasLineOfSight(state, x, y, nearestEnemy.x, nearestEnemy.y);
-
-      validMoves.push({
-        x,
-        y,
-        distToEnemy,
-        isCover,
-        canShootAfterMove,
-      });
+      validMoves.push({ x, y });
     }
   }
 
   if (validMoves.length === 0) return null;
-
-  // Prioritize: can shoot after move > cover > closer to enemy
-  validMoves.sort((a, b) => {
-    if (a.canShootAfterMove !== b.canShootAfterMove) return a.canShootAfterMove ? -1 : 1;
-    if (a.isCover !== b.isCover) return a.isCover ? -1 : 1;
-    return a.distToEnemy - b.distToEnemy;
-  });
-
-  return validMoves[0];
+  return validMoves[Math.floor(Math.random() * validMoves.length)];
 }
 
 // ─── Helper functions (duplicated from gameState for AI module) ───
