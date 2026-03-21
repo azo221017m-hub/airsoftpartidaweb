@@ -200,7 +200,6 @@ io.on('connection', (socket) => {
 
     // Record player actions in AI rooms for mirroring
     if (room.isAI && player.team === 'alpha') {
-      if (!room.playerActions) room.playerActions = [];
       room.playerActions.push({ type, unitId, x: tx, y: ty });
     }
 

@@ -1,6 +1,7 @@
 'use strict';
 
 const GRID_SIZE = 15;
+const MAX_PLACEMENT_ATTEMPTS = 200;
 
 const UNIT_TYPES = {
   HEAVY: { name: 'Heavy', maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, symbol: '⚔' },
@@ -200,7 +201,7 @@ function randomizeTeamPositions(state, team, minX, maxX) {
 
   for (const unit of units) {
     let placed = false;
-    for (let attempt = 0; attempt < 200; attempt++) {
+    for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
       const x = minX + Math.floor(Math.random() * (maxX - minX + 1));
       const y = Math.floor(Math.random() * GRID_SIZE);
       const key = `${x},${y}`;
