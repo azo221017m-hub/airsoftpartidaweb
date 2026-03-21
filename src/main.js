@@ -830,8 +830,11 @@ function renderUnitList() {
     card.dataset.unitId = unit.id;
     if (unit.id === selectedUnitId) card.classList.add('selected');
 
-    // Nombre del avatar líder según equipo
-    const avatarName = myTeam === 'alpha' ? 'OCELOT' : 'FINER';
+
+
+  // Asignar el avatar actual de Ocelot a Finer y el de Finer a Ocelot
+  const avatarName = myTeam === 'alpha' ? 'FINER' : 'OCELOT';
+  const avatarSrc = myTeam === 'alpha' ? '/avatar-ocelot.svg' : '/avatar-finer.svg';
 
     card.innerHTML = `
       <div class="unit-card-header">
@@ -839,6 +842,7 @@ function renderUnitList() {
         <span class="unit-card-name">${getUnitTypeName(unit.type)}</span>
         <span class="unit-card-coord">${xyToCoord(unit.x, unit.y)}</span>
       </div>
+      <div class="unit-card-avatar-img"><img src="${avatarSrc}" alt="${avatarName}" class="unit-avatar-img" /></div>
       <div class="unit-card-avatar-name">Lider: ${avatarName}</div>
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
       ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
