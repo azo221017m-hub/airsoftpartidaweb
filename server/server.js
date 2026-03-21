@@ -229,7 +229,13 @@ io.on('connection', (socket) => {
         players: room.players.map(p => ({ name: p.name, team: p.team })),
       });
     } else {
-      io.to(roomId).emit('action_result', { success: true, message: result.message, type, hit: result.hit });
+      io.to(roomId).emit('action_result', { 
+        success: true, 
+        message: result.message, 
+        type, 
+        hit: result.hit,
+        team: player.team 
+      });
     }
   });
 

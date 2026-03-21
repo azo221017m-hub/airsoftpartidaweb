@@ -182,16 +182,29 @@ function setupSocket() {
     }
   });
 
-  socket.on('action_result', ({ success, message, type, hit }) => {
+  socket.on('action_result', ({ success, message, type, hit, team }) => {
     if (type === 'move') playMove();
     else if (type === 'shoot') { if (hit) playHit(); else playMiss(); }
 
-    const logEntry = document.createElement('div');
-    logEntry.className = `log-entry ${type === 'move' ? 'move' : hit ? 'hit' : 'miss'}`;
-    logEntry.textContent = message;
-    const log = $('action-log');
-    log.insertBefore(logEntry, log.firstChild);
-    if (log.children.length > 30) log.removeChild(log.lastChild);
+    // En Nivel 2: solo mostrar movimientos si radar activo y enemigo sin camuflaje
+    let shouldShowLog = true;
+    if (gameLevel === 2 && type === 'move' && team !== myTeam) {
+      // Es un movimiento enemigo
+      const radarActive = tacticalAdvantages?.radar?.active || false;
+      const enemyCamouflage = renderer?.enemyCamouflage || false;
+      
+      // Solo mostrar si radar activo Y enemigo sin camuflaje
+      shouldShowLog = radarActive && !enemyCamouflage;
+    }
+
+    if (shouldShowLog) {
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry ${type === 'move' ? 'move' : hit ? 'hit' : 'miss'}`;
+      logEntry.textContent = message;
+      const log = $('action-log');
+      log.insertBefore(logEntry, log.firstChild);
+      if (log.children.length > 30) log.removeChild(log.lastChild);
+    }
   });
 
   socket.on('turn_change', ({ currentTeam, turnNumber }) => {
@@ -297,14 +310,6 @@ function initGame() {
 function renderGridLabels() {
   const gs = gameState.gridSize;
   const cs = renderer.cellSize;
-
-  // En Nivel 2, no mostrar coordenadas
-  if (gameLevel === 2) {
-    $('grid-header').innerHTML = '';
-    $('grid-row-labels').innerHTML = '';
-    $('grid-header').style.width = '0px';
-    return;
-  }
 
   // Column labels (1..15)
   const header = $('grid-header');
