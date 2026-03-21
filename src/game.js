@@ -49,6 +49,8 @@ export class GameRenderer {
     this.flashCells = []; // [{x,y,color,until}]
     this.cellSize = 52; // Aumentado 30% desde 40
     this.gridSize = 15;
+    this.gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
+    this.tacticalAdvantages = null; // Para nivel 2
     this._setupCanvas();
   }
 
@@ -191,9 +193,19 @@ export class GameRenderer {
 
     // Draw units
     const { units } = this.gameState;
-    for (const team of ['alpha', 'bravo']) {
-      for (const unit of units[team]) {
+    
+    // Nivel 2: Niebla de guerra - solo mostrar unidades propias
+    if (this.gameLevel === 2 && this.myTeam) {
+      const myUnits = units[this.myTeam];
+      for (const unit of myUnits) {
         this._drawUnit(unit, cs);
+      }
+    } else {
+      // Nivel 1: Mostrar todas las unidades
+      for (const team of ['alpha', 'bravo']) {
+        for (const unit of units[team]) {
+          this._drawUnit(unit, cs);
+        }
       }
     }
 
@@ -299,6 +311,7 @@ export class GameRenderer {
     const glow = isAlpha ? COLORS.alphaGlow : COLORS.bravoGlow;
     const fill = isAlpha ? COLORS.alphaFill : COLORS.bravoFill;
     const isSelected = this.selectedUnit?.id === unit.id;
+    const isMyUnit = unit.team === this.myTeam;
 
     // Background circle
     ctx.save();
@@ -311,9 +324,16 @@ export class GameRenderer {
     ctx.roundRect(px + 3, py + 3, cs - 6, cs - 6, 4);
     ctx.fill();
 
-    // Border
-    ctx.strokeStyle = color;
-    ctx.lineWidth = isSelected ? 2 : 1.5;
+    // Border (con blindaje si está activo)
+    if (isMyUnit && this.tacticalAdvantages?.armor?.active) {
+      ctx.strokeStyle = '#00d4ff'; // Color azul para blindaje
+      ctx.lineWidth = 3;
+      ctx.setLineDash([4, 2]);
+    } else {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = isSelected ? 2 : 1.5;
+      ctx.setLineDash([]);
+    }
     ctx.stroke();
 
     ctx.restore();
@@ -345,6 +365,18 @@ export class GameRenderer {
     if (unit.inCover && !unit.acted) {
       ctx.font = `${Math.floor(cs * 0.25)}px serif`;
       ctx.fillText('🪨', px + cs - 10, py + 10);
+    }
+    
+    // Blindaje indicator (nivel 2)
+    if (isMyUnit && this.tacticalAdvantages?.armor?.active) {
+      ctx.font = `${Math.floor(cs * 0.2)}px serif`;
+      ctx.fillText('🛡', px + 6, py + 10);
+    }
+    
+    // Mira indicator (nivel 2)
+    if (isMyUnit && this.tacticalAdvantages?.scope?.active) {
+      ctx.font = `${Math.floor(cs * 0.2)}px serif`;
+      ctx.fillText('🔭', px + cs - 10, py + cs - 8);
     }
   }
 

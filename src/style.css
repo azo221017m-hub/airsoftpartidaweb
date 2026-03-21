@@ -255,6 +255,66 @@ html, body {
 }
 .form-group input::placeholder { color: rgba(170,255,0,0.3); }
 
+/* ─── SELECTOR DE NIVEL ─── */
+.level-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.level-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.level-option:hover {
+  border-color: var(--alpha-color);
+  background: rgba(170,255,0,0.05);
+}
+.level-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--alpha-color);
+}
+.level-option input[type="radio"]:checked + .level-label {
+  color: var(--alpha-color);
+}
+.level-option input[type="radio"]:checked ~ * {
+  color: var(--alpha-color);
+}
+.level-option:has(input:checked) {
+  border-color: var(--alpha-color);
+  background: rgba(170,255,0,0.1);
+  box-shadow: 0 0 10px var(--alpha-glow);
+}
+.level-label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.level-icon {
+  font-size: 20px;
+  display: inline-block;
+}
+.level-name {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+}
+.level-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
 #join-btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
 
 #join-ai-btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
@@ -456,6 +516,127 @@ html, body {
 }
 .action-status.success { color: #00ff88; }
 .action-status.error { color: var(--bravo-color); }
+
+/* ─── PANEL DE VENTAJAS TÁCTICAS ─── */
+.tactical-panel {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid var(--border-bright);
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.exp-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.exp-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+.exp-label span {
+  color: var(--neutral);
+  font-weight: bold;
+}
+.exp-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.exp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--alpha-color), var(--neutral));
+  box-shadow: 0 0 10px var(--alpha-glow);
+  transition: width 0.5s ease;
+  width: 0%;
+}
+.tactical-advantages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.advantage-item {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.advantage-item.available {
+  border-color: var(--neutral);
+  cursor: pointer;
+  animation: pulse-advantage 2s ease-in-out infinite;
+}
+.advantage-item.available:hover {
+  background: rgba(200,255,0,0.1);
+  box-shadow: 0 0 10px var(--neutral-glow);
+}
+.advantage-item.active {
+  border-color: var(--alpha-color);
+  background: rgba(170,255,0,0.15);
+  box-shadow: 0 0 8px var(--alpha-glow);
+}
+.advantage-item.locked {
+  opacity: 0.4;
+}
+@keyframes pulse-advantage {
+  0%, 100% { box-shadow: 0 0 5px var(--neutral-glow); }
+  50% { box-shadow: 0 0 15px var(--neutral-glow); }
+}
+.advantage-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.advantage-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.advantage-name {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+.advantage-desc {
+  font-size: 9px;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+.advantage-status {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.advantage-status.available {
+  background: rgba(200,255,0,0.2);
+  color: var(--neutral);
+  border: 1px solid var(--neutral);
+}
+.advantage-status.active {
+  background: rgba(170,255,0,0.2);
+  color: var(--alpha-color);
+  border: 1px solid var(--alpha-color);
+}
+.advantage-status.locked {
+  background: rgba(100,100,100,0.2);
+  color: var(--text-dim);
+  border: 1px solid var(--border-dim);
+}
 
 /* ─── GRID AREA ─── */
 .grid-area {

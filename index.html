@@ -40,6 +40,27 @@
                 <label for="room-id">CÓDIGO DE SALA</label>
                 <input type="text" id="room-id" placeholder="Ej: SALA-1" maxlength="20" autocomplete="off" />
               </div>
+              <div class="form-group">
+                <label for="game-level">NIVEL DE JUEGO</label>
+                <div class="level-selector">
+                  <label class="level-option">
+                    <input type="radio" name="game-level" value="1" checked />
+                    <span class="level-label">
+                      <span class="level-icon">🎯</span>
+                      <span class="level-name">RECLUTA</span>
+                      <span class="level-desc">Visión total, juego básico</span>
+                    </span>
+                  </label>
+                  <label class="level-option">
+                    <input type="radio" name="game-level" value="2" />
+                    <span class="level-label">
+                      <span class="level-icon">⚡</span>
+                      <span class="level-name">YA SÉ PONER BBs</span>
+                      <span class="level-desc">Niebla de guerra, ventajas tácticas</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
               <button id="join-btn" class="btn btn-primary">
                 <span class="btn-icon">🚀</span> ENTRAR AL COMBATE
               </button>
@@ -160,6 +181,19 @@
         </div>
 
         <button id="btn-end-turn" class="btn btn-end-turn" style="display:none">⏭ TERMINAR TURNO</button>
+        
+        <!-- Panel de Ventajas Tácticas (Nivel 2) -->
+        <div id="tactical-panel" class="tactical-panel" style="display:none">
+          <h3 class="panel-title">🎖 DESARROLLO TÁCTICO</h3>
+          <div class="exp-bar-container">
+            <div class="exp-label">EXP: <span id="exp-current">0</span>/200s</div>
+            <div class="exp-bar">
+              <div class="exp-bar-fill" id="exp-bar-fill"></div>
+            </div>
+          </div>
+          <div id="tactical-advantages" class="tactical-advantages"></div>
+        </div>
+        
         <div id="action-status" class="action-status"></div>
       </div>
 

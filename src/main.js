@@ -19,6 +19,16 @@ let renderer = null;
 let timerInterval = null;
 let timerMax = 30;
 let isAIGame = false;
+let gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
+
+// ─── Nivel 2: Estado de ventajas tácticas ───────────────────────────────────
+let expAccumulated = 0; // Segundos acumulados
+let tacticalAdvantages = {
+  armor: { unlocked: false, active: false }, // Blindaje
+  scope: { unlocked: false, active: false }, // Mira
+  camouflage: { unlocked: false, active: false } // Camuflaje
+};
+let lastTurnEndTime = 0;
 
 // ─── Screens ────────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -65,6 +75,8 @@ $('room-id').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(
 function joinGame() {
   const name = $('player-name').value.trim() || 'Operador';
   const roomId = $('room-id').value.trim() || 'default';
+  const selectedLevel = document.querySelector('input[name="game-level"]:checked')?.value || '1';
+  gameLevel = parseInt(selectedLevel);
   $('lobby-status').textContent = '';
 
   if (!socket) {
@@ -72,12 +84,17 @@ function joinGame() {
     setupSocket();
   }
   isAIGame = false;
-  socket.emit('join_game', { playerName: name, roomId });
+  socket.emit('join_game', { playerName: name, roomId, gameLevel });
   myName = name;
+  
+  // Cerrar modal
+  gameModal.classList.remove('active');
 }
 
 function joinAIGame() {
   const name = $('player-name').value.trim() || 'Operador';
+  const selectedLevel = document.querySelector('input[name="game-level"]:checked')?.value || '1';
+  gameLevel = parseInt(selectedLevel);
   $('lobby-status').textContent = '';
 
   if (!socket) {
@@ -85,8 +102,11 @@ function joinAIGame() {
     setupSocket();
   }
   isAIGame = true;
-  socket.emit('join_ai_game', { playerName: name });
+  socket.emit('join_ai_game', { playerName: name, gameLevel });
   myName = name;
+  
+  // Cerrar modal
+  gameModal.classList.remove('active');
 }
 
 // ─── Socket ──────────────────────────────────────────────────────────────────
@@ -224,11 +244,20 @@ function initGame() {
     setupCanvasEvents(canvas);
   }
   renderer.myTeam = myTeam;
+  renderer.gameLevel = gameLevel;
   renderer.updateState(gameState);
   renderGridLabels();
   renderHUD();
   renderUnitList();
   updateTimer(gameState.turnTimeLeft || 30);
+
+  // Mostrar panel táctico si es nivel 2
+  if (gameLevel === 2) {
+    $('tactical-panel').style.display = 'flex';
+    initTacticalAdvantages();
+  } else {
+    $('tactical-panel').style.display = 'none';
+  }
 
   // Action buttons
   $('btn-move').addEventListener('click', () => setAction('move'));
@@ -356,13 +385,18 @@ function selectUnit(unitId) {
   $('btn-move').disabled = !isMyTurn || unit.acted;
   $('btn-shoot').disabled = !isMyTurn || unit.acted;
 
+  // Calcular rangos (con bonus de mira si está activo)
+  const shootRangeBonus = (gameLevel === 2 && tacticalAdvantages.scope.active) ? 2 : 0;
+  const displayShootRange = unit.shootRange + shootRangeBonus;
+
   $('selected-unit-info').innerHTML = `
     <b>${unit.name.toUpperCase()}</b> [${unit.id.toUpperCase()}]<br>
     Coord: <b>${xyToCoord(unit.x, unit.y)}</b><br>
     HP: <b>${unit.hp}/${unit.maxHp}</b><br>
-    Mov: <b>${unit.moveRange}</b> | Disparo: <b>${unit.shootRange}</b><br>
+    Mov: <b>${unit.moveRange}</b> | Disparo: <b>${displayShootRange}${shootRangeBonus > 0 ? ' 🔭' : ''}</b><br>
     ${unit.inCover ? '🪨 <b>En cobertura</b>' : ''}
     ${unit.acted ? '<span style="color:#ff4e4e">✓ Ya actuó</span>' : ''}
+    ${gameLevel === 2 && tacticalAdvantages.armor.active ? '🛡 <b style="color:#00d4ff">Blindaje</b>' : ''}
   `;
 
   // Highlight selected in unit list
@@ -397,10 +431,11 @@ function setAction(type) {
   
   // Mostrar mensaje de ayuda en el status
   const unit = getUnit(selectedUnitId);
+  const shootRangeBonus = (gameLevel === 2 && tacticalAdvantages.scope.active) ? 2 : 0;
   const actionText = type === 'move' ? 'MOVER' : 'DISPARAR';
   const rangeText = type === 'move' 
     ? `Rango de movimiento: ${unit?.moveRange || 0} casillas`
-    : `Rango de disparo: ${unit?.shootRange || 0} casillas`;
+    : `Rango de disparo: ${(unit?.shootRange || 0) + shootRangeBonus} casillas${shootRangeBonus > 0 ? ' 🔭' : ''}`;
   showStatus(`${actionText} - Haz clic en el tablero. ${rangeText}`, '');
 }
 
@@ -448,9 +483,24 @@ function updateCoordHint(x, y) {
 
 function endTurn() {
   if (gameState.currentTeam !== myTeam) { showStatus('No es tu turno', 'error'); return; }
+  
+  // Nivel 2: Acumular EXP basado en tiempo restante
+  if (gameLevel === 2) {
+    const timeRemaining = gameState.turnTimeLeft || 0;
+    if (timeRemaining > 0) {
+      expAccumulated += timeRemaining;
+      updateExpBar();
+      showStatus(`Turno terminado (+${timeRemaining}s EXP)`, 'success');
+      
+      // Verificar si se alcanzó el umbral para desbloquear ventajas
+      checkAdvantageUnlocks();
+    }
+  } else {
+    showStatus('Turno terminado', '');
+  }
+  
   clearSelection();
   socket.emit('end_turn');
-  showStatus('Turno terminado', '');
 }
 
 // ─── HUD ─────────────────────────────────────────────────────────────────────
@@ -607,5 +657,140 @@ $('btn-lobby').addEventListener('click', () => {
   pendingAction = null;
   renderer = null;
   isAIGame = false;
+  // Reset nivel 2 state
+  expAccumulated = 0;
+  tacticalAdvantages = {
+    armor: { unlocked: false, active: false },
+    scope: { unlocked: false, active: false },
+    camouflage: { unlocked: false, active: false }
+  };
   showScreen('lobby-screen');
 });
+
+// ─── NIVEL 2: Ventajas Tácticas ──────────────────────────────────────────────
+const ADVANTAGE_CONFIGS = {
+  armor: {
+    icon: '🛡',
+    name: 'BLINDAJE',
+    description: 'Bloquea un impacto sin daño'
+  },
+  scope: {
+    icon: '🔭',
+    name: 'MIRA',
+    description: 'Aumenta rango de disparo +2'
+  },
+  camouflage: {
+    icon: '👤',
+    name: 'CAMUFLAJE',
+    description: 'Invisible al radar enemigo'
+  }
+};
+
+function initTacticalAdvantages() {
+  updateExpBar();
+  renderAdvantages();
+}
+
+function updateExpBar() {
+  const percentage = Math.min((expAccumulated / 200) * 100, 100);
+  $('exp-bar-fill').style.width = `${percentage}%`;
+  $('exp-current').textContent = expAccumulated;
+}
+
+function checkAdvantageUnlocks() {
+  // Cada 200 segundos se desbloquea una ventaja
+  const unlocksAvailable = Math.floor(expAccumulated / 200);
+  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
+  
+  if (unlocksAvailable > currentUnlocks) {
+    // Hay ventajas para desbloquear
+    renderAdvantages();
+    showStatus('¡Ventaja táctica disponible!', 'success');
+  }
+}
+
+function renderAdvantages() {
+  const container = $('tactical-advantages');
+  container.innerHTML = '';
+  
+  const unlocksAvailable = Math.floor(expAccumulated / 200);
+  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
+  
+  Object.entries(ADVANTAGE_CONFIGS).forEach(([key, config]) => {
+    const advantage = tacticalAdvantages[key];
+    const canUnlock = !advantage.unlocked && currentUnlocks < unlocksAvailable;
+    
+    const item = document.createElement('div');
+    item.className = `advantage-item ${advantage.unlocked ? (advantage.active ? 'active' : '') : (canUnlock ? 'available' : 'locked')}`;
+    
+    let statusText = 'BLOQUEADO';
+    let statusClass = 'locked';
+    if (advantage.unlocked) {
+      statusText = advantage.active ? 'ACTIVO' : 'INACTIVO';
+      statusClass = advantage.active ? 'active' : '';
+    } else if (canUnlock) {
+      statusText = 'DISPONIBLE';
+      statusClass = 'available';
+    }
+    
+    item.innerHTML = `
+      <span class="advantage-icon">${config.icon}</span>
+      <div class="advantage-info">
+        <div class="advantage-name">${config.name}</div>
+        <div class="advantage-desc">${config.description}</div>
+      </div>
+      <span class="advantage-status ${statusClass}">${statusText}</span>
+    `;
+    
+    if (canUnlock) {
+      item.addEventListener('click', () => unlockAdvantage(key));
+    } else if (advantage.unlocked) {
+      item.addEventListener('click', () => toggleAdvantage(key));
+    }
+    
+    container.appendChild(item);
+  });
+}
+
+function unlockAdvantage(key) {
+  if (tacticalAdvantages[key].unlocked) return;
+  
+  const unlocksAvailable = Math.floor(expAccumulated / 200);
+  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
+  
+  if (currentUnlocks < unlocksAvailable) {
+    tacticalAdvantages[key].unlocked = true;
+    tacticalAdvantages[key].active = false;
+    renderAdvantages();
+    const config = ADVANTAGE_CONFIGS[key];
+    showStatus(`${config.name} desbloqueado!`, 'success');
+    addChat('SISTEMA', 'neutral', `🎖 Has desbloqueado: ${config.name}`);
+  }
+}
+
+function toggleAdvantage(key) {
+  if (!tacticalAdvantages[key].unlocked) return;
+  
+  tacticalAdvantages[key].active = !tacticalAdvantages[key].active;
+  renderAdvantages();
+  
+  const config = ADVANTAGE_CONFIGS[key];
+  const status = tacticalAdvantages[key].active ? 'activado' : 'desactivado';
+  showStatus(`${config.name} ${status}`, 'success');
+  
+  // Aplicar efectos según la ventaja
+  applyAdvantageEffects();
+}
+
+function applyAdvantageEffects() {
+  // Los efectos se aplican en el renderer y en la lógica del juego
+  if (renderer) {
+    renderer.tacticalAdvantages = tacticalAdvantages;
+    renderer.render();
+  }
+  
+  // Actualizar información de unidades si hay scope activo
+  if (tacticalAdvantages.scope.active) {
+    renderUnitList();
+  }
+}
