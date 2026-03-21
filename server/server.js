@@ -29,7 +29,7 @@ app.get(/.*/, (req, res) => {
 });
 
 // --- Room management ---
-// rooms: { [roomId]: { players: [{id, name, team, socketId}], gameState, timer } }
+// rooms: { [roomId]: { players: [{id, name, team, socketId}], gameState, timer, tacticalAdvantages: {alpha: {}, bravo: {}} } }
 const rooms = {};
 
 function getRoomForSocket(socketId) {
@@ -44,9 +44,17 @@ function getRoomForSocket(socketId) {
 function broadcastState(roomId) {
   const room = rooms[roomId];
   if (!room) return;
-  io.to(roomId).emit('state_update', {
-    gameState: room.gameState,
-    players: room.players.map(p => ({ name: p.name, team: p.team })),
+  
+  // Enviar estado con ventajas tácticas del enemigo (solo camuflaje)
+  room.players.forEach(player => {
+    const enemyTeam = player.team === 'alpha' ? 'bravo' : 'alpha';
+    const enemyCamouflage = room.tacticalAdvantages?.[enemyTeam]?.camouflage || false;
+    
+    io.to(player.socketId).emit('state_update', {
+      gameState: room.gameState,
+      players: room.players.map(p => ({ name: p.name, team: p.team })),
+      enemyCamouflage: enemyCamouflage
+    });
   });
 }
 
@@ -88,7 +96,15 @@ io.on('connection', (socket) => {
     const rid = String(roomId || 'default').trim().slice(0, 30) || 'default';
 
     if (!rooms[rid]) {
-      rooms[rid] = { players: [], gameState: null, timer: null };
+      rooms[rid] = { 
+        players: [], 
+        gameState: null, 
+        timer: null,
+        tacticalAdvantages: {
+          alpha: { camouflage: false },
+          bravo: { camouflage: false }
+        }
+      };
     }
     const room = rooms[rid];
 
@@ -252,6 +268,20 @@ io.on('connection', (socket) => {
     const msg = String(message || '').trim().slice(0, 200);
     if (!msg) return;
     io.to(roomId).emit('chat_message', { from: player.name, team: player.team, message: msg, time: Date.now() });
+  });
+
+  // Tactical advantages update (Nivel 2)
+  socket.on('update_tactical_advantages', ({ camouflage }) => {
+    const found = getRoomForSocket(socket.id);
+    if (!found) return;
+    const { roomId, room } = found;
+    const player = room.players.find(p => p.socketId === socket.id);
+    if (!player) return;
+    
+    // Actualizar estado de camuflaje del equipo
+    if (room.tacticalAdvantages) {
+      room.tacticalAdvantages[player.team].camouflage = Boolean(camouflage);
+    }
   });
 
   // Restart game

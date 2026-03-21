@@ -51,6 +51,7 @@ export class GameRenderer {
     this.gridSize = 15;
     this.gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
     this.tacticalAdvantages = null; // Para nivel 2
+    this.enemyCamouflage = false; // Estado de camuflaje del enemigo
     this._setupCanvas();
   }
 
@@ -203,12 +204,16 @@ export class GameRenderer {
         this._drawUnit(unit, cs);
       }
       
-      // Si el radar está activo, mostrar también unidades enemigas
+      // Si el radar está activo, mostrar unidades enemigas SIN camuflaje activo
       if (radarActive) {
         const enemyTeam = this.myTeam === 'alpha' ? 'bravo' : 'alpha';
         const enemyUnits = units[enemyTeam];
-        for (const unit of enemyUnits) {
-          this._drawUnit(unit, cs, true); // true = es enemigo visible por radar
+        
+        // Si el enemigo tiene camuflaje activo, NO mostrar sus unidades
+        if (!this.enemyCamouflage) {
+          for (const unit of enemyUnits) {
+            this._drawUnit(unit, cs, true); // true = es enemigo visible por radar
+          }
         }
       }
     } else {
