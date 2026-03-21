@@ -24,11 +24,13 @@ let gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
 // ─── Nivel 2: Estado de ventajas tácticas ───────────────────────────────────
 let expAccumulated = 0; // Segundos acumulados
 let tacticalAdvantages = {
-  armor: { unlocked: false, active: false }, // Blindaje
-  scope: { unlocked: false, active: false }, // Mira
-  camouflage: { unlocked: false, active: false } // Camuflaje
+  armor: { unlocked: false, active: false, turnsRemaining: 0 }, // Blindaje - 2 turnos
+  scope: { unlocked: false, active: false, turnsRemaining: 0 }, // Mira - 2 turnos
+  camouflage: { unlocked: false, active: false, turnsRemaining: 0 }, // Camuflaje - 2 turnos
+  radar: { unlocked: false, active: false, turnsRemaining: 0 } // Radar - 1 turno
 };
 let lastTurnEndTime = 0;
+let maxActiveAdvantages = 2; // Máximo 2 ventajas activas simultáneamente
 
 // ─── Screens ────────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -189,6 +191,12 @@ function setupSocket() {
   socket.on('turn_change', ({ currentTeam, turnNumber }) => {
     playTurnChange();
     const isMyTurn = currentTeam === myTeam;
+    
+    // Decrementar turnos de ventajas tácticas si es mi turno
+    if (isMyTurn && gameLevel === 2) {
+      decrementAdvantageTurns();
+    }
+    
     clearSelection();
     showStatus(isMyTurn ? '⚡ ¡ES TU TURNO!' : `Turno del equipo ${currentTeam.toUpperCase()}`, isMyTurn ? 'success' : '');
     addChat('SISTEMA', 'neutral', `🔄 Turno ${turnNumber} — ${currentTeam.toUpperCase()} actúa`);
@@ -253,10 +261,20 @@ function initGame() {
 
   // Mostrar panel táctico si es nivel 2
   if (gameLevel === 2) {
-    $('tactical-panel').style.display = 'flex';
+    // Panel en el HUD (superior)
+    $('tactical-hud-panel').style.display = 'flex';
+    
+    // Panel lateral (oculto ahora que está en el HUD)
+    if ($('tactical-panel')) {
+      $('tactical-panel').style.display = 'none';
+    }
+    
     initTacticalAdvantages();
   } else {
-    $('tactical-panel').style.display = 'none';
+    $('tactical-hud-panel').style.display = 'none';
+    if ($('tactical-panel')) {
+      $('tactical-panel').style.display = 'none';
+    }
   }
 
   // Action buttons
@@ -660,9 +678,10 @@ $('btn-lobby').addEventListener('click', () => {
   // Reset nivel 2 state
   expAccumulated = 0;
   tacticalAdvantages = {
-    armor: { unlocked: false, active: false },
-    scope: { unlocked: false, active: false },
-    camouflage: { unlocked: false, active: false }
+    armor: { unlocked: false, active: false, turnsRemaining: 0 },
+    scope: { unlocked: false, active: false, turnsRemaining: 0 },
+    camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
+    radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
   showScreen('lobby-screen');
 });
@@ -672,53 +691,113 @@ const ADVANTAGE_CONFIGS = {
   armor: {
     icon: '🛡',
     name: 'BLINDAJE',
-    description: 'Bloquea un impacto sin daño'
+    description: 'Bloquea un impacto (2 turnos)',
+    duration: 2
   },
   scope: {
     icon: '🔭',
     name: 'MIRA',
-    description: 'Aumenta rango de disparo +2'
+    description: 'Rango disparo +2 (2 turnos)',
+    duration: 2
   },
   camouflage: {
     icon: '👤',
     name: 'CAMUFLAJE',
-    description: 'Invisible al radar enemigo'
+    description: 'Invisible al radar (2 turnos)',
+    duration: 2
+  },
+  radar: {
+    icon: '📡',
+    name: 'RADAR',
+    description: 'Ver enemigos (1 turno)',
+    duration: 1
   }
 };
 
 function initTacticalAdvantages() {
   updateExpBar();
-  renderAdvantages();
+  renderAdvantagesHUD();
 }
 
 function updateExpBar() {
   const percentage = Math.min((expAccumulated / 200) * 100, 100);
-  $('exp-bar-fill').style.width = `${percentage}%`;
-  $('exp-current').textContent = expAccumulated;
+  
+  // Actualizar barra en HUD
+  if ($('exp-hud-bar-fill')) {
+    $('exp-hud-bar-fill').style.width = `${percentage}%`;
+    $('exp-hud-current').textContent = expAccumulated;
+  }
+  
+  // Actualizar barra en panel lateral (si existe)
+  if ($('exp-bar-fill')) {
+    $('exp-bar-fill').style.width = `${percentage}%`;
+    $('exp-current').textContent = expAccumulated;
+  }
 }
 
 function checkAdvantageUnlocks() {
-  // Cada 200 segundos se desbloquea una ventaja
-  const unlocksAvailable = Math.floor(expAccumulated / 200);
-  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
-  
-  if (unlocksAvailable > currentUnlocks) {
-    // Hay ventajas para desbloquear
+  // Al llegar a 200 o más, resetear EXP y permitir desbloqueo
+  if (expAccumulated >= 200) {
+    expAccumulated = 0; // Resetear EXP
+    updateExpBar();
+    
+    // Permitir desbloquear una ventaja
     renderAdvantages();
-    showStatus('¡Ventaja táctica disponible!', 'success');
+    renderAdvantagesHUD();
+    showStatus('¡200 EXP! Ventaja táctica disponible', 'success');
   }
+}
+
+function renderAdvantagesHUD() {
+  const container = $('tactical-hud-advantages');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  // Verificar si hay EXP suficiente para desbloquear
+  const canUnlockNew = expAccumulated >= 200;
+  
+  Object.entries(ADVANTAGE_CONFIGS).forEach(([key, config]) => {
+    const advantage = tacticalAdvantages[key];
+    const canUnlock = !advantage.unlocked && canUnlockNew;
+    
+    const item = document.createElement('div');
+    item.className = `advantage-hud-item ${advantage.unlocked ? (advantage.active ? 'active' : 'unlocked') : (canUnlock ? 'available' : 'locked')}`;
+    item.title = `${config.name} - ${config.description}`;
+    
+    let content = config.icon;
+    if (advantage.active && advantage.turnsRemaining > 0) {
+      content += `<span class="advantage-turns">${advantage.turnsRemaining}</span>`;
+    }
+    
+    item.innerHTML = content;
+    
+    if (canUnlock) {
+      item.addEventListener('click', () => {
+        unlockAdvantage(key);
+        renderAdvantagesHUD();
+      });
+    } else if (advantage.unlocked) {
+      item.addEventListener('click', () => {
+        toggleAdvantage(key);
+        renderAdvantagesHUD();
+      });
+    }
+    
+    container.appendChild(item);
+  });
 }
 
 function renderAdvantages() {
   const container = $('tactical-advantages');
   container.innerHTML = '';
   
-  const unlocksAvailable = Math.floor(expAccumulated / 200);
-  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
+  // Verificar si hay EXP suficiente para desbloquear
+  const canUnlockNew = expAccumulated >= 200;
   
   Object.entries(ADVANTAGE_CONFIGS).forEach(([key, config]) => {
     const advantage = tacticalAdvantages[key];
-    const canUnlock = !advantage.unlocked && currentUnlocks < unlocksAvailable;
+    const canUnlock = !advantage.unlocked && canUnlockNew;
     
     const item = document.createElement('div');
     item.className = `advantage-item ${advantage.unlocked ? (advantage.active ? 'active' : '') : (canUnlock ? 'available' : 'locked')}`;
@@ -726,8 +805,13 @@ function renderAdvantages() {
     let statusText = 'BLOQUEADO';
     let statusClass = 'locked';
     if (advantage.unlocked) {
-      statusText = advantage.active ? 'ACTIVO' : 'INACTIVO';
-      statusClass = advantage.active ? 'active' : '';
+      if (advantage.active) {
+        statusText = `ACTIVO (${advantage.turnsRemaining}T)`;
+        statusClass = 'active';
+      } else {
+        statusText = 'LISTO';
+        statusClass = '';
+      }
     } else if (canUnlock) {
       statusText = 'DISPONIBLE';
       statusClass = 'available';
@@ -754,32 +838,75 @@ function renderAdvantages() {
 
 function unlockAdvantage(key) {
   if (tacticalAdvantages[key].unlocked) return;
+  if (expAccumulated < 200) return;
   
-  const unlocksAvailable = Math.floor(expAccumulated / 200);
-  const currentUnlocks = Object.values(tacticalAdvantages).filter(a => a.unlocked).length;
+  tacticalAdvantages[key].unlocked = true;
+  tacticalAdvantages[key].active = false;
+  tacticalAdvantages[key].turnsRemaining = 0;
   
-  if (currentUnlocks < unlocksAvailable) {
-    tacticalAdvantages[key].unlocked = true;
-    tacticalAdvantages[key].active = false;
-    renderAdvantages();
-    const config = ADVANTAGE_CONFIGS[key];
-    showStatus(`${config.name} desbloqueado!`, 'success');
-    addChat('SISTEMA', 'neutral', `🎖 Has desbloqueado: ${config.name}`);
-  }
+  // Resetear EXP después de desbloquear
+  expAccumulated = 0;
+  updateExpBar();
+  
+  renderAdvantages();
+  renderAdvantagesHUD();
+  const config = ADVANTAGE_CONFIGS[key];
+  showStatus(`${config.name} desbloqueado!`, 'success');
+  addChat('SISTEMA', 'neutral', `🎖 Has desbloqueado: ${config.name}`);
 }
 
 function toggleAdvantage(key) {
   if (!tacticalAdvantages[key].unlocked) return;
   
-  tacticalAdvantages[key].active = !tacticalAdvantages[key].active;
-  renderAdvantages();
-  
+  const advantage = tacticalAdvantages[key];
   const config = ADVANTAGE_CONFIGS[key];
-  const status = tacticalAdvantages[key].active ? 'activado' : 'desactivado';
-  showStatus(`${config.name} ${status}`, 'success');
   
-  // Aplicar efectos según la ventaja
+  if (!advantage.active) {
+    // Verificar límite de ventajas activas
+    const activeCount = Object.values(tacticalAdvantages).filter(a => a.active).length;
+    if (activeCount >= maxActiveAdvantages) {
+      showStatus(`Máximo ${maxActiveAdvantages} ventajas activas`, 'error');
+      return;
+    }
+    
+    // Activar ventaja
+    advantage.active = true;
+    advantage.turnsRemaining = config.duration;
+    showStatus(`${config.name} activado (${config.duration} turno${config.duration > 1 ? 's' : ''})`, 'success');
+  } else {
+    // Desactivar ventaja manualmente
+    advantage.active = false;
+    advantage.turnsRemaining = 0;
+    showStatus(`${config.name} desactivado`, '');
+  }
+  
+  renderAdvantages();
+  renderAdvantagesHUD();
   applyAdvantageEffects();
+}
+
+function decrementAdvantageTurns() {
+  // Llamar al inicio de cada turno del jugador
+  let anyExpired = false;
+  
+  Object.entries(tacticalAdvantages).forEach(([key, advantage]) => {
+    if (advantage.active && advantage.turnsRemaining > 0) {
+      advantage.turnsRemaining--;
+      
+      if (advantage.turnsRemaining <= 0) {
+        advantage.active = false;
+        const config = ADVANTAGE_CONFIGS[key];
+        showStatus(`${config.name} expiró`, '');
+        anyExpired = true;
+      }
+    }
+  });
+  
+  if (anyExpired) {
+    renderAdvantages();
+    renderAdvantagesHUD();
+    applyAdvantageEffects();
+  }
 }
 
 function applyAdvantageEffects() {

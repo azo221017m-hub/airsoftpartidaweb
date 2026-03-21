@@ -141,6 +141,18 @@
       <div class="hud-team hud-alpha" id="hud-alpha">
         <div class="hud-team-name">⚡ ALPHA</div>
         <div class="hud-units" id="hud-alpha-units"></div>
+        
+        <!-- Panel de Ventajas Tácticas (solo visible para el equipo del jugador en Nivel 2) -->
+        <div id="tactical-hud-panel" class="tactical-hud-panel" style="display:none">
+          <div class="exp-indicator">
+            <span class="exp-icon">⭐</span>
+            <span class="exp-text" id="exp-hud-current">0</span>
+            <div class="exp-mini-bar">
+              <div class="exp-mini-bar-fill" id="exp-hud-bar-fill"></div>
+            </div>
+          </div>
+          <div class="tactical-hud-advantages" id="tactical-hud-advantages"></div>
+        </div>
       </div>
       <div class="hud-center">
         <div class="hud-turn" id="hud-turn">TURNO 1</div>
@@ -152,6 +164,18 @@
           </svg>
         </div>
         <div class="hud-current-team" id="hud-current-team">ALPHA</div>
+        
+        <!-- Panel de Ventajas Tácticas en HUD (Nivel 2) -->
+        <div id="tactical-hud-panel" class="tactical-hud-panel" style="display:none">
+          <div class="exp-indicator">
+            <span class="exp-icon">⚡</span>
+            <span class="exp-text"><span id="exp-hud-current">0</span>/200</span>
+            <div class="exp-mini-bar">
+              <div class="exp-mini-bar-fill" id="exp-hud-bar-fill"></div>
+            </div>
+          </div>
+          <div id="tactical-hud-advantages" class="tactical-hud-advantages"></div>
+        </div>
       </div>
       <div class="hud-team hud-bravo" id="hud-bravo">
         <div class="hud-team-name">🔥 BRAVO</div>

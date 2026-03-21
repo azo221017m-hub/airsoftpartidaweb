@@ -194,11 +194,22 @@ export class GameRenderer {
     // Draw units
     const { units } = this.gameState;
     
-    // Nivel 2: Niebla de guerra - solo mostrar unidades propias
+    // Nivel 2: Niebla de guerra - solo mostrar unidades propias (excepto si radar está activo)
+    const radarActive = this.tacticalAdvantages?.radar?.active;
+    
     if (this.gameLevel === 2 && this.myTeam) {
       const myUnits = units[this.myTeam];
       for (const unit of myUnits) {
         this._drawUnit(unit, cs);
+      }
+      
+      // Si el radar está activo, mostrar también unidades enemigas
+      if (radarActive) {
+        const enemyTeam = this.myTeam === 'alpha' ? 'bravo' : 'alpha';
+        const enemyUnits = units[enemyTeam];
+        for (const unit of enemyUnits) {
+          this._drawUnit(unit, cs, true); // true = es enemigo visible por radar
+        }
       }
     } else {
       // Nivel 1: Mostrar todas las unidades
@@ -292,7 +303,7 @@ export class GameRenderer {
     }
   }
 
-  _drawUnit(unit, cs) {
+  _drawUnit(unit, cs, detectedByRadar = false) {
     const { ctx } = this;
     if (unit.hp <= 0) {
       // Draw skull for eliminated
@@ -312,6 +323,11 @@ export class GameRenderer {
     const fill = isAlpha ? COLORS.alphaFill : COLORS.bravoFill;
     const isSelected = this.selectedUnit?.id === unit.id;
     const isMyUnit = unit.team === this.myTeam;
+
+    // Si es detectado por radar, ajustar opacidad
+    if (detectedByRadar) {
+      ctx.globalAlpha = 0.7;
+    }
 
     // Background circle
     ctx.save();
@@ -378,6 +394,15 @@ export class GameRenderer {
       ctx.font = `${Math.floor(cs * 0.2)}px serif`;
       ctx.fillText('🔭', px + cs - 10, py + cs - 8);
     }
+    
+    // Radar indicator (unidad detectada)
+    if (detectedByRadar) {
+      ctx.font = `${Math.floor(cs * 0.25)}px serif`;
+      ctx.fillText('📡', px + cs / 2, py + 6);
+    }
+    
+    // Restaurar alpha
+    ctx.globalAlpha = 1;
   }
 
   _drawCoordLabels(cs, gridSize) {
