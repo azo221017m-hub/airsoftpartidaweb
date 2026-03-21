@@ -47,7 +47,7 @@ export class GameRenderer {
     this.hoveredCell = null;
     this.validCells = [];
     this.flashCells = []; // [{x,y,color,until}]
-    this.cellSize = 40;
+    this.cellSize = 52; // Aumentado 30% desde 40
     this.gridSize = 15;
     this._setupCanvas();
   }
@@ -70,7 +70,7 @@ export class GameRenderer {
     if (!container) return;
     const available = Math.min(container.clientWidth - 24, container.clientHeight - 60);
     const cs = Math.floor(available / this.gridSize);
-    this.cellSize = Math.max(24, Math.min(cs, 44));
+    this.cellSize = Math.max(31, Math.min(cs, 57)); // Aumentado 30%: de 24-44 a 31-57
     const size = this.gridSize * this.cellSize;
     this.canvas.width = size;
     this.canvas.height = size;

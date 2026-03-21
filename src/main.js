@@ -286,9 +286,8 @@ function setupCanvasEvents(canvas) {
       $('coord-display').textContent = unit
         ? `${coord} — ${unit.team.toUpperCase()} ${unit.name} (${unit.hp}/${unit.maxHp} HP)${unit.inCover ? ' 🪨' : ''}`
         : coord;
-      // Auto-fill coord input if action pending
-      if (pendingAction) {
-        $('coord-input').value = coord;
+      // Mostrar hint de distancia si hay acción pendiente
+      if (pendingAction && selectedUnitId) {
         updateCoordHint(x, y);
       }
     }
@@ -314,10 +313,8 @@ function handleGridClick(x, y) {
   if (!gameState || gameState.phase !== 'playing') return;
 
   if (pendingAction) {
-    // Confirm action on click
-    const coord = xyToCoord(x, y);
-    $('coord-input').value = coord;
-    confirmCoordAction();
+    // Confirm action on click - ejecutar directamente con las coordenadas
+    confirmCoordActionDirect(x, y);
     return;
   }
 
@@ -394,13 +391,38 @@ function setAction(type) {
 
   $('btn-move').classList.toggle('active', type === 'move');
   $('btn-shoot').classList.toggle('active', type === 'shoot');
-  $('coord-input-group').style.display = 'flex';
-  $('coord-label').textContent = type === 'move' ? 'DESTINO (ej: A1):' : 'OBJETIVO (ej: H8):';
-  $('coord-input').value = '';
-  $('coord-input').focus();
-  $('coord-hint').textContent = type === 'move'
-    ? `Rango: ${getUnit(selectedUnitId)?.moveRange || 0} casillas`
-    : `Rango: ${getUnit(selectedUnitId)?.shootRange || 0} casillas`;
+  // NO mostrar el input de coordenadas - ahora se hace clic directo en el tablero
+  // $('coord-input-group').style.display = 'flex';
+  $('coord-input-group').style.display = 'none';
+  
+  // Mostrar mensaje de ayuda en el status
+  const unit = getUnit(selectedUnitId);
+  const actionText = type === 'move' ? 'MOVER' : 'DISPARAR';
+  const rangeText = type === 'move' 
+    ? `Rango de movimiento: ${unit?.moveRange || 0} casillas`
+    : `Rango de disparo: ${unit?.shootRange || 0} casillas`;
+  showStatus(`${actionText} - Haz clic en el tablero. ${rangeText}`, '');
+}
+
+function confirmCoordActionDirect(x, y) {
+  if (!selectedUnitId || !pendingAction) return;
+
+  socket.emit('action', {
+    type: pendingAction,
+    unitId: selectedUnitId,
+    x: x,
+    y: y,
+  });
+
+  // Flash the target cell
+  renderer.addFlash(x, y, pendingAction === 'shoot' ? '#ff4e4e' : '#AAFF00', 500);
+
+  // Clear after action
+  pendingAction = null;
+  $('coord-input-group').style.display = 'none';
+  $('btn-move').classList.remove('active');
+  $('btn-shoot').classList.remove('active');
+  renderer.setPendingAction(null);
 }
 
 function confirmCoordAction() {
@@ -410,22 +432,7 @@ function confirmCoordAction() {
   const xy = coordToXY(rawCoord);
   if (!xy) { showStatus('Coordenada inválida (ej: A1)', 'error'); return; }
 
-  socket.emit('action', {
-    type: pendingAction,
-    unitId: selectedUnitId,
-    x: xy.x,
-    y: xy.y,
-  });
-
-  // Flash the target cell
-  renderer.addFlash(xy.x, xy.y, pendingAction === 'shoot' ? '#ff4e4e' : '#AAFF00', 500);
-
-  // Clear after action
-  pendingAction = null;
-  $('coord-input-group').style.display = 'none';
-  $('btn-move').classList.remove('active');
-  $('btn-shoot').classList.remove('active');
-  renderer.setPendingAction(null);
+  confirmCoordActionDirect(xy.x, xy.y);
 }
 
 function updateCoordHint(x, y) {
