@@ -921,26 +921,27 @@ html, body {
 /* ─── BOTÓN CÓDIGO NEGRO FIJO ─── */
 .btn-codigo-negro-fixed {
   position: fixed;
-  bottom: 20px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  background: rgba(30, 0, 0, 0.92);
+  background: rgba(20, 0, 0, 0.93);
   color: var(--bravo-color);
   border: 1px solid var(--bravo-color);
-  box-shadow: 0 0 18px var(--bravo-glow), 0 0 40px rgba(255,0,0,0.15);
-  font-size: 12px;
-  padding: 8px 22px;
+  box-shadow: 0 0 14px var(--bravo-glow);
+  font-size: 11px;
+  padding: 7px 20px;
   letter-spacing: 2px;
-  opacity: 0.7;
+  opacity: 0.65;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 .btn-codigo-negro-fixed:hover {
   opacity: 1;
   background: var(--bravo-color);
   color: #fff;
-  box-shadow: 0 0 30px var(--bravo-glow);
-  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 0 28px var(--bravo-glow);
+  transform: translateX(-50%) scale(1.04);
 }
 
 /* ─── HIGHLIGHT ANIMATIONS ─── */

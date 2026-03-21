@@ -149,6 +149,7 @@ function setupSocket() {
     players = pl;
     initGame();
     showScreen('game-screen');
+    $('btn-codigo-negro').style.display = 'block';  // Mostrar solo en partida
     if (isAIGame) {
       showStatus(`¡Partida contra IA iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
       addChat('SISTEMA', 'neutral', '🤖 ¡Partida contra IA iniciada! Equipo ALPHA comienza.');
@@ -185,11 +186,8 @@ function setupSocket() {
   socket.on('action_result', ({ success, message, type, hit, team, unitName }) => {
     if (type === 'move') playMove();
     else if (type === 'shoot') { 
-      playShoot();
-      
       if (hit) {
         playHit();
-        // Mostrar popup de "Hit!" en el canvas
         showHitPopup();
       } else {
         playMiss();
@@ -249,6 +247,7 @@ function setupSocket() {
     $('gameover-team').className = `gameover-team ${winner}`;
     $('gameover-icon').textContent = winner === myTeam ? '🏆' : '💀';
     $('gameover-msg').textContent = msg || `El equipo ${winner.toUpperCase()} ha eliminado a todos los enemigos`;
+    $('btn-codigo-negro').style.display = 'none';  // Ocultar al terminar partida
     showScreen('gameover-screen');
   });
 
@@ -760,6 +759,7 @@ $('btn-lobby').addEventListener('click', () => {
     camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
     radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
+  $('btn-codigo-negro').style.display = 'none';  // Ocultar al salir al lobby
   showScreen('lobby-screen');
 });
 
