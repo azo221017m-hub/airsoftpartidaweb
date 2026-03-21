@@ -1242,6 +1242,117 @@ html, body {
   .dialog-hint { display: none; }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   ROTATE SCREEN — Pantalla de "gira tu dispositivo"
+   Solo se muestra en móvil / tablet en orientación portrait.
+   NO afecta el layout de escritorio en ningún caso.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Por defecto: oculto (desktop siempre oculto) */
+.rotate-screen {
+  display: none;
+}
+
+/* Solo aparece en pantallas pequeñas Y en orientación portrait */
+@media (max-width: 900px) and (orientation: portrait) {
+  .rotate-screen {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: var(--bg-dark);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  /* Oculta TODO lo demás detrás del overlay */
+  body > *:not(.rotate-screen) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.rotate-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  padding: 40px 30px;
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  background: var(--bg-panel);
+  box-shadow: 0 0 40px var(--alpha-glow);
+  overflow: hidden;
+  max-width: 280px;
+  text-align: center;
+}
+
+/* Scanlines decorativas en el fondo del panel */
+.rotate-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.15) 3px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+}
+
+/* Ícono del teléfono */
+.rotate-phone {
+  font-size: 52px;
+  line-height: 1;
+  animation: phone-tilt 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px var(--alpha-glow));
+}
+@keyframes phone-tilt {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  35%  { transform: rotate(-90deg) scale(1.05); }
+  65%  { transform: rotate(-90deg) scale(1.05); }
+  100% { transform: rotate(0deg)   scale(1);    }
+}
+
+/* Flecha de rotación */
+.rotate-arrow {
+  font-size: 32px;
+  color: var(--alpha-color);
+  text-shadow: 0 0 14px var(--alpha-glow);
+  animation: arrow-spin 1.8s ease-in-out infinite;
+}
+@keyframes arrow-spin {
+  0%   { transform: rotate(0deg);    opacity: 0.4; }
+  35%  { transform: rotate(-90deg);  opacity: 1;   }
+  65%  { transform: rotate(-90deg);  opacity: 1;   }
+  100% { transform: rotate(0deg);    opacity: 0.4; }
+}
+
+.rotate-title {
+  font-family: var(--font-arcade);
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--alpha-color);
+  text-shadow: 0 0 10px var(--alpha-glow);
+  text-transform: uppercase;
+}
+
+.rotate-sub {
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+.rotate-sub strong {
+  color: var(--text-bright);
+  letter-spacing: 3px;
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .side-panel { width: 180px; }
