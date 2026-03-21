@@ -29,6 +29,33 @@ function showScreen(id) {
 // ─── DOM refs ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+// ─── Modal ──────────────────────────────────────────────────────────────────
+const gameModal = $('game-modal');
+const openModalBtn = $('open-game-modal');
+const closeModalBtn = $('close-modal');
+
+openModalBtn.addEventListener('click', () => {
+  gameModal.classList.add('active');
+});
+
+closeModalBtn.addEventListener('click', () => {
+  gameModal.classList.remove('active');
+});
+
+// Cerrar modal al hacer clic fuera del contenido
+gameModal.addEventListener('click', (e) => {
+  if (e.target === gameModal) {
+    gameModal.classList.remove('active');
+  }
+});
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && gameModal.classList.contains('active')) {
+    gameModal.classList.remove('active');
+  }
+});
+
 // ─── Lobby ──────────────────────────────────────────────────────────────────
 $('join-btn').addEventListener('click', joinGame);
 $('join-ai-btn').addEventListener('click', joinAIGame);

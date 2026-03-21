@@ -109,6 +109,102 @@ html, body {
   display: flex; gap: 24px; width: 100%; align-items: center;
   justify-content: center;
 }
+
+/* ─── BOTÓN JUEGO ─── */
+.btn-game {
+  background: linear-gradient(135deg, var(--alpha-color), var(--neutral));
+  color: #000;
+  font-size: 28px;
+  padding: 20px 50px;
+  box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow);
+  border: 2px solid var(--neutral);
+  animation: pulse-game-btn 2s ease-in-out infinite;
+}
+.btn-game:hover {
+  background: linear-gradient(135deg, #fff, var(--neutral));
+  box-shadow: 0 0 50px var(--alpha-glow), 0 0 80px var(--neutral-glow);
+  transform: scale(1.05);
+}
+@keyframes pulse-game-btn {
+  0%, 100% { box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow); }
+  50% { box-shadow: 0 0 40px var(--alpha-glow), 0 0 80px var(--neutral-glow); }
+}
+
+/* ─── MODAL CON EFECTO VIDRIO ─── */
+.game-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+.game-modal.active {
+  display: flex;
+}
+.modal-content {
+  background: rgba(14, 16, 32, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(170, 255, 0, 0.3);
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0 50px rgba(170, 255, 0, 0.3), 
+              0 0 100px rgba(200, 255, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: modalSlideIn 0.4s ease;
+}
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(-50px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 78, 78, 0.2);
+  border: 1px solid var(--bravo-color);
+  color: var(--bravo-color);
+  font-size: 20px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-family: var(--font-arcade);
+}
+.modal-close:hover {
+  background: var(--bravo-color);
+  color: #fff;
+  box-shadow: 0 0 15px var(--bravo-glow);
+  transform: rotate(90deg);
+}
+.modal-sections {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.modal-sections .lobby-card,
+.modal-sections .lobby-instructions {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+}
 .lobby-footer {
   margin-top: auto; padding: 16px; text-align: center;
   font-size: 12px; letter-spacing: 2px; color: var(--alpha-color);
@@ -452,8 +548,21 @@ html, body {
   .side-panel { width: 180px; }
   .lobby-content { flex-direction: column; }
   .lobby-card, .lobby-instructions { max-width: 100%; }
+  .modal-sections { flex-direction: column; }
+  .modal-sections .lobby-card,
+  .modal-sections .lobby-instructions {
+    max-width: 100%;
+  }
 }
 @media (max-width: 700px) {
   .side-panel { display: none; }
   .hud-units { flex-wrap: wrap; }
+  .btn-game {
+    font-size: 20px;
+    padding: 15px 35px;
+  }
+  .modal-content {
+    padding: 20px;
+    width: 95%;
+  }
 }
