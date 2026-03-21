@@ -1425,9 +1425,32 @@ html, body {
 .launch-glass {
   position: absolute;
   inset: 0;
-  background: rgba(6, 8, 16, 0.72);
-  backdrop-filter: blur(18px) saturate(0.6);
-  -webkit-backdrop-filter: blur(18px) saturate(0.6);
+  /* Opacidad muy alta + blur extremo para que sea imposible leer el fondo */
+  background: rgba(4, 5, 12, 0.91);
+  backdrop-filter: blur(48px) saturate(0.15) brightness(0.35) contrast(0.7);
+  -webkit-backdrop-filter: blur(48px) saturate(0.15) brightness(0.35) contrast(0.7);
+}
+/* Capa extra de ruido/distorsión encima del glass */
+.launch-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.18) 0px,
+      rgba(0, 0, 0, 0.18) 2px,
+      transparent 2px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.06) 0px,
+      rgba(0, 0, 0, 0.06) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+  pointer-events: none;
 }
 
 /* Tarjeta central */
