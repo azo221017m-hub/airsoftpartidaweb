@@ -980,6 +980,268 @@ html, body {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   DIALOG SYSTEM — Estilo arcade RPG
+   ══════════════════════════════════════════════════════════════ */
+
+/* Overlay oscuro que cubre toda la pantalla */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 40px;
+  backdrop-filter: blur(2px);
+  animation: dialog-fade-in 0.2s ease;
+}
+@keyframes dialog-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Caja principal: personaje + burbuja */
+.dialog-box {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  width: min(780px, 95vw);
+  position: relative;
+}
+
+/* ── PERSONAJE ── */
+.dialog-character {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.dialog-character-frame {
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--alpha-color);
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 0 18px var(--alpha-glow),
+    inset 0 0 12px rgba(0,0,0,0.6);
+  background: #0a0f05;
+  position: relative;
+  overflow: hidden;
+  image-rendering: pixelated;
+  animation: char-idle 2.4s ease-in-out infinite;
+}
+@keyframes char-idle {
+  0%, 100% { transform: translateY(0px);    box-shadow: 0 0 18px var(--alpha-glow); }
+  50%       { transform: translateY(-3px);  box-shadow: 0 0 30px var(--alpha-glow); }
+}
+
+/* Imagen del personaje */
+.dialog-char-sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  image-rendering: pixelated;
+  filter: saturate(1.3) contrast(1.1);
+}
+
+/* Scanlines sobre el personaje (efecto CRT) */
+.dialog-char-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  pointer-events: none;
+}
+
+/* Brillo verde en esquina superior */
+.dialog-char-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(170,255,0,0.12), transparent);
+  pointer-events: none;
+}
+
+/* Nombre del personaje bajo el frame */
+.dialog-char-name {
+  margin-top: 6px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--alpha-color);
+  text-shadow: 0 0 8px var(--alpha-glow);
+  text-transform: uppercase;
+  text-align: center;
+  background: rgba(0,0,0,0.7);
+  padding: 2px 8px;
+  border: 1px solid rgba(170,255,0,0.25);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ── NUBE DE DIÁLOGO ── */
+.dialog-bubble {
+  position: relative;
+  flex: 1;
+  background: rgba(10, 14, 24, 0.97);
+  border: 2px solid var(--alpha-color);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 0 24px var(--alpha-glow),
+    inset 0 0 30px rgba(0,0,0,0.5);
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 18px;
+}
+
+/* Cola triangular apuntando al personaje (izquierda) */
+.dialog-bubble-tail {
+  position: absolute;
+  left: -14px;
+  bottom: 28px;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 14px solid var(--alpha-color);
+  filter: drop-shadow(-2px 0 4px var(--alpha-glow));
+}
+.dialog-bubble-tail::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 12px solid rgba(10, 14, 24, 0.97);
+}
+
+.dialog-bubble-inner {
+  padding: 18px 22px 14px;
+  position: relative;
+}
+
+/* Texto del diálogo con efecto typewriter */
+.dialog-text {
+  font-family: var(--font-arcade);
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text-bright);
+  letter-spacing: 0.5px;
+  min-height: 44px;
+}
+
+/* Cursor parpadeante al final del texto */
+.dialog-cursor {
+  display: inline-block;
+  color: var(--alpha-color);
+  font-size: 13px;
+  animation: cursor-blink 0.7s step-end infinite;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── CONTROLES ── */
+.dialog-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(780px, 95vw);
+  margin-top: 10px;
+  padding: 0 4px;
+}
+
+.dialog-hint {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  animation: hint-pulse 1.8s ease-in-out infinite;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* Puntos de progreso (cuántos textos hay en la secuencia) */
+.dialog-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.dialog-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.2s;
+}
+.dialog-dot.active {
+  background: var(--alpha-color);
+  box-shadow: 0 0 6px var(--alpha-glow);
+}
+
+/* ── VARIANTE ROJA (Bravo / enemigo / alerta) ── */
+.dialog-overlay.dialog-bravo .dialog-character-frame {
+  border-color: var(--bravo-color);
+  box-shadow: 0 0 18px var(--bravo-glow), inset 0 0 12px rgba(0,0,0,0.6);
+  animation-name: char-idle-bravo;
+}
+@keyframes char-idle-bravo {
+  0%, 100% { transform: translateY(0px);   box-shadow: 0 0 18px var(--bravo-glow); }
+  50%       { transform: translateY(-3px); box-shadow: 0 0 30px var(--bravo-glow); }
+}
+.dialog-overlay.dialog-bravo .dialog-char-name {
+  color: var(--bravo-color);
+  text-shadow: 0 0 8px var(--bravo-glow);
+  border-color: rgba(255,78,78,0.25);
+}
+.dialog-overlay.dialog-bravo .dialog-bubble {
+  border-color: var(--bravo-color);
+  box-shadow: 0 0 24px var(--bravo-glow), inset 0 0 30px rgba(0,0,0,0.5);
+}
+.dialog-overlay.dialog-bravo .dialog-bubble-tail {
+  border-right-color: var(--bravo-color);
+}
+.dialog-overlay.dialog-bravo .dialog-cursor { color: var(--bravo-color); }
+.dialog-overlay.dialog-bravo .dialog-dot.active {
+  background: var(--bravo-color);
+  box-shadow: 0 0 6px var(--bravo-glow);
+}
+.dialog-overlay.dialog-bravo .dialog-char-glow {
+  background: linear-gradient(180deg, rgba(255,78,78,0.12), transparent);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  .dialog-character-frame { width: 72px; height: 72px; }
+  .dialog-text { font-size: 11px; }
+  .dialog-bubble-inner { padding: 12px 14px 10px; }
+  .dialog-hint { display: none; }
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .side-panel { width: 180px; }

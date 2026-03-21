@@ -6,6 +6,7 @@ import {
   playShoot, playHit, playEliminate, playMove,
   playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect
 } from './sounds.js';
+import { showDialog, closeDialog, nextDialog, demoDialog } from './dialog.js';
 
 // ─── State ─────────────────────────────────────────────────────────────────
 let socket = null;
@@ -48,6 +49,8 @@ const closeModalBtn = $('close-modal');
 
 openModalBtn.addEventListener('click', () => {
   gameModal.classList.add('active');
+  // Diálogo de bienvenida al abrir el juego
+  demoDialog();
 });
 
 closeModalBtn.addEventListener('click', () => {
