@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const { createGameState, applyMove, applyShoot, endTurn } = require('./gameState');
+const { runAITurn } = require('./ai');
 
 const app = express();
 const httpServer = createServer(app);
@@ -70,6 +71,10 @@ function startTurnTimer(roomId) {
         currentTeam: room.gameState.currentTeam,
         turnNumber: room.gameState.turnNumber,
       });
+      // Trigger AI turn if this is an AI room and it's BRAVO's turn
+      if (room.isAI && room.gameState.currentTeam === 'bravo') {
+        runAITurn(room, roomId, io, broadcastState);
+      }
     }
   }, 1000);
 }
@@ -117,6 +122,31 @@ io.on('connection', (socket) => {
       console.log(`[*] Game started in room ${rid}`);
       startTurnTimer(rid);
     }
+  });
+
+  // Join a game against AI
+  socket.on('join_ai_game', ({ playerName }) => {
+    const name = String(playerName || 'Player').trim().slice(0, 20) || 'Player';
+    const rid = `ai_${socket.id}`;
+
+    rooms[rid] = { players: [], gameState: null, timer: null, isAI: true };
+    const room = rooms[rid];
+
+    room.players.push({ socketId: socket.id, name, team: 'alpha' });
+    room.players.push({ socketId: '__ai__', name: 'IA', team: 'bravo' });
+    socket.join(rid);
+
+    socket.emit('joined', { team: 'alpha', playerName: name, roomId: rid, playersCount: 2 });
+
+    console.log(`[+] ${name} started AI game in room ${rid}`);
+
+    room.gameState = createGameState();
+    io.to(rid).emit('game_start', {
+      gameState: room.gameState,
+      players: room.players.map(p => ({ name: p.name, team: p.team })),
+    });
+    console.log(`[*] AI game started in room ${rid}`);
+    startTurnTimer(rid);
   });
 
   // Perform an action
@@ -201,6 +231,10 @@ io.on('connection', (socket) => {
       currentTeam: room.gameState.currentTeam,
       turnNumber: room.gameState.turnNumber,
     });
+    // Trigger AI turn if this is an AI room and it's BRAVO's turn
+    if (room.isAI && room.gameState.currentTeam === 'bravo') {
+      runAITurn(room, roomId, io, broadcastState);
+    }
   });
 
   // Chat
@@ -220,7 +254,9 @@ io.on('connection', (socket) => {
     const found = getRoomForSocket(socket.id);
     if (!found) return;
     const { roomId, room } = found;
-    if (room.players.length < 2) return;
+    // AI rooms only need 1 human player; PvP rooms need 2
+    const minPlayers = room.isAI ? 1 : 2;
+    if (room.players.filter(p => p.socketId !== '__ai__').length < minPlayers) return;
 
     clearInterval(room.timer);
     room.timer = null;

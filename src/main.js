@@ -18,6 +18,7 @@ let pendingAction = null; // 'move' | 'shoot'
 let renderer = null;
 let timerInterval = null;
 let timerMax = 30;
+let isAIGame = false;
 
 // ─── Screens ────────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -30,6 +31,7 @@ const $ = id => document.getElementById(id);
 
 // ─── Lobby ──────────────────────────────────────────────────────────────────
 $('join-btn').addEventListener('click', joinGame);
+$('join-ai-btn').addEventListener('click', joinAIGame);
 $('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 $('room-id').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 
@@ -42,7 +44,21 @@ function joinGame() {
     socket = io({ transports: ['websocket', 'polling'] });
     setupSocket();
   }
+  isAIGame = false;
   socket.emit('join_game', { playerName: name, roomId });
+  myName = name;
+}
+
+function joinAIGame() {
+  const name = $('player-name').value.trim() || 'Operador';
+  $('lobby-status').textContent = '';
+
+  if (!socket) {
+    socket = io({ transports: ['websocket', 'polling'] });
+    setupSocket();
+  }
+  isAIGame = true;
+  socket.emit('join_ai_game', { playerName: name });
   myName = name;
 }
 
@@ -65,9 +81,14 @@ function setupSocket() {
   socket.on('joined', ({ team, playerName, roomId, playersCount }) => {
     myTeam = team;
     myName = playerName;
-    showScreen('waiting-screen');
-    $('waiting-room-info').textContent = `Sala: ${roomId}`;
-    updateWaitingSlots([{ team, name: playerName }]);
+    if (isAIGame) {
+      // Skip waiting screen for AI games — game_start will follow immediately
+      $('waiting-room-info').textContent = `Sala: ${roomId}`;
+    } else {
+      showScreen('waiting-screen');
+      $('waiting-room-info').textContent = `Sala: ${roomId}`;
+      updateWaitingSlots([{ team, name: playerName }]);
+    }
   });
 
   socket.on('player_count', ({ count, players: pl }) => {
@@ -79,8 +100,13 @@ function setupSocket() {
     players = pl;
     initGame();
     showScreen('game-screen');
-    showStatus(`¡Partida iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
-    addChat('SISTEMA', 'neutral', '🎮 ¡Partida iniciada! Equipo ALPHA comienza.');
+    if (isAIGame) {
+      showStatus(`¡Partida contra IA iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
+      addChat('SISTEMA', 'neutral', '🤖 ¡Partida contra IA iniciada! Equipo ALPHA comienza.');
+    } else {
+      showStatus(`¡Partida iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
+      addChat('SISTEMA', 'neutral', '🎮 ¡Partida iniciada! Equipo ALPHA comienza.');
+    }
   });
 
   socket.on('state_update', ({ gameState: gs, players: pl }) => {
@@ -546,5 +572,6 @@ $('btn-lobby').addEventListener('click', () => {
   selectedUnitId = null;
   pendingAction = null;
   renderer = null;
+  isAIGame = false;
   showScreen('lobby-screen');
 });

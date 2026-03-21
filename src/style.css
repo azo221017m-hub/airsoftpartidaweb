@@ -148,6 +148,14 @@ html, body {
 
 #join-btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
 
+#join-ai-btn { width: 100%; padding: 14px; font-size: 15px; margin-top: 8px; }
+.btn-ai {
+  background: rgba(200,255,0,0.15); color: var(--neutral);
+  border: 1px solid var(--neutral);
+  box-shadow: 0 0 10px var(--neutral-glow);
+}
+.btn-ai:hover { background: var(--neutral); color: #000; box-shadow: 0 0 25px var(--neutral-glow); }
+
 .lobby-status {
   margin-top: 12px; text-align: center; font-size: 12px;
   color: var(--bravo-color); min-height: 20px;
