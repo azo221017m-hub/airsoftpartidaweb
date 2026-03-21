@@ -85,6 +85,27 @@ function applySide(box, side) {
   if (side === 'right') box.classList.add('dialog-side-right');
 }
 
+// ── Inyectar / quitar botón CTA en la burbuja ────────────────
+function _renderCTA(line) {
+  // Elimina cualquier botón previo
+  const prev = document.getElementById('dialog-cta-btn');
+  if (prev) prev.remove();
+
+  if (!line.ctaButton) return;
+
+  const btn = document.createElement('a');
+  btn.id        = 'dialog-cta-btn';
+  btn.href      = line.ctaButton.url;
+  btn.target    = '_blank';
+  btn.rel       = 'noopener noreferrer';
+  btn.className = 'dialog-cta-btn';
+  btn.textContent = line.ctaButton.label;
+
+  // Insertar después del texto, dentro de la burbuja
+  const bubble = document.querySelector('.dialog-bubble');
+  if (bubble) bubble.appendChild(btn);
+}
+
 // ── Mostrar línea ─────────────────────────────────────────────
 function showLine(index) {
   const line = _lines[index];
@@ -117,6 +138,9 @@ function showLine(index) {
 
   // Dots
   renderDots(_lines.length, index);
+
+  // CTA button (ej: WhatsApp)
+  _renderCTA(line);
 
   // Typewriter
   typeWrite(textEl(), line.text, null);
@@ -161,6 +185,9 @@ export function closeDialog() {
   _index = 0;
   _typing = false;
   stopDialogMusic();
+  // Limpia botón CTA si quedó
+  const cta = document.getElementById('dialog-cta-btn');
+  if (cta) cta.remove();
   if (_onClose) { _onClose(); _onClose = null; }
 }
 
@@ -342,5 +369,31 @@ export function demoDialog() {
       text:  '[ DÍA 0 — MISIÓN INICIADA ]\n\nElige tu equipo. Entra al combate.\n¡El tablero espera, OPERADOR! ☠️',
     },
 
+  ]);
+}
+
+// ════════════════════════════════════════════════════════════
+//  CRÉDITOS — SPECTRUM AIRSOFT
+// ════════════════════════════════════════════════════════════
+export function creditsDialog() {
+  showDialog([
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  'Saludos comandos 👋 Somos SpectrumAirsoft, creamos este arcade para cuando hay ganas de jugar en la oficina, en la casa o en alguna junta importante... ¡o si ya te aburren los inmortales y boxeadores de COD! 😄',
+    },
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'neutral',
+      text:  '¿Te gustaría tener a tu equipo en avatares dentro de AirsoftTacticalChess? 🎮\n¡Escríbenos por WhatsApp y lo hacemos realidad! 👇',
+      ctaButton: {
+        label: '💬 Escríbenos en WhatsApp',
+        url:   'https://wa.me/525527618631',
+      },
+    },
   ]);
 }

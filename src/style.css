@@ -1545,3 +1545,56 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CRÉDITOS — Botón en el modal + botón WhatsApp en diálogo
+   ══════════════════════════════════════════════════════════════ */
+
+.modal-credits-row {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+  border-top: 1px solid var(--border-dim);
+  margin-top: 8px;
+}
+
+.btn-credits {
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  color: var(--text-dim);
+  font-family: var(--font-arcade);
+  font-size: 11px;
+  letter-spacing: 3px;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.btn-credits:hover {
+  color: var(--alpha-color);
+  border-color: var(--alpha-color);
+  box-shadow: 0 0 12px var(--alpha-glow);
+}
+
+/* Botón CTA (WhatsApp) dentro del diálogo */
+.dialog-cta-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 22px;
+  background: #25d366;
+  color: #fff;
+  font-family: var(--font-arcade);
+  font-size: 12px;
+  letter-spacing: 2px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 0 18px rgba(37,211,102,0.55);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  cursor: pointer;
+}
+.dialog-cta-btn:hover {
+  background: #1ebe5c;
+  box-shadow: 0 0 28px rgba(37,211,102,0.8);
+  transform: scale(1.04);
+}

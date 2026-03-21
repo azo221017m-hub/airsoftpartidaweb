@@ -110,7 +110,7 @@ export function playSelect() {
   playTone(700, 'sine', 0.05, 0.1);
 }
 
-// ── MÚSICA DE SISTEMA — Durante diálogos ──────────────────────
+// ── MÚSICA DE DIÁLOGOS — Épica / aventura táctica ────────────
 let _dialogMusicNodes = [];
 let _dialogMusicPlaying = false;
 
@@ -121,55 +121,80 @@ export function startDialogMusic() {
   try {
     const ac = getCtx();
 
-    // Loop principal: patrón de pulso ambiental de sistema
     function scheduleLoop() {
       if (!_dialogMusicPlaying) return;
 
-      // Bajo pulso ambiental (pad)
-      const padFreqs = [110, 138, 110, 123];
-      padFreqs.forEach((freq, i) => {
-        const osc  = ac.createOscillator();
-        const gain = ac.createGain();
-        osc.connect(gain); gain.connect(ac.destination);
+      const t0 = ac.currentTime;
+
+      // ── BAJO ÉPICO: acorde menor que sube y baja ──
+      const bassNotes = [82, 98, 110, 98, 82, 73, 82, 98];
+      bassNotes.forEach((freq, i) => {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.connect(g); g.connect(ac.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        const t = t0 + i * 0.5;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.09, t + 0.15);
+        g.gain.linearRampToValueAtTime(0, t + 0.45);
+        osc.start(t); osc.stop(t + 0.5);
+        _dialogMusicNodes.push(osc);
+      });
+
+      // ── MELODÍA HEROICA: intervalo ascendente ──
+      const melodyNotes = [
+        { f: 330, t: 0.3 },
+        { f: 392, t: 0.9 },
+        { f: 440, t: 1.5 },
+        { f: 494, t: 2.1 },
+        { f: 440, t: 2.7 },
+        { f: 392, t: 3.3 },
+      ];
+      melodyNotes.forEach(({ f, t }) => {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.connect(g); g.connect(ac.destination);
+        osc.type = 'square';
+        osc.frequency.value = f;
+        const ts = t0 + t;
+        g.gain.setValueAtTime(0.04, ts);
+        g.gain.exponentialRampToValueAtTime(0.001, ts + 0.35);
+        osc.start(ts); osc.stop(ts + 0.4);
+        _dialogMusicNodes.push(osc);
+      });
+
+      // ── TAMBOR GRAVE: pulso de marcha cada beat ──
+      [0, 1.0, 2.0, 3.0].forEach((dt) => {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.connect(g); g.connect(ac.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(80, t0 + dt);
+        osc.frequency.exponentialRampToValueAtTime(40, t0 + dt + 0.18);
+        g.gain.setValueAtTime(0.12, t0 + dt);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + dt + 0.2);
+        osc.start(t0 + dt); osc.stop(t0 + dt + 0.22);
+        _dialogMusicNodes.push(osc);
+      });
+
+      // ── PAD AMBIENTAL: acorde de fondo sostenido ──
+      [164, 196, 246].forEach((freq) => {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.connect(g); g.connect(ac.destination);
         osc.type = 'sine';
         osc.frequency.value = freq;
-        const t = ac.currentTime + i * 0.8;
-        gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(0.04, t + 0.3);
-        gain.gain.linearRampToValueAtTime(0, t + 0.75);
-        osc.start(t); osc.stop(t + 0.8);
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(0.025, t0 + 0.4);
+        g.gain.linearRampToValueAtTime(0.025, t0 + 3.5);
+        g.gain.linearRampToValueAtTime(0, t0 + 4.0);
+        osc.start(t0); osc.stop(t0 + 4.1);
         _dialogMusicNodes.push(osc);
       });
 
-      // Arpeggio de sistema (beeps cortos estilo terminal)
-      const arpFreqs = [440, 554, 659, 554];
-      arpFreqs.forEach((freq, i) => {
-        const osc  = ac.createOscillator();
-        const gain = ac.createGain();
-        osc.connect(gain); gain.connect(ac.destination);
-        osc.type = 'square';
-        osc.frequency.value = freq;
-        const t = ac.currentTime + 0.2 + i * 0.55;
-        gain.gain.setValueAtTime(0.03, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-        osc.start(t); osc.stop(t + 0.15);
-        _dialogMusicNodes.push(osc);
-      });
-
-      // Pulso de "radar" cada ciclo
-      const radar = ac.createOscillator();
-      const radarGain = ac.createGain();
-      radar.connect(radarGain); radarGain.connect(ac.destination);
-      radar.type = 'sine';
-      radar.frequency.value = 880;
-      const rt = ac.currentTime + 2.0;
-      radarGain.gain.setValueAtTime(0.05, rt);
-      radarGain.gain.exponentialRampToValueAtTime(0.001, rt + 0.08);
-      radar.start(rt); radar.stop(rt + 0.1);
-      _dialogMusicNodes.push(radar);
-
-      // Repetir cada 3.2 segundos
-      const loopTimer = setTimeout(scheduleLoop, 3200);
+      // Repetir cada 4 segundos
+      const loopTimer = setTimeout(scheduleLoop, 4000);
       _dialogMusicNodes.push({ stop: () => clearTimeout(loopTimer) });
     }
 

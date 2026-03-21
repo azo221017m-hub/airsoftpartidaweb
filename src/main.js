@@ -7,7 +7,7 @@ import {
   playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect,
   playMysteriousAmbient
 } from './sounds.js';
-import { showDialog, closeDialog, nextDialog, demoDialog } from './dialog.js';
+import { showDialog, closeDialog, nextDialog, demoDialog, creditsDialog } from './dialog.js';
 
 // ─── State ─────────────────────────────────────────────────────────────────
 let socket = null;
@@ -70,6 +70,12 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && gameModal.classList.contains('active')) {
     gameModal.classList.remove('active');
   }
+});
+
+// Botón Créditos — cierra modal y muestra diálogo de créditos
+$('btn-credits').addEventListener('click', () => {
+  gameModal.classList.remove('active');
+  creditsDialog();
 });
 
 // ─── Lobby ──────────────────────────────────────────────────────────────────
