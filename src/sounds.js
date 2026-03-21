@@ -7,6 +7,17 @@ function getCtx() {
   return ctx;
 }
 
+// Función para reproducir archivos de audio WAV
+function playAudioFile(filename, volume = 0.5) {
+  try {
+    const audio = new Audio(`/sounds/${filename}`);
+    audio.volume = volume;
+    audio.play().catch(e => console.log('Audio play prevented:', e));
+  } catch (e) {
+    console.log('Audio error:', e);
+  }
+}
+
 function playTone(freq, type, duration, vol = 0.3, delay = 0) {
   try {
     const ac = getCtx();
@@ -58,6 +69,27 @@ export function playTurnChange() {
 export function playVictory() {
   const notes = [523, 659, 784, 1047];
   notes.forEach((n, i) => playTone(n, 'square', 0.3, 0.25, i * 0.15));
+}
+
+// ─── NUEVOS SONIDOS WAV ─── 
+export function playBackgroundBBs() {
+  playAudioFile('bbs.wav', 0.3);
+}
+
+export function playUIClick() {
+  playAudioFile('disprobbs.wav', 0.4);
+}
+
+export function playEnterGame() {
+  playAudioFile('disprobbsauto.wav', 0.5);
+}
+
+export function playScoutShot() {
+  playAudioFile('disprobbs.wav', 0.6);
+}
+
+export function playHeavyShot() {
+  playAudioFile('disprobbsauto.wav', 0.6);
 }
 
 export function playTimerUrgent() {

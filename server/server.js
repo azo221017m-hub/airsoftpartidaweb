@@ -229,12 +229,17 @@ io.on('connection', (socket) => {
         players: room.players.map(p => ({ name: p.name, team: p.team })),
       });
     } else {
+      // Obtener información de la unidad que realizó la acción
+      const actingUnit = room.gameState.units[player.team].find(u => u.id === unitId);
+      const unitName = actingUnit ? actingUnit.name : '';
+      
       io.to(roomId).emit('action_result', { 
         success: true, 
         message: result.message, 
         type, 
         hit: result.hit,
-        team: player.team 
+        team: player.team,
+        unitName: unitName
       });
     }
   });

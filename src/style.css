@@ -926,6 +926,34 @@ html, body {
 }
 .flash-overlay { animation: cell-flash 0.3s ease 3; }
 
+/* ─── HIT POPUP ─── */
+.hit-popup {
+  position: absolute;
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--bravo-color);
+  text-shadow: 0 0 15px var(--bravo-glow), 0 0 30px var(--bravo-glow);
+  pointer-events: none;
+  z-index: 1000;
+  animation: hit-float 1s ease-out forwards;
+  letter-spacing: 3px;
+  font-family: var(--font-arcade);
+}
+@keyframes hit-float {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -70%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(0.8);
+  }
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   .side-panel { width: 180px; }

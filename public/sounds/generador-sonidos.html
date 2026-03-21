@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador de Sonidos de Prueba - Airsoft Game</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a12;
+      color: #d0e0ff;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { color: #AAFF00; text-shadow: 0 0 10px rgba(170,255,0,0.4); }
+    .btn {
+      background: #AAFF00;
+      color: #000;
+      border: none;
+      padding: 15px 30px;
+      margin: 10px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .btn:hover { background: #fff; }
+    .info {
+      background: rgba(170,255,0,0.1);
+      border: 1px solid #AAFF00;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .warning {
+      background: rgba(255,78,78,0.1);
+      border: 1px solid #ff4e4e;
+      color: #ff4e4e;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Generador de Sonidos de Prueba</h1>
+  
+  <div class="info">
+    <h3>Instrucciones:</h3>
+    <p>Este generador crea archivos WAV de prueba para el juego de Airsoft.</p>
+    <p>Haz clic en cada botón para generar y descargar el archivo de sonido correspondiente.</p>
+    <p><strong>Nota:</strong> Estos son sonidos de prueba sintéticos. Para una mejor experiencia, reemplázalos con archivos de audio reales.</p>
+  </div>
+
+  <div class="warning">
+    ⚠️ <strong>IMPORTANTE:</strong> Guarda los archivos descargados en la carpeta <code>public/sounds/</code> de tu proyecto.
+  </div>
+
+  <h2>Generar Archivos:</h2>
+  
+  <button class="btn" onclick="generateBBs()">📦 Generar bbs.wav (Sonido de fondo)</button>
+  <br>
+  <button class="btn" onclick="generateDisproBBs()">🎯 Generar disprobbs.wav (Disparo Scout/Sniper)</button>
+  <br>
+  <button class="btn" onclick="generateDisproBBsAuto()">💥 Generar disprobbsauto.wav (Disparo Heavy)</button>
+
+  <div class="info" style="margin-top: 40px;">
+    <h3>Uso de los archivos:</h3>
+    <ul>
+      <li><strong>bbs.wav:</strong> Se reproduce al cargar la página principal</li>
+      <li><strong>disprobbs.wav:</strong> Se reproduce en clics de UI y disparos de Scout/Sniper</li>
+      <li><strong>disprobbsauto.wav:</strong> Se reproduce al entrar al combate y disparos de Heavy</li>
+    </ul>
+  </div>
+
+  <script>
+    // Función para crear un buffer de audio WAV
+    function createWAVFile(audioBuffer) {
+      const numChannels = audioBuffer.numberOfChannels;
+      const sampleRate = audioBuffer.sampleRate;
+      const format = 1; // PCM
+      const bitDepth = 16;
+      
+      const bytesPerSample = bitDepth / 8;
+      const blockAlign = numChannels * bytesPerSample;
+      
+      const data = audioBuffer.getChannelData(0);
+      const dataLength = data.length * bytesPerSample;
+      const buffer = new ArrayBuffer(44 + dataLength);
+      const view = new DataView(buffer);
+      
+      // WAV header
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + dataLength, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, format, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * blockAlign, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitDepth, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, dataLength, true);
+      
+      // Audio data
+      let offset = 44;
+      for (let i = 0; i < data.length; i++) {
+        const sample = Math.max(-1, Math.min(1, data[i]));
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+        offset += 2;
+      }
+      
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+    
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+    
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    // Generar bbs.wav - Sonido de BBs rodando
+    function generateBBs() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const duration = 1.5;
+      const sampleRate = ctx.sampleRate;
+      const buffer = ctx.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      // Generar ruido blanco filtrado (simula BBs)
+      for (let i = 0; i < data.length; i++) {
+        const t = i / sampleRate;
+        const noise = (Math.random() * 2 - 1) * 0.3;
+        const envelope = Math.exp(-t * 2); // Decay
+        data[i] = noise * envelope;
+      }
+      
+      const blob = createWAVFile(buffer);
+      downloadBlob(blob, 'bbs.wav');
+      alert('✅ Archivo bbs.wav generado y descargado');
+    }
+    
+    // Generar disprobbs.wav - Disparo semiautomático (Scout/Sniper)
+    function generateDisproBBs() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const duration = 0.3;
+      const sampleRate = ctx.sampleRate;
+      const buffer = ctx.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      // Disparo corto y seco
+      for (let i = 0; i < data.length; i++) {
+        const t = i / sampleRate;
+        const freq = 150 - t * 200; // Frecuencia descendente
+        const noise = (Math.random() * 2 - 1) * 0.5;
+        const tone = Math.sin(2 * Math.PI * freq * t) * 0.3;
+        const envelope = Math.exp(-t * 20);
+        data[i] = (noise + tone) * envelope;
+      }
+      
+      const blob = createWAVFile(buffer);
+      downloadBlob(blob, 'disprobbs.wav');
+      alert('✅ Archivo disprobbs.wav generado y descargado');
+    }
+    
+    // Generar disprobbsauto.wav - Disparo automático (Heavy)
+    function generateDisproBBsAuto() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const duration = 0.5;
+      const sampleRate = ctx.sampleRate;
+      const buffer = ctx.createBuffer(1, sampleRate * duration, sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      // Ráfaga de disparos
+      for (let i = 0; i < data.length; i++) {
+        const t = i / sampleRate;
+        const burst = Math.sin(2 * Math.PI * 30 * t); // Modulación de ráfaga
+        const noise = (Math.random() * 2 - 1) * 0.6;
+        const freq = 120 - t * 150;
+        const tone = Math.sin(2 * Math.PI * freq * t) * 0.4;
+        const envelope = Math.exp(-t * 8);
+        data[i] = (noise + tone) * envelope * (0.5 + burst * 0.5);
+      }
+      
+      const blob = createWAVFile(buffer);
+      downloadBlob(blob, 'disprobbsauto.wav');
+      alert('✅ Archivo disprobbsauto.wav generado y descargado');
+    }
+  </script>
+</body>
+</html>

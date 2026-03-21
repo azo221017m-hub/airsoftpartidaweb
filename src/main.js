@@ -4,7 +4,8 @@ import { io } from 'socket.io-client';
 import { GameRenderer, coordToXY, xyToCoord, buildHpPips, getHpClass } from './game.js';
 import {
   playShoot, playHit, playEliminate, playMove,
-  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect
+  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect,
+  playBackgroundBBs, playUIClick, playEnterGame, playScoutShot, playHeavyShot
 } from './sounds.js';
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -69,8 +70,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ─── Lobby ──────────────────────────────────────────────────────────────────
-$('join-btn').addEventListener('click', joinGame);
-$('join-ai-btn').addEventListener('click', joinAIGame);
+$('join-btn').addEventListener('click', () => {
+  playEnterGame();
+  joinGame();
+});
+$('join-ai-btn').addEventListener('click', () => {
+  playEnterGame();
+  joinAIGame();
+});
 $('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 $('room-id').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 
@@ -182,9 +189,24 @@ function setupSocket() {
     }
   });
 
-  socket.on('action_result', ({ success, message, type, hit, team }) => {
+  socket.on('action_result', ({ success, message, type, hit, team, unitName }) => {
     if (type === 'move') playMove();
-    else if (type === 'shoot') { if (hit) playHit(); else playMiss(); }
+    else if (type === 'shoot') { 
+      // Reproducir sonido según el tipo de unidad
+      if (unitName === 'Scout' || unitName === 'Sniper') {
+        playScoutShot();
+      } else if (unitName === 'Heavy') {
+        playHeavyShot();
+      }
+      
+      if (hit) {
+        playHit();
+        // Mostrar popup de "Hit!" en el canvas
+        showHitPopup();
+      } else {
+        playMiss();
+      }
+    }
 
     // En Nivel 2: solo mostrar movimientos si radar activo y enemigo sin camuflaje
     // En Nivel 3: siempre mostrar movimientos
@@ -708,6 +730,25 @@ function showStatus(msg, type = '') {
   }
 }
 
+// Mostrar popup de "Hit!" en el centro del canvas
+function showHitPopup() {
+  const canvas = $('game-canvas');
+  const canvasRect = canvas.getBoundingClientRect();
+  
+  const popup = document.createElement('div');
+  popup.className = 'hit-popup';
+  popup.textContent = 'HIT!';
+  popup.style.left = `${canvasRect.left + canvasRect.width / 2}px`;
+  popup.style.top = `${canvasRect.top + canvasRect.height / 2}px`;
+  
+  document.body.appendChild(popup);
+  
+  // Remover después de 1 segundo
+  setTimeout(() => {
+    popup.remove();
+  }, 1000);
+}
+
 // ─── Game over buttons ────────────────────────────────────────────────────────
 $('btn-restart').addEventListener('click', () => {
   socket.emit('restart_game');
@@ -981,3 +1022,19 @@ function applyAdvantageEffects() {
     });
   }
 }
+
+// ─── Sonido de fondo al cargar la página ─────────────────────────────────────
+window.addEventListener('load', () => {
+  // Pequeño delay para asegurar que el usuario interactúe
+  setTimeout(() => {
+    playBackgroundBBs();
+  }, 500);
+});
+
+// Reproducir sonido de click en elementos de la interfaz
+document.addEventListener('click', (e) => {
+  // Solo en elementos interactivos (botones, inputs, etc)
+  if (e.target.matches('button, .btn, input[type="radio"], .level-option, .advantage-item, .unit-card')) {
+    playUIClick();
+  }
+});
