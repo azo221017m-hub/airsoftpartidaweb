@@ -208,18 +208,18 @@ function setupSocket() {
       }
     }
 
-    // En Nivel 2: solo mostrar movimientos si radar activo y enemigo sin camuflaje
-    // En Nivel 3: siempre mostrar movimientos
+    // En Nivel 3: solo mostrar movimientos si radar activo y enemigo sin camuflaje
+    // En Nivel 2: siempre mostrar movimientos
     let shouldShowLog = true;
-    if (gameLevel === 2 && type === 'move' && team !== myTeam) {
-      // Es un movimiento enemigo en Nivel 2
+    if (gameLevel === 3 && type === 'move' && team !== myTeam) {
+      // Es un movimiento enemigo en Nivel 3 (con niebla de guerra)
       const radarActive = tacticalAdvantages?.radar?.active || false;
       const enemyCamouflage = renderer?.enemyCamouflage || false;
       
       // Solo mostrar si radar activo Y enemigo sin camuflaje
       shouldShowLog = radarActive && !enemyCamouflage;
     }
-    // Nivel 3: shouldShowLog = true (siempre mostrar)
+    // Nivel 2: shouldShowLog = true (siempre mostrar)
 
     if (shouldShowLog) {
       const logEntry = document.createElement('div');

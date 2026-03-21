@@ -8,13 +8,38 @@ function getCtx() {
 }
 
 // Función para reproducir archivos de audio WAV
-function playAudioFile(filename, volume = 0.5) {
+function playAudioFile(filename, volume = 0.8, fallback = null) {
   try {
+    // Intentar con múltiples rutas posibles
     const audio = new Audio(`/sounds/${filename}`);
     audio.volume = volume;
-    audio.play().catch(e => console.log('Audio play prevented:', e));
+    
+    // Si hay error, usar fallback
+    audio.addEventListener('error', (e) => {
+      console.warn(`No se pudo cargar: /sounds/${filename}, usando sonido sintético`);
+      if (fallback && typeof fallback === 'function') {
+        fallback();
+      }
+    });
+    
+    audio.addEventListener('canplaythrough', () => {
+      console.log(`✅ Audio cargado: ${filename}`);
+    });
+    
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(e => {
+        console.warn('Audio play prevented, usando fallback');
+        if (fallback && typeof fallback === 'function') {
+          fallback();
+        }
+      });
+    }
   } catch (e) {
-    console.log('Audio error:', e);
+    console.error('Audio error, usando fallback:', e);
+    if (fallback && typeof fallback === 'function') {
+      fallback();
+    }
   }
 }
 
@@ -71,25 +96,43 @@ export function playVictory() {
   notes.forEach((n, i) => playTone(n, 'square', 0.3, 0.25, i * 0.15));
 }
 
-// ─── NUEVOS SONIDOS WAV ─── 
+// ─── NUEVOS SONIDOS WAV (con fallback a síntesis) ─── 
 export function playBackgroundBBs() {
-  playAudioFile('bbs.wav', 0.3);
+  playAudioFile('bbs.wav', 0.5, () => {
+    // Fallback: sonido sintético de BBs
+    playTone(150, 'sawtooth', 0.8, 0.2);
+    playTone(180, 'sawtooth', 0.7, 0.15, 0.1);
+  });
 }
 
 export function playUIClick() {
-  playAudioFile('disprobbs.wav', 0.4);
+  playAudioFile('disprobbs.wav', 0.7, () => {
+    // Fallback: clic corto
+    playTone(800, 'sine', 0.05, 0.3);
+  });
 }
 
 export function playEnterGame() {
-  playAudioFile('disprobbsauto.wav', 0.5);
+  playAudioFile('disprobbsauto.wav', 0.8, () => {
+    // Fallback: sonido de inicio
+    playTone(400, 'square', 0.2, 0.4);
+    playTone(600, 'square', 0.2, 0.3, 0.1);
+  });
 }
 
 export function playScoutShot() {
-  playAudioFile('disprobbs.wav', 0.6);
+  playAudioFile('disprobbs.wav', 0.9, () => {
+    // Fallback: disparo semiautomático
+    playTone(200, 'sawtooth', 0.15, 0.5);
+  });
 }
 
 export function playHeavyShot() {
-  playAudioFile('disprobbsauto.wav', 0.6);
+  playAudioFile('disprobbsauto.wav', 0.9, () => {
+    // Fallback: disparo automático
+    playTone(150, 'sawtooth', 0.25, 0.6);
+    playTone(120, 'square', 0.2, 0.4, 0.08);
+  });
 }
 
 export function playTimerUrgent() {
