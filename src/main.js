@@ -720,7 +720,7 @@ function initTacticalAdvantages() {
 }
 
 function updateExpBar() {
-  const percentage = Math.min((expAccumulated / 200) * 100, 100);
+  const percentage = Math.min((expAccumulated / 250) * 100, 100);
   
   // Actualizar barra en HUD
   if ($('exp-hud-bar-fill')) {
@@ -736,15 +736,15 @@ function updateExpBar() {
 }
 
 function checkAdvantageUnlocks() {
-  // Al llegar a 200 o más, resetear EXP y permitir desbloqueo
-  if (expAccumulated >= 200) {
+  // Al llegar a 250 o más, resetear EXP y permitir desbloqueo
+  if (expAccumulated >= 250) {
     expAccumulated = 0; // Resetear EXP
     updateExpBar();
     
     // Permitir desbloquear una ventaja
     renderAdvantages();
     renderAdvantagesHUD();
-    showStatus('¡200 EXP! Ventaja táctica disponible', 'success');
+    showStatus('¡250 EXP! Ventaja táctica disponible', 'success');
   }
 }
 
@@ -755,7 +755,7 @@ function renderAdvantagesHUD() {
   container.innerHTML = '';
   
   // Verificar si hay EXP suficiente para desbloquear
-  const canUnlockNew = expAccumulated >= 200;
+  const canUnlockNew = expAccumulated >= 250;
   
   Object.entries(ADVANTAGE_CONFIGS).forEach(([key, config]) => {
     const advantage = tacticalAdvantages[key];
@@ -793,7 +793,7 @@ function renderAdvantages() {
   container.innerHTML = '';
   
   // Verificar si hay EXP suficiente para desbloquear
-  const canUnlockNew = expAccumulated >= 200;
+  const canUnlockNew = expAccumulated >= 250;
   
   Object.entries(ADVANTAGE_CONFIGS).forEach(([key, config]) => {
     const advantage = tacticalAdvantages[key];
@@ -838,7 +838,7 @@ function renderAdvantages() {
 
 function unlockAdvantage(key) {
   if (tacticalAdvantages[key].unlocked) return;
-  if (expAccumulated < 200) return;
+  if (expAccumulated < 250) return;
   
   tacticalAdvantages[key].unlocked = true;
   tacticalAdvantages[key].active = false;
