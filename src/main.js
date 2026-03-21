@@ -4,8 +4,7 @@ import { io } from 'socket.io-client';
 import { GameRenderer, coordToXY, xyToCoord, buildHpPips, getHpClass } from './game.js';
 import {
   playShoot, playHit, playEliminate, playMove,
-  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect,
-  playBackgroundBBs, playUIClick, playEnterGame, playScoutShot, playHeavyShot
+  playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect
 } from './sounds.js';
 
 // ─── State ─────────────────────────────────────────────────────────────────
@@ -70,14 +69,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ─── Lobby ──────────────────────────────────────────────────────────────────
-$('join-btn').addEventListener('click', () => {
-  playEnterGame();
-  joinGame();
-});
-$('join-ai-btn').addEventListener('click', () => {
-  playEnterGame();
-  joinAIGame();
-});
+$('join-btn').addEventListener('click', joinGame);
+$('join-ai-btn').addEventListener('click', joinAIGame);
 $('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 $('room-id').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
 
@@ -192,12 +185,7 @@ function setupSocket() {
   socket.on('action_result', ({ success, message, type, hit, team, unitName }) => {
     if (type === 'move') playMove();
     else if (type === 'shoot') { 
-      // Reproducir sonido según el tipo de unidad
-      if (unitName === 'Scout' || unitName === 'Sniper') {
-        playScoutShot();
-      } else if (unitName === 'Heavy') {
-        playHeavyShot();
-      }
+      playShoot();
       
       if (hit) {
         playHit();
@@ -1022,19 +1010,3 @@ function applyAdvantageEffects() {
     });
   }
 }
-
-// ─── Sonido de fondo al cargar la página ─────────────────────────────────────
-window.addEventListener('load', () => {
-  // Pequeño delay para asegurar que el usuario interactúe
-  setTimeout(() => {
-    playBackgroundBBs();
-  }, 500);
-});
-
-// Reproducir sonido de click en elementos de la interfaz
-document.addEventListener('click', (e) => {
-  // Solo en elementos interactivos (botones, inputs, etc)
-  if (e.target.matches('button, .btn, input[type="radio"], .level-option, .advantage-item, .unit-card')) {
-    playUIClick();
-  }
-});
