@@ -716,6 +716,45 @@ html, body {
   text-transform: uppercase;
 }
 
+/* ─── BOTONES PRINCIPALES ENTRE PANEL Y TABLERO ─── */
+.board-action-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0 12px 0;
+  padding: 12px 0;
+  background: rgba(200,255,0,0.07);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(170,255,0,0.08);
+  border: 1px solid var(--neutral-glow);
+}
+
+.board-action-buttons .btn {
+  width: 180px;
+  max-width: 90vw;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .board-action-buttons .btn {
+    width: 98vw;
+    max-width: 98vw;
+    font-size: 13px;
+  }
+  .board-action-buttons {
+    margin: 12px 0 8px 0;
+    padding: 8px 0;
+  }
+}
+
+.side-panel.panel-left {
+  min-width: 220px;
+}
+
 /* ─── UNIT LIST ─── */
 .unit-list { display: flex; flex-direction: column; gap: 6px; }
 .unit-card {
@@ -1991,28 +2030,4 @@ html, body {
   background: #0a0a0a;
   display: block;
   margin: 0 auto;
-}
-
-.board-action-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-  margin: 32px 0 32px 0;
-  padding: 12px 0;
-  background: rgba(20,30,10,0.12);
-  border-radius: 10px;
-  box-shadow: 0 2px 12px 0 rgba(170,255,0,0.04);
-  width: 90%;
-  max-width: 220px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-@media (max-width: 900px) {
-  .board-action-buttons {
-    max-width: 100%;
-    width: 100%;
-    margin: 16px 0;
-  }
 }
