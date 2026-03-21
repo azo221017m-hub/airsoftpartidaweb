@@ -285,12 +285,13 @@
   <!-- DIALOG SYSTEM — Overlay de diálogo estilo arcade RPG  -->
   <!-- ═══════════════════════════════════════════════════════ -->
   <div id="dialog-overlay" class="dialog-overlay" style="display:none">
-    <div class="dialog-box">
+    <div class="dialog-box" id="dialog-box-inner">
 
-      <!-- Personaje -->
-      <div class="dialog-character">
+      <!-- Personaje IZQUIERDA -->
+      <div class="dialog-character dialog-char-left">
         <div class="dialog-character-frame">
           <img id="dialog-char-img" src="/spectrumTexcoco.png" alt="personaje" class="dialog-char-sprite" />
+          <div id="dialog-char-emoji" class="dialog-char-emoji" style="display:none"></div>
           <div class="dialog-char-scanlines"></div>
           <div class="dialog-char-glow"></div>
         </div>
@@ -300,12 +301,11 @@
       <!-- Nube de diálogo -->
       <div class="dialog-bubble">
         <div class="dialog-bubble-inner">
-          <!-- Cursor parpadeante que indica que hay más texto -->
           <p id="dialog-text" class="dialog-text"></p>
           <span class="dialog-cursor">▮</span>
         </div>
-        <!-- Cola de la nube apuntando al personaje -->
         <div class="dialog-bubble-tail"></div>
+        <div class="dialog-bubble-tail-right"></div>
       </div>
 
     </div>

@@ -1,19 +1,13 @@
 /**
  * dialog.js — Sistema de diálogo estilo arcade RPG
  * ──────────────────────────────────────────────────
- * Uso:
- *   import { showDialog, closeDialog } from './dialog.js';
- *
- *   showDialog([
- *     { name: 'OPERADOR',  text: 'Bienvenido al campo de batalla...' },
- *     { name: 'OPERADOR',  text: '¡Elige tu equipo y prepárate!' },
- *   ]);
- *
- *   // Variante roja (enemigo / alerta):
- *   showDialog([...], { theme: 'bravo' });
- *
- *   // Con callback al cerrar:
- *   showDialog([...], { onClose: () => console.log('cerrado') });
+ * Cada línea puede tener:
+ *   name   : string           — Nombre del personaje
+ *   text   : string           — Texto del diálogo
+ *   img    : string           — URL de imagen (opcional)
+ *   emoji  : string           — Emoji como avatar (si no hay img)
+ *   side   : 'left'|'right'   — Posición del personaje
+ *   theme  : 'alpha'|'bravo'|'neutral'
  */
 
 // ── Referencias DOM ──────────────────────────────────────────
@@ -22,17 +16,19 @@ const textEl    = () => document.getElementById('dialog-text');
 const nameEl    = () => document.getElementById('dialog-char-name');
 const dotsEl    = () => document.getElementById('dialog-dots');
 const charImg   = () => document.getElementById('dialog-char-img');
+const charEmoji = () => document.getElementById('dialog-char-emoji');
+const dialogBox = () => document.getElementById('dialog-box-inner');
 
 // ── Estado interno ───────────────────────────────────────────
-let _lines      = [];   // Array de { name, text, img? }
-let _index      = 0;    // Línea actual
-let _typing     = false;// ¿Está escribiendo?
-let _stopTyping = null; // Cancela el typewriter en curso
-let _onClose    = null; // Callback al cerrar
+let _lines       = [];
+let _index       = 0;
+let _typing      = false;
+let _stopTyping  = null;
+let _onClose     = null;
 let _initialized = false;
 
 // ── Typewriter ───────────────────────────────────────────────
-const TYPEWRITER_SPEED = 28; // ms por carácter
+const TYPEWRITER_SPEED = 26;
 
 function typeWrite(el, text, onDone) {
   let i = 0;
@@ -42,7 +38,7 @@ function typeWrite(el, text, onDone) {
   let cancelled = false;
   _stopTyping = () => {
     cancelled = true;
-    el.textContent = text;  // muestra texto completo de golpe
+    el.textContent = text;
     _typing = false;
     if (onDone) onDone();
   };
@@ -73,23 +69,54 @@ function renderDots(total, active) {
   }
 }
 
+// ── Aplicar tema de color por línea ──────────────────────────
+function applyTheme(ov, theme) {
+  ov.classList.remove('dialog-bravo', 'dialog-neutral');
+  if (theme === 'bravo')   ov.classList.add('dialog-bravo');
+  if (theme === 'neutral') ov.classList.add('dialog-neutral');
+}
+
+// ── Aplicar posición del personaje ───────────────────────────
+function applySide(box, side) {
+  if (!box) return;
+  box.classList.remove('dialog-side-right');
+  if (side === 'right') box.classList.add('dialog-side-right');
+}
+
 // ── Mostrar línea ─────────────────────────────────────────────
 function showLine(index) {
   const line = _lines[index];
   if (!line) return;
 
-  // Nombre del personaje
-  const ne = nameEl();
+  const ov  = overlay();
+  const box = dialogBox();
+  const ci  = charImg();
+  const ce  = charEmoji();
+  const ne  = nameEl();
+
+  // Nombre
   if (ne) ne.textContent = line.name || 'OPERADOR';
 
-  // Imagen opcional por línea
-  const ci = charImg();
-  if (ci && line.img) ci.src = line.img;
+  // Avatar: imagen o emoji
+  if (line.img) {
+    if (ci) { ci.src = line.img; ci.style.display = 'block'; }
+    if (ce) ce.style.display = 'none';
+  } else if (line.emoji) {
+    if (ci) ci.style.display = 'none';
+    if (ce) { ce.textContent = line.emoji; ce.style.display = 'flex'; }
+  } else {
+    if (ci) { ci.src = '/spectrumTexcoco.png'; ci.style.display = 'block'; }
+    if (ce) ce.style.display = 'none';
+  }
+
+  // Tema y posición por línea
+  applyTheme(ov, line.theme || 'alpha');
+  applySide(box, line.side || 'left');
 
   // Dots
   renderDots(_lines.length, index);
 
-  // Texto con typewriter
+  // Typewriter
   typeWrite(textEl(), line.text, null);
 }
 
@@ -97,8 +124,8 @@ function showLine(index) {
 
 /**
  * Muestra una secuencia de diálogos.
- * @param {Array<{name:string, text:string, img?:string}>} lines
- * @param {{ theme?: 'alpha'|'bravo', onClose?: Function }} [opts]
+ * @param {Array<{name,text,img?,emoji?,side?,theme?}>} lines
+ * @param {{ onClose?: Function }} [opts]
  */
 export function showDialog(lines, opts = {}) {
   if (!lines || lines.length === 0) return;
@@ -110,17 +137,8 @@ export function showDialog(lines, opts = {}) {
   const ov = overlay();
   if (!ov) return;
 
-  // Tema de color
-  ov.classList.remove('dialog-bravo');
-  if (opts.theme === 'bravo') ov.classList.add('dialog-bravo');
-
-  // Reset imagen al default si la línea no tiene img propia
-  const ci = charImg();
-  if (ci && !lines[0].img) ci.src = '/spectrumTexcoco.png';
-
   ov.style.display = 'flex';
 
-  // Inicializar listeners una sola vez
   if (!_initialized) {
     _bindEvents();
     _initialized = true;
@@ -143,15 +161,13 @@ export function closeDialog() {
 }
 
 /**
- * Avanza al siguiente texto, o cierra si ya no hay más.
+ * Avanza al siguiente texto, o muestra el completo si está escribiendo.
  */
 export function nextDialog() {
-  // Si está escribiendo → muestra el texto completo primero
   if (_typing && _stopTyping) {
     _stopTyping();
     return;
   }
-
   _index++;
   if (_index < _lines.length) {
     showLine(_index);
@@ -162,13 +178,8 @@ export function nextDialog() {
 
 // ── Eventos ──────────────────────────────────────────────────
 function _bindEvents() {
-  // Click en el overlay
-  overlay().addEventListener('click', (e) => {
-    // Evitar propagación si se hizo click en algún botón interno
-    nextDialog();
-  });
+  overlay().addEventListener('click', () => nextDialog());
 
-  // Tecla espacio o Enter
   document.addEventListener('keydown', (e) => {
     const ov = overlay();
     if (!ov || ov.style.display === 'none') return;
@@ -176,26 +187,156 @@ function _bindEvents() {
       e.preventDefault();
       nextDialog();
     }
-    if (e.code === 'Escape') {
-      closeDialog();
-    }
+    if (e.code === 'Escape') closeDialog();
   });
 }
 
-// ── Demo / prueba rápida (se exporta para testing) ────────────
+// ════════════════════════════════════════════════════════════
+//  HISTORIA — TEMPORADA 1 / DÍA 0
+//  "INMORTALES EN EL TABLERO"
+// ════════════════════════════════════════════════════════════
 export function demoDialog() {
   showDialog([
+
+    // ── INTRO SISTEMA ────────────────────────────────────
     {
-      name: 'SPECTRUM TEXCOCO',
-      text: '¡Bienvenido, operador! El campo de batalla te espera...',
+      name:  'SISTEMA · AIRSOFT TACTICAL',
+      emoji: '🎮',
+      side:  'left',
+      theme: 'alpha',
+      text:  '... INICIALIZANDO SISTEMA DE COMBATE ...\nBienvenido, OPERADOR. El tablero de batalla te espera.',
     },
     {
-      name: 'SPECTRUM TEXCOCO',
-      text: 'Tienes tres unidades: Heavy, Scout y Sniper. Cada una tiene habilidades distintas.',
+      name:  'SISTEMA · AIRSOFT TACTICAL',
+      emoji: '🎮',
+      side:  'right',
+      theme: 'alpha',
+      text:  'Temporada 1 — DÍA 0.\nMisión: eliminar a 100 INMORTALES del tablero.',
+    },
+
+    // ── LOS INMORTALES ───────────────────────────────────
+    {
+      name:  'OCELOT · Líder Unidad Montaña',
+      emoji: '🐆',
+      side:  'left',
+      theme: 'alpha',
+      text:  'Operador... los Inmortales son el mal del airsoft.\nSe han reportado varios en el tablero. No tienen equipo. No tienen honor.',
     },
     {
-      name: 'SPECTRUM TEXCOCO',
-      text: '¡Elige tu nivel de dificultad y entra al combate! ☠️',
+      name:  'FINER · Líder Unidad Asalto',
+      emoji: '⚔️',
+      side:  'right',
+      theme: 'bravo',
+      text:  '¡Son peligrosos! PS alto y estrategia secreta.\nNo los subestimes, operador.',
     },
+    {
+      name:  'SISTEMA · AIRSOFT TACTICAL',
+      emoji: '🎮',
+      side:  'left',
+      theme: 'alpha',
+      text:  'Los primeros 50 jugadores que eliminen 100 Inmortales\nrecibirán la insignia ⭐ AIRSOFT TACTICAL CHESS.',
+    },
+
+    // ── SPECTRUM AIRSOFT ─────────────────────────────────
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'alpha',
+      text:  'Somos SPECTRUM AIRSOFT IXTAPALUCA.\nDos unidades élite. Un solo objetivo: limpiar el tablero.',
+    },
+    {
+      name:  'SPECTRUM AIRSOFT',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'alpha',
+      text:  'Unidad MONTAÑA — terreno difícil.\nUnidad ASALTO — combate directo y contundente.',
+    },
+
+    // ── UNIDAD ASALTO ────────────────────────────────────
+    {
+      name:  'FINER · Líder Unidad Asalto',
+      emoji: '⚔️',
+      side:  'left',
+      theme: 'bravo',
+      text:  'Soy FINER, líder de la Unidad Asalto.\nMi batallón: YUL y YAYO. Entramos primero, salimos últimos.',
+    },
+    {
+      name:  'YUL · Explorador',
+      emoji: '🏃',
+      side:  'right',
+      theme: 'alpha',
+      text:  'YUL — EXPLORADOR\n────────────────\nPS: 2  |  FPS: 1\nAlcance: 3  |  Mov: 4\nRápido. Siempre delante.',
+    },
+    {
+      name:  'YAYO · Francotirador',
+      emoji: '🎯',
+      side:  'left',
+      theme: 'alpha',
+      text:  'YAYO — FRANCOTIRADOR\n────────────────────\nPS: 2  |  FPS: 2\nAlcance: 9  |  Mov: 1\nUn disparo. Una eliminación.',
+    },
+
+    // ── UNIDAD MONTAÑA ───────────────────────────────────
+    {
+      name:  'OCELOT · Líder Unidad Montaña',
+      emoji: '🐆',
+      side:  'right',
+      theme: 'alpha',
+      text:  'OCELOT al frente. Líder de la Unidad Montaña.\nMi batallón: SNIP3R y ANIQUILADOR.',
+    },
+    {
+      name:  'SNIP3R · Francotirador',
+      emoji: '🔭',
+      side:  'left',
+      theme: 'neutral',
+      text:  'SNIP3R — FRANCOTIRADOR\n──────────────────────\nPS: 2  |  FPS: 2\nAlcance: 9  |  Mov: 1\nSi me ves... ya es demasiado tarde.',
+    },
+    {
+      name:  'ANIQUILADOR · Asalto',
+      emoji: '💥',
+      side:  'right',
+      theme: 'bravo',
+      text:  'ANIQUILADOR — ASALTO\n────────────────────\nPS: 3  |  FPS: 1\nAlcance: 4  |  Mov: 2\nBlindado. Imparable. Listo para el caos.',
+    },
+
+    // ── REGLAS DE COMBATE ─────────────────────────────────
+    {
+      name:  'SISTEMA · REGLAS DE COMBATE',
+      emoji: '📋',
+      side:  'left',
+      theme: 'alpha',
+      text:  'REGLAS:\n• 1 BBs = 1 disparo\n• Inicio: 100 BBs por partida\n• Blindaje (Bln): reduce 0.5 PS de daño',
+    },
+    {
+      name:  'SISTEMA · REGLAS DE COMBATE',
+      emoji: '📋',
+      side:  'right',
+      theme: 'alpha',
+      text:  'Observa el tablero.\nMemoriza posiciones. Crea tu estrategia.\nDerrota al contrario... o serás el derrotado.',
+    },
+
+    // ── CIERRE ────────────────────────────────────────────
+    {
+      name:  'OCELOT · Líder Unidad Montaña',
+      emoji: '🐆',
+      side:  'left',
+      theme: 'alpha',
+      text:  'Durante nuestros entrenamientos aparecieron los primeros Inmortales.\nNo fue un accidente. Alguien los envió.',
+    },
+    {
+      name:  'FINER · Líder Unidad Asalto',
+      emoji: '⚔️',
+      side:  'right',
+      theme: 'bravo',
+      text:  '¡100 Inmortales en el tablero, operador!\n¿Estás listo para la cacería?\n¡SPECTRUM no se rinde!',
+    },
+    {
+      name:  'SISTEMA · AIRSOFT TACTICAL',
+      emoji: '🎮',
+      side:  'left',
+      theme: 'alpha',
+      text:  '[ DÍA 0 — MISIÓN INICIADA ]\n\nElige tu equipo. Entra al combate.\n¡El tablero espera, OPERADOR! ☠️',
+    },
+
   ]);
 }
