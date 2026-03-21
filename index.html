@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚔ AIRSOFT TACTICAL | Juego de Coordenadas Multijugador</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>" />
+</head>
+<body>
+  <!-- LOBBY SCREEN -->
+  <div id="lobby-screen" class="screen active">
+    <div class="lobby-container">
+      <div class="logo-area">
+        <div class="logo-icon">🎯</div>
+        <h1 class="logo-title">AIRSOFT<span class="logo-accent">TACTICAL</span></h1>
+        <p class="logo-sub">JUEGO TÁCTICO MULTIJUGADOR POR COORDENADAS</p>
+        <div class="scanline-bar"></div>
+      </div>
+
+      <div class="lobby-card">
+        <h2 class="card-title">⚡ UNIRSE A PARTIDA</h2>
+        <div class="form-group">
+          <label for="player-name">NOMBRE DEL OPERADOR</label>
+          <input type="text" id="player-name" placeholder="TU NOMBRE..." maxlength="20" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="room-id">CÓDIGO DE SALA</label>
+          <input type="text" id="room-id" placeholder="Ej: SALA-1" maxlength="20" autocomplete="off" />
+        </div>
+        <button id="join-btn" class="btn btn-primary">
+          <span class="btn-icon">🚀</span> ENTRAR AL COMBATE
+        </button>
+        <div id="lobby-status" class="lobby-status"></div>
+      </div>
+
+      <div class="lobby-instructions">
+        <h3>📋 INSTRUCCIONES</h3>
+        <div class="instructions-grid">
+          <div class="inst-item">
+            <span class="inst-icon">⚔</span>
+            <span>Heavy: 3HP, Rango mov.2, Disparo.4</span>
+          </div>
+          <div class="inst-item">
+            <span class="inst-icon">🏃</span>
+            <span>Scout: 2HP, Rango mov.4, Disparo.3</span>
+          </div>
+          <div class="inst-item">
+            <span class="inst-icon">🎯</span>
+            <span>Sniper: 2HP, Rango mov.1, Disparo.9</span>
+          </div>
+          <div class="inst-item">
+            <span class="inst-icon">🧱</span>
+            <span>Pared: Bloquea movimiento y visión</span>
+          </div>
+          <div class="inst-item">
+            <span class="inst-icon">🪨</span>
+            <span>Cobertura: Reduce 1 de daño recibido</span>
+          </div>
+          <div class="inst-item">
+            <span class="inst-icon">⏱</span>
+            <span>30s por turno — mueve o dispara cada unidad</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAITING SCREEN -->
+  <div id="waiting-screen" class="screen">
+    <div class="waiting-container">
+      <div class="waiting-icon">⏳</div>
+      <h2>ESPERANDO SEGUNDO JUGADOR...</h2>
+      <div class="pulse-ring"></div>
+      <p id="waiting-room-info"></p>
+      <div class="player-slots">
+        <div class="slot slot-alpha" id="slot-alpha">
+          <span class="slot-team">EQUIPO ALPHA</span>
+          <span class="slot-name" id="slot-alpha-name">ESPERANDO...</span>
+        </div>
+        <div class="slot-vs">VS</div>
+        <div class="slot slot-bravo" id="slot-bravo">
+          <span class="slot-team">EQUIPO BRAVO</span>
+          <span class="slot-name" id="slot-bravo-name">ESPERANDO...</span>
+        </div>
+      </div>
+      <button id="leave-btn" class="btn btn-danger">❌ SALIR</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen">
+    <!-- TOP HUD -->
+    <div class="hud-top">
+      <div class="hud-team hud-alpha" id="hud-alpha">
+        <div class="hud-team-name">⚡ ALPHA</div>
+        <div class="hud-units" id="hud-alpha-units"></div>
+      </div>
+      <div class="hud-center">
+        <div class="hud-turn" id="hud-turn">TURNO 1</div>
+        <div class="hud-timer-wrap">
+          <div class="hud-timer" id="hud-timer">30</div>
+          <svg class="timer-ring" viewBox="0 0 50 50">
+            <circle class="timer-ring-bg" cx="25" cy="25" r="20"/>
+            <circle class="timer-ring-fill" id="timer-ring-fill" cx="25" cy="25" r="20"/>
+          </svg>
+        </div>
+        <div class="hud-current-team" id="hud-current-team">ALPHA</div>
+      </div>
+      <div class="hud-team hud-bravo" id="hud-bravo">
+        <div class="hud-team-name">🔥 BRAVO</div>
+        <div class="hud-units" id="hud-bravo-units"></div>
+      </div>
+    </div>
+
+    <!-- MAIN GAME AREA -->
+    <div class="game-main">
+      <!-- LEFT PANEL: Unit Controls -->
+      <div class="side-panel panel-left">
+        <h3 class="panel-title">🎮 UNIDADES</h3>
+        <div id="unit-list" class="unit-list"></div>
+
+        <div class="action-panel" id="action-panel" style="display:none">
+          <h3 class="panel-title">⚡ ACCIÓN</h3>
+          <div class="selected-unit-info" id="selected-unit-info"></div>
+          <div class="action-buttons">
+            <button id="btn-move" class="btn btn-action btn-move">🚶 MOVER</button>
+            <button id="btn-shoot" class="btn btn-action btn-shoot">💥 DISPARAR</button>
+          </div>
+          <div class="coord-input-group" id="coord-input-group" style="display:none">
+            <label id="coord-label">DESTINO (ej: A1):</label>
+            <div class="coord-input-row">
+              <input type="text" id="coord-input" placeholder="A1..." maxlength="3" autocomplete="off" />
+              <button id="btn-confirm" class="btn btn-confirm">✓</button>
+            </div>
+            <div class="coord-hint" id="coord-hint"></div>
+          </div>
+        </div>
+
+        <button id="btn-end-turn" class="btn btn-end-turn" style="display:none">⏭ TERMINAR TURNO</button>
+        <div id="action-status" class="action-status"></div>
+      </div>
+
+      <!-- CENTER: Game Grid -->
+      <div class="grid-area">
+        <div class="grid-header" id="grid-header"></div>
+        <div class="grid-wrapper">
+          <div class="grid-row-labels" id="grid-row-labels"></div>
+          <canvas id="game-canvas" width="600" height="600"></canvas>
+        </div>
+        <div class="coord-display" id="coord-display">Hover sobre la cuadrícula</div>
+      </div>
+
+      <!-- RIGHT PANEL: Log + Chat -->
+      <div class="side-panel panel-right">
+        <h3 class="panel-title">📜 REGISTRO</h3>
+        <div id="action-log" class="action-log"></div>
+
+        <h3 class="panel-title">💬 COMUNICACIONES</h3>
+        <div id="chat-log" class="chat-log"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Mensaje..." maxlength="150" autocomplete="off" />
+          <button id="chat-send" class="btn btn-chat">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+      <div class="gameover-icon" id="gameover-icon">🏆</div>
+      <h1 class="gameover-title" id="gameover-title">VICTORIA</h1>
+      <h2 class="gameover-team" id="gameover-team">EQUIPO ALPHA</h2>
+      <p class="gameover-msg" id="gameover-msg"></p>
+      <div class="gameover-buttons">
+        <button id="btn-restart" class="btn btn-primary">🔄 NUEVA PARTIDA</button>
+        <button id="btn-lobby" class="btn btn-secondary">🏠 LOBBY</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
