@@ -14,29 +14,32 @@
       Primer arcade táctico airsoft hecho para la comunidad
     </div>
     
-    <div class="lobby-container">
-      <div class="logo-area">
-        <div class="logo-icon">🎯</div>
-        <h1 class="logo-title">AIRSOFT<span class="logo-accent">TACTICAL</span></h1>
-        <p class="logo-sub">JUEGO TÁCTICO MULTIJUGADOR POR COORDENADAS</p>
-        <div class="scanline-bar"></div>
-      </div>
+    <!-- Botón para abrir el modal -->
+    <button id="open-game-modal" class="btn btn-game">
+      <span class="btn-icon">🎮</span> JUEGO!!
+    </button>
+    
+    <!-- Footer -->
+    <div class="lobby-footer">
+      Hecho por soldado.420 - SpectrumAirsoft
+    </div>
 
-      <div class="lobby-content">
-        <!-- Botón para abrir el modal -->
-        <button id="open-game-modal" class="btn btn-game">
-          <span class="btn-icon">🎮</span> JUEGO!!
-        </button>
-      </div>
-
-      <!-- Modal con información del juego -->
-      <div id="game-modal" class="game-modal">
-        <div class="modal-content">
-          <button class="modal-close" id="close-modal">✕</button>
-          
-          <div class="modal-sections">
-            <div class="lobby-card">
-              <h2 class="card-title">⚡ DATOS DE PARTIDA</h2>
+    <!-- Modal con información del juego -->
+    <div id="game-modal" class="game-modal">
+      <div class="modal-content">
+        <button class="modal-close" id="close-modal">✕</button>
+        
+        <!-- Logo en el modal -->
+        <div class="logo-area">
+          <div class="logo-icon">🎯</div>
+          <h1 class="logo-title">AIRSOFT<span class="logo-accent">TACTICAL</span></h1>
+          <p class="logo-sub">JUEGO TÁCTICO MULTIJUGADOR POR COORDENADAS</p>
+          <div class="scanline-bar"></div>
+        </div>
+        
+        <div class="modal-sections">
+          <div class="lobby-card">
+            <h2 class="card-title">⚡ DATOS DE PARTIDA</h2>
               <div class="form-group">
                 <label for="player-name">NOMBRE DEL OPERADOR</label>
                 <input type="text" id="player-name" placeholder="TU NOMBRE..." maxlength="20" autocomplete="off" />
@@ -111,10 +114,6 @@
         </div>
       </div>
     </div>
-
-    <footer class="lobby-footer">
-      Hecho por Soldado.420-SpectrumAirsoft
-    </footer>
   </div>
 
   <!-- WAITING SCREEN -->
@@ -203,6 +202,7 @@
         </div>
 
         <button id="btn-end-turn" class="btn btn-end-turn" style="display:none">⏭ TERMINAR TURNO</button>
+        <button id="btn-codigo-negro" class="btn btn-danger" style="margin-top: 10px;">☠️ CÓDIGO NEGRO</button>
         
         <!-- Panel de Ventajas Tácticas (Nivel 2) -->
         <div id="tactical-panel" class="tactical-panel" style="display:none">

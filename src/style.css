@@ -106,48 +106,46 @@ html, body {
   position: relative;
 }
 
+/* ─── BOTÓN JUEGO ─── */
+.btn-game {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: linear-gradient(135deg, var(--alpha-color), var(--neutral));
+  color: #000;
+  font-size: 20px;
+  padding: 15px 35px;
+  box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow);
+  border: 2px solid var(--neutral);
+  animation: pulse-game-btn 2s ease-in-out infinite;
+}
+.btn-game:hover {
+  background: linear-gradient(135deg, #fff, var(--neutral));
+  box-shadow: 0 0 50px var(--alpha-glow), 0 0 80px var(--neutral-glow);
+  transform: scale(1.05);
+}
+@keyframes pulse-game-btn {
+  0%, 100% { box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow); }
+  50% { box-shadow: 0 0 40px var(--alpha-glow), 0 0 80px var(--neutral-glow); }
+}
+
 /* ─── TEXTO ANIMADO ─── */
 .animated-tagline {
   position: fixed;
-  font-size: 60px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
   font-weight: bold;
   color: var(--alpha-color);
   text-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--alpha-glow);
   letter-spacing: 3px;
   text-align: center;
-  opacity: 0;
-  z-index: 10;
-  animation: zoomOutToCorner 4s ease-out forwards;
+  opacity: 1;
+  z-index: 5;
   pointer-events: none;
-}
-
-@keyframes zoomOutToCorner {
-  0% {
-    font-size: 60px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(2);
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    font-size: 60px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  100% {
-    font-size: 16px;
-    top: auto;
-    bottom: 20px;
-    left: 20px;
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
+  max-width: 80%;
 }
 
 .lobby-container {
@@ -213,6 +211,41 @@ html, body {
               inset 0 1px 0 rgba(255, 255, 255, 0.1);
   animation: modalSlideIn 0.4s ease;
 }
+.modal-content .logo-area {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-dim);
+}
+.modal-content .logo-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 0 20px rgba(170,255,0,0.8));
+}
+.modal-content .logo-title {
+  font-size: clamp(24px, 5vw, 36px);
+  letter-spacing: 5px;
+  color: var(--text-bright);
+  text-shadow: 0 0 20px var(--alpha-glow);
+}
+.modal-content .logo-sub {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+.modal-content .scanline-bar {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--alpha-color), transparent);
+  margin-top: 12px;
+  animation: scan 2s linear infinite;
+}
+.modal-content .logo-accent {
+  color: var(--alpha-color);
+  text-shadow: 0 0 30px var(--alpha-color);
+}
+@keyframes scan { 0%{opacity:0.3} 50%{opacity:1} 100%{opacity:0.3} }
+
 @keyframes modalSlideIn {
   from { opacity: 0; transform: translateY(-50px) scale(0.9); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -255,24 +288,25 @@ html, body {
   max-width: 400px;
 }
 .lobby-footer {
-  margin-top: auto; padding: 16px; text-align: center;
-  font-size: 12px; letter-spacing: 2px; color: var(--alpha-color);
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 16px;
+  text-align: right;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--alpha-color);
   text-shadow: 0 0 10px var(--alpha-glow);
-  width: 100%;
+  z-index: 10;
+  background: rgba(10, 10, 18, 0.7);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
 }
-.logo-area { text-align: center; }
-.logo-icon { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(170,255,0,0.8)); }
-.logo-title {
-  font-size: clamp(28px, 6vw, 42px); letter-spacing: 6px;
-  color: var(--text-bright); text-shadow: 0 0 20px var(--alpha-glow);
+
+/* Logo area se usa solo en el modal ahora */
+.lobby-container .logo-area { 
+  display: none; 
 }
-.logo-accent { color: var(--alpha-color); text-shadow: 0 0 30px var(--alpha-color); }
-.logo-sub { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); margin-top: 6px; }
-.scanline-bar {
-  height: 2px; background: linear-gradient(90deg, transparent, var(--alpha-color), transparent);
-  margin-top: 12px; animation: scan 2s linear infinite;
-}
-@keyframes scan { 0%{opacity:0.3} 50%{opacity:1} 100%{opacity:0.3} }
 
 .lobby-card {
   background: var(--bg-card); border: 1px solid var(--border-bright);

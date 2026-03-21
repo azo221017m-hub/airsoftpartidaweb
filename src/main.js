@@ -302,6 +302,7 @@ function initGame() {
   $('btn-confirm').addEventListener('click', confirmCoordAction);
   $('coord-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmCoordAction(); });
   $('btn-end-turn').addEventListener('click', endTurn);
+  $('btn-codigo-negro').addEventListener('click', codigoNegro);
   $('chat-send').addEventListener('click', sendChat);
   $('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
 }
@@ -538,6 +539,32 @@ function endTurn() {
   
   clearSelection();
   socket.emit('end_turn');
+}
+
+function codigoNegro() {
+  if (confirm('⚠️ CÓDIGO NEGRO: ¿Abandonar la partida y volver al lobby?')) {
+    if (socket) {
+      socket.disconnect();
+      socket = null;
+    }
+    
+    // Resetear estado del juego
+    gameState = null;
+    myTeam = null;
+    selectedUnitId = null;
+    pendingAction = null;
+    gameLevel = 1;
+    expAccumulated = 0;
+    tacticalAdvantages = {
+      armor: { unlocked: false, active: false, turnsRemaining: 0 },
+      scope: { unlocked: false, active: false, turnsRemaining: 0 },
+      camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
+      radar: { unlocked: false, active: false, turnsRemaining: 0 }
+    };
+    
+    showScreen('lobby-screen');
+    showStatus('Partida abandonada', '');
+  }
 }
 
 // ─── HUD ─────────────────────────────────────────────────────────────────────
