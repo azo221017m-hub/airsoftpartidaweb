@@ -428,7 +428,7 @@ export function creditsDialog() {
       img:   '/spectrumTexcoco.png',
       side:  'right',
       theme: 'neutral',
-      text:  '¿Te gustaría tener a tu equipo en avatares dentro de AirsoftTacticalChess? 🎮\n¡Escríbenos por WhatsApp y lo hacemos realidad! 👇',
+      text:  '¿Te gustaría tener a tu equipo en avatares dentro de Airsoft Tactical Chess? 🎮\n¡Escríbenos por WhatsApp y lo hacemos realidad! 👇',
       ctaButton: {
         label: '💬 Escríbenos en WhatsApp',
         url:   'https://wa.me/525527618631',

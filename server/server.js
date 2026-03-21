@@ -348,5 +348,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log(`🎮 Airsoft Tactical server running on http://localhost:${PORT}`);
+  console.log(`🎮 Airsoft Tactical Chess server running on http://localhost:${PORT}`);
 });
