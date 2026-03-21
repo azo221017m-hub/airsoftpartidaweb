@@ -145,7 +145,17 @@ io.on('connection', (socket) => {
     const name = String(playerName || 'Player').trim().slice(0, 20) || 'Player';
     const rid = `ai_${socket.id}`;
 
-    rooms[rid] = { players: [], gameState: null, timer: null, isAI: true, playerActions: [] };
+    rooms[rid] = { 
+      players: [], 
+      gameState: null, 
+      timer: null, 
+      isAI: true, 
+      playerActions: [],
+      tacticalAdvantages: {
+        alpha: { camouflage: false },
+        bravo: { camouflage: false }
+      }
+    };
     const room = rooms[rid];
 
     room.players.push({ socketId: socket.id, name, team: 'alpha' });
@@ -308,6 +318,11 @@ io.on('connection', (socket) => {
     room.timer = null;
     room.gameState = room.isAI ? createGameStateForAI() : createGameState();
     if (room.isAI) room.playerActions = [];
+    // Resetear ventajas tácticas al reiniciar
+    room.tacticalAdvantages = {
+      alpha: { camouflage: false },
+      bravo: { camouflage: false }
+    };
     io.to(roomId).emit('game_start', {
       gameState: room.gameState,
       players: room.players.map(p => ({ name: p.name, team: p.team })),

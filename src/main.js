@@ -128,9 +128,21 @@ function joinAIGame() {
 // ─── Socket ──────────────────────────────────────────────────────────────────
 function setupSocket() {
   socket.on('connect', () => console.log('Connected:', socket.id));
-  socket.on('disconnect', () => {
-    showStatus('Desconectado del servidor', 'error');
-    showScreen('lobby-screen');
+  socket.on('disconnect', (reason) => {
+    console.warn('Socket disconnected:', reason);
+    // Solo regresar al lobby si fue una desconexión explícita del usuario
+    // (io server disconnect = el servidor cerró la conexión activamente)
+    // Las desconexiones temporales de red (transport close, ping timeout) no deben regresar al lobby
+    const fatalReasons = ['io server disconnect'];
+    if (fatalReasons.includes(reason) && !gameState) {
+      showStatus('Desconectado del servidor', 'error');
+      showScreen('lobby-screen');
+    } else if (fatalReasons.includes(reason) && gameState) {
+      showStatus('Desconectado del servidor', 'error');
+    } else {
+      // Desconexión temporal — mostrar aviso sin salir del juego
+      showStatus('Reconectando...', 'error');
+    }
   });
 
   socket.on('error', ({ message }) => {
@@ -296,14 +308,26 @@ $('leave-btn').addEventListener('click', () => {
 });
 
 // ─── Game init ───────────────────────────────────────────────────────────────
+// Flags para registrar listeners solo una vez
+let _gameButtonsInitialized = false;
+
 function initGame() {
   if (!renderer) {
     const canvas = $('game-canvas');
     renderer = new GameRenderer(canvas);
     setupCanvasEvents(canvas);
+  } else {
+    // Limpiar estado residual del renderer al reiniciar partida
+    renderer.selectedUnit = null;
+    renderer.pendingAction = null;
+    renderer.validCells = [];
+    renderer.flashCells = [];
+    renderer.hoveredCell = null;
   }
   renderer.myTeam = myTeam;
   renderer.gameLevel = gameLevel;
+  renderer.enemyCamouflage = false;
+  renderer.tacticalAdvantages = tacticalAdvantages;
   renderer.updateState(gameState);
   renderGridLabels();
   renderHUD();
@@ -328,15 +352,18 @@ function initGame() {
     }
   }
 
-  // Action buttons
-  $('btn-move').addEventListener('click', () => setAction('move'));
-  $('btn-shoot').addEventListener('click', () => setAction('shoot'));
-  $('btn-confirm').addEventListener('click', confirmCoordAction);
-  $('coord-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmCoordAction(); });
-  $('btn-end-turn').addEventListener('click', endTurn);
-  $('btn-codigo-negro').addEventListener('click', codigoNegro);
-  $('chat-send').addEventListener('click', sendChat);
-  $('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+  // Registrar listeners de botones de acción UNA SOLA VEZ
+  if (!_gameButtonsInitialized) {
+    $('btn-move').addEventListener('click', () => setAction('move'));
+    $('btn-shoot').addEventListener('click', () => setAction('shoot'));
+    $('btn-confirm').addEventListener('click', confirmCoordAction);
+    $('coord-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmCoordAction(); });
+    $('btn-end-turn').addEventListener('click', endTurn);
+    $('btn-codigo-negro').addEventListener('click', codigoNegro);
+    $('chat-send').addEventListener('click', sendChat);
+    $('chat-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+    _gameButtonsInitialized = true;
+  }
 }
 
 // ─── Grid labels ─────────────────────────────────────────────────────────────
@@ -585,6 +612,8 @@ function codigoNegro() {
     myTeam = null;
     selectedUnitId = null;
     pendingAction = null;
+    renderer = null;
+    _gameButtonsInitialized = false; // Permitir re-registro de listeners al volver
     gameLevel = 1;
     expAccumulated = 0;
     tacticalAdvantages = {
@@ -770,6 +799,17 @@ function showEliminatedPopup() {
 
 // ─── Game over buttons ────────────────────────────────────────────────────────
 $('btn-restart').addEventListener('click', () => {
+  // Limpiar selección y estado pendiente antes de reiniciar
+  selectedUnitId = null;
+  pendingAction = null;
+  // Resetear ventajas tácticas para la nueva partida
+  expAccumulated = 0;
+  tacticalAdvantages = {
+    armor: { unlocked: false, active: false, turnsRemaining: 0 },
+    scope: { unlocked: false, active: false, turnsRemaining: 0 },
+    camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
+    radar: { unlocked: false, active: false, turnsRemaining: 0 }
+  };
   socket.emit('restart_game');
   showScreen('game-screen');
 });
@@ -783,6 +823,7 @@ $('btn-lobby').addEventListener('click', () => {
   pendingAction = null;
   renderer = null;
   isAIGame = false;
+  _gameButtonsInitialized = false; // Permitir re-registro de listeners al volver
   // Reset nivel 2 state
   expAccumulated = 0;
   tacticalAdvantages = {
