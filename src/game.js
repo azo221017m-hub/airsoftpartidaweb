@@ -196,6 +196,7 @@ export class GameRenderer {
     const { units } = this.gameState;
     
     // Nivel 2: Niebla de guerra - solo mostrar unidades propias (excepto si radar está activo)
+    // Nivel 3: Mostrar todas las unidades (sin niebla de guerra)
     const radarActive = this.tacticalAdvantages?.radar?.active;
     
     if (this.gameLevel === 2 && this.myTeam) {
@@ -217,7 +218,7 @@ export class GameRenderer {
         }
       }
     } else {
-      // Nivel 1: Mostrar todas las unidades
+      // Nivel 1 y Nivel 3: Mostrar todas las unidades
       for (const team of ['alpha', 'bravo']) {
         for (const unit of units[team]) {
           this._drawUnit(unit, cs);

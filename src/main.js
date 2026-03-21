@@ -187,15 +187,17 @@ function setupSocket() {
     else if (type === 'shoot') { if (hit) playHit(); else playMiss(); }
 
     // En Nivel 2: solo mostrar movimientos si radar activo y enemigo sin camuflaje
+    // En Nivel 3: siempre mostrar movimientos
     let shouldShowLog = true;
     if (gameLevel === 2 && type === 'move' && team !== myTeam) {
-      // Es un movimiento enemigo
+      // Es un movimiento enemigo en Nivel 2
       const radarActive = tacticalAdvantages?.radar?.active || false;
       const enemyCamouflage = renderer?.enemyCamouflage || false;
       
       // Solo mostrar si radar activo Y enemigo sin camuflaje
       shouldShowLog = radarActive && !enemyCamouflage;
     }
+    // Nivel 3: shouldShowLog = true (siempre mostrar)
 
     if (shouldShowLog) {
       const logEntry = document.createElement('div');
@@ -211,8 +213,8 @@ function setupSocket() {
     playTurnChange();
     const isMyTurn = currentTeam === myTeam;
     
-    // Decrementar turnos de ventajas tácticas si es mi turno
-    if (isMyTurn && gameLevel === 2) {
+    // Decrementar turnos de ventajas tácticas si es mi turno (Nivel 2 o 3)
+    if (isMyTurn && (gameLevel === 2 || gameLevel === 3)) {
       decrementAdvantageTurns();
     }
     
@@ -278,8 +280,8 @@ function initGame() {
   renderUnitList();
   updateTimer(gameState.turnTimeLeft || 30);
 
-  // Mostrar panel táctico si es nivel 2
-  if (gameLevel === 2) {
+  // Mostrar panel táctico si es nivel 2 o 3
+  if (gameLevel === 2 || gameLevel === 3) {
     // Panel en el HUD (superior)
     $('tactical-hud-panel').style.display = 'flex';
     
@@ -424,7 +426,7 @@ function selectUnit(unitId) {
   $('btn-shoot').disabled = !isMyTurn || unit.acted;
 
   // Calcular rangos (con bonus de mira si está activo)
-  const shootRangeBonus = (gameLevel === 2 && tacticalAdvantages.scope.active) ? 2 : 0;
+  const shootRangeBonus = ((gameLevel === 2 || gameLevel === 3) && tacticalAdvantages.scope.active) ? 2 : 0;
   const displayShootRange = unit.shootRange + shootRangeBonus;
 
   $('selected-unit-info').innerHTML = `
@@ -434,7 +436,7 @@ function selectUnit(unitId) {
     Mov: <b>${unit.moveRange}</b> | Disparo: <b>${displayShootRange}${shootRangeBonus > 0 ? ' 🔭' : ''}</b><br>
     ${unit.inCover ? '🪨 <b>En cobertura</b>' : ''}
     ${unit.acted ? '<span style="color:#ff4e4e">✓ Ya actuó</span>' : ''}
-    ${gameLevel === 2 && tacticalAdvantages.armor.active ? '🛡 <b style="color:#00d4ff">Blindaje</b>' : ''}
+    ${(gameLevel === 2 || gameLevel === 3) && tacticalAdvantages.armor.active ? '🛡 <b style="color:#00d4ff">Blindaje</b>' : ''}
   `;
 
   // Highlight selected in unit list
@@ -469,7 +471,7 @@ function setAction(type) {
   
   // Mostrar mensaje de ayuda en el status
   const unit = getUnit(selectedUnitId);
-  const shootRangeBonus = (gameLevel === 2 && tacticalAdvantages.scope.active) ? 2 : 0;
+  const shootRangeBonus = ((gameLevel === 2 || gameLevel === 3) && tacticalAdvantages.scope.active) ? 2 : 0;
   const actionText = type === 'move' ? 'MOVER' : 'DISPARAR';
   const rangeText = type === 'move' 
     ? `Rango de movimiento: ${unit?.moveRange || 0} casillas`
@@ -522,8 +524,8 @@ function updateCoordHint(x, y) {
 function endTurn() {
   if (gameState.currentTeam !== myTeam) { showStatus('No es tu turno', 'error'); return; }
   
-  // Nivel 2: Acumular EXP basado en tiempo restante
-  if (gameLevel === 2) {
+  // Nivel 2 y 3: Acumular EXP basado en tiempo restante
+  if (gameLevel === 2 || gameLevel === 3) {
     const timeRemaining = gameState.turnTimeLeft || 0;
     if (timeRemaining > 0) {
       expAccumulated += timeRemaining;
@@ -945,8 +947,9 @@ function decrementAdvantageTurns() {
       
       if (advantage.turnsRemaining <= 0) {
         advantage.active = false;
+        advantage.unlocked = false; // Deshabilitar la ventaja al expirar
         const config = ADVANTAGE_CONFIGS[key];
-        showStatus(`${config.name} expiró`, '');
+        showStatus(`${config.name} expiró y se deshabilitó`, '');
         anyExpired = true;
       }
     }
@@ -972,7 +975,7 @@ function applyAdvantageEffects() {
   }
   
   // Sincronizar camuflaje con el servidor
-  if (socket && gameLevel === 2) {
+  if (socket && (gameLevel === 2 || gameLevel === 3)) {
     socket.emit('update_tactical_advantages', {
       camouflage: tacticalAdvantages.camouflage.active
     });
