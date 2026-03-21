@@ -1409,6 +1409,146 @@ html, body {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   LAUNCH SCREEN — Pantalla de lanzamiento con efecto cristal
+   ══════════════════════════════════════════════════════════════ */
+
+.launch-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;               /* debajo del rotate-screen (99999) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Capa de cristal — bloquea y difumina todo lo que hay detrás */
+.launch-glass {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 8, 16, 0.72);
+  backdrop-filter: blur(18px) saturate(0.6);
+  -webkit-backdrop-filter: blur(18px) saturate(0.6);
+}
+
+/* Tarjeta central */
+.launch-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 40px 48px;
+  background: rgba(10, 12, 22, 0.78);
+  border: 1px solid rgba(100, 200, 0, 0.28);
+  border-radius: 16px;
+  box-shadow:
+    0 0 60px rgba(100, 200, 0, 0.12),
+    0 8px 40px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  max-width: 520px;
+  width: 90vw;
+  animation: launch-appear 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes launch-appear {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Imagen del lanzamiento */
+.launch-img {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 200, 0, 0.2);
+  box-shadow: 0 0 30px rgba(100, 200, 0, 0.15);
+  image-rendering: auto;
+}
+
+/* Caja del contador */
+.launch-counter-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.launch-label {
+  font-family: var(--font-arcade);
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Dígitos */
+.launch-digits {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.launch-digit-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.launch-num {
+  font-family: var(--font-arcade);
+  font-size: clamp(36px, 8vw, 64px);
+  font-weight: bold;
+  color: var(--alpha-color);
+  text-shadow:
+    0 0 20px var(--alpha-glow),
+    0 0 40px var(--alpha-glow);
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+  letter-spacing: 2px;
+  animation: launch-pulse 1s ease-in-out infinite;
+}
+@keyframes launch-pulse {
+  0%, 100% { text-shadow: 0 0 20px var(--alpha-glow), 0 0 40px var(--alpha-glow); }
+  50%       { text-shadow: 0 0 6px  var(--alpha-glow), 0 0 16px var(--alpha-glow); }
+}
+
+.launch-unit {
+  font-family: var(--font-arcade);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.launch-sep {
+  font-family: var(--font-arcade);
+  font-size: clamp(28px, 6vw, 52px);
+  color: var(--alpha-color);
+  opacity: 0.5;
+  margin-bottom: 14px;
+  animation: sep-blink 1s step-start infinite;
+}
+@keyframes sep-blink {
+  0%, 49% { opacity: 0.5; }
+  50%, 100% { opacity: 0.1; }
+}
+
+.launch-sublabel {
+  font-family: var(--font-arcade);
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
    ROTATE SCREEN — Pantalla de "gira tu dispositivo"
    Solo se muestra en móvil / tablet en orientación portrait.
    NO afecta el layout de escritorio en ningún caso.

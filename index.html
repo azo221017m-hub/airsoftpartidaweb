@@ -8,6 +8,41 @@
 </head>
 <body>
 
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- LAUNCH SCREEN — Pantalla de lanzamiento (21/03/2026 22:00 CDMX) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div id="launch-screen" class="launch-screen" style="display:none">
+    <!-- Fondo cristal (blur sobre la app) -->
+    <div class="launch-glass"></div>
+
+    <!-- Contenido central -->
+    <div class="launch-content">
+      <img src="/lanzamientoATC.png" alt="Lanzamiento ATC" class="launch-img" />
+
+      <div class="launch-counter-box">
+        <p class="launch-label">LANZAMIENTO EN</p>
+        <div class="launch-digits" id="launch-digits">
+          <div class="launch-digit-group">
+            <span class="launch-num" id="lc-h">00</span>
+            <span class="launch-unit">H</span>
+          </div>
+          <span class="launch-sep">:</span>
+          <div class="launch-digit-group">
+            <span class="launch-num" id="lc-m">00</span>
+            <span class="launch-unit">MIN</span>
+          </div>
+          <span class="launch-sep">:</span>
+          <div class="launch-digit-group">
+            <span class="launch-num" id="lc-s">00</span>
+            <span class="launch-unit">SEG</span>
+          </div>
+        </div>
+        <p class="launch-sublabel">HOY · 22:00 HRS · CDMX</p>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════════════════════════════════════════════════ -->
+
   <!-- ══════════════════════════════════════════════════ -->
   <!-- ROTATE SCREEN — Solo visible en portrait móvil    -->
   <!-- ══════════════════════════════════════════════════ -->

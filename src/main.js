@@ -8,6 +8,10 @@ import {
   playMysteriousAmbient
 } from './sounds.js';
 import { showDialog, closeDialog, nextDialog, demoDialog, creditsDialog } from './dialog.js';
+import { initLaunchScreen } from './launch.js';
+
+// ── Pantalla de lanzamiento (se evalúa antes de cualquier otra cosa) ──
+initLaunchScreen();
 
 // ─── State ─────────────────────────────────────────────────────────────────
 let socket = null;
