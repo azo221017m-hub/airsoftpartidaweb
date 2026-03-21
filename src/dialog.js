@@ -116,7 +116,7 @@ export function showDialog(lines, opts = {}) {
 
   // Reset imagen al default si la línea no tiene img propia
   const ci = charImg();
-  if (ci && !lines[0].img) ci.src = '/src/spectrumTexcoco.png';
+  if (ci && !lines[0].img) ci.src = '/spectrumTexcoco.png';
 
   ov.style.display = 'flex';
 

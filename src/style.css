@@ -98,7 +98,7 @@ html, body {
 /* ─── LOBBY ─── */
 #lobby-screen {
   align-items: center; justify-content: center;
-  background: url('./spectrumTexcoco.png') no-repeat center center;
+  background: url('/spectrumTexcoco.png') no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
   overflow-y: auto; flex-direction: column;
