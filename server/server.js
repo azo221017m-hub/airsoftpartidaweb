@@ -5,7 +5,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
-const { createGameState, applyMove, applyShoot, endTurn } = require('./gameState');
+const { createGameState, createGameStateForAI, applyMove, applyShoot, endTurn } = require('./gameState');
 const { runAITurn } = require('./ai');
 
 const app = express();
@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
     const name = String(playerName || 'Player').trim().slice(0, 20) || 'Player';
     const rid = `ai_${socket.id}`;
 
-    rooms[rid] = { players: [], gameState: null, timer: null, isAI: true };
+    rooms[rid] = { players: [], gameState: null, timer: null, isAI: true, playerActions: [] };
     const room = rooms[rid];
 
     room.players.push({ socketId: socket.id, name, team: 'alpha' });
@@ -140,7 +140,7 @@ io.on('connection', (socket) => {
 
     console.log(`[+] ${name} started AI game in room ${rid}`);
 
-    room.gameState = createGameState();
+    room.gameState = createGameStateForAI();
     io.to(rid).emit('game_start', {
       gameState: room.gameState,
       players: room.players.map(p => ({ name: p.name, team: p.team })),
@@ -196,6 +196,12 @@ io.on('connection', (socket) => {
     if (!result.success) {
       socket.emit('action_error', { message: result.message });
       return;
+    }
+
+    // Record player actions in AI rooms for mirroring
+    if (room.isAI && player.team === 'alpha') {
+      if (!room.playerActions) room.playerActions = [];
+      room.playerActions.push({ type, unitId, x: tx, y: ty });
     }
 
     broadcastState(roomId);
@@ -260,7 +266,8 @@ io.on('connection', (socket) => {
 
     clearInterval(room.timer);
     room.timer = null;
-    room.gameState = createGameState();
+    room.gameState = room.isAI ? createGameStateForAI() : createGameState();
+    if (room.isAI) room.playerActions = [];
     io.to(roomId).emit('game_start', {
       gameState: room.gameState,
       players: room.players.map(p => ({ name: p.name, team: p.team })),
