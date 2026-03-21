@@ -27,14 +27,14 @@ const OBSTACLES = [
 function createUnits() {
   return {
     alpha: [
-      { id: 'a1', team: 'alpha', type: 'HEAVY', x: 1, y: 7, hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Heavy', inCover: false, acted: false },
-      { id: 'a2', team: 'alpha', type: 'SCOUT', x: 2, y: 3, hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Scout', inCover: false, acted: false },
-      { id: 'a3', team: 'alpha', type: 'SNIPER', x: 2, y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Sniper', inCover: false, acted: false },
+      { id: 'a1', team: 'alpha', type: 'HEAVY',  x: 1,  y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
+      { id: 'a2', team: 'alpha', type: 'SCOUT',  x: 2,  y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
+      { id: 'a3', team: 'alpha', type: 'SNIPER', x: 2,  y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
     ],
     bravo: [
-      { id: 'b1', team: 'bravo', type: 'HEAVY', x: 13, y: 7, hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Heavy', inCover: false, acted: false },
-      { id: 'b2', team: 'bravo', type: 'SCOUT', x: 12, y: 3, hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Scout', inCover: false, acted: false },
-      { id: 'b3', team: 'bravo', type: 'SNIPER', x: 12, y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Sniper', inCover: false, acted: false },
+      { id: 'b1', team: 'bravo', type: 'HEAVY',  x: 13, y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
+      { id: 'b2', team: 'bravo', type: 'SCOUT',  x: 12, y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
+      { id: 'b3', team: 'bravo', type: 'SNIPER', x: 12, y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
     ],
   };
 }

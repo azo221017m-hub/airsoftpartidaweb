@@ -5,10 +5,20 @@ const COLORS = {
   bgCell: '#0c0e1a',
   bgCellAlt: '#0e1020',
   gridLine: 'rgba(60,80,140,0.3)',
-  wall: '#1a1f36',
-  wallStroke: '#2a3060',
-  cover: '#1a2a1a',
+  // Wall — concreto oscuro táctico
+  wall: '#1c1e28',
+  wallBase: '#23263a',
+  wallEdgeLight: '#3a3f5c',
+  wallEdgeDark: '#0d0f18',
+  wallCrack: 'rgba(10,10,20,0.7)',
+  // Cover — sacos de arena / roca
+  cover: '#1e2b14',
+  coverBase: '#263618',
+  coverEdgeLight: '#4a6230',
+  coverEdgeDark: '#111a09',
   coverStroke: '#2a4a2a',
+  coverSand: '#6b5a2a',
+  coverSandLight: '#8a7235',
   alpha: '#AAFF00',
   alphaGlow: 'rgba(170,255,0,0.35)',
   alphaFill: 'rgba(170,255,0,0.2)',
@@ -242,36 +252,9 @@ export class GameRenderer {
     const obs = gameState.obstacles.find(o => o.x === x && o.y === y);
     if (obs) {
       if (obs.type === 'wall') {
-        ctx.fillStyle = COLORS.wall;
-        ctx.fillRect(px, py, cs, cs);
-        // Cross-hatch
-        ctx.strokeStyle = COLORS.wallStroke;
-        ctx.lineWidth = 1;
-        for (let d = -cs; d < cs * 2; d += 8) {
-          ctx.beginPath();
-          ctx.moveTo(px + d, py);
-          ctx.lineTo(px + d + cs, py + cs);
-          ctx.stroke();
-        }
-        ctx.strokeStyle = COLORS.wallStroke;
-        ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
+        this._drawWall(ctx, px, py, cs);
       } else if (obs.type === 'cover') {
-        ctx.fillStyle = COLORS.cover;
-        ctx.fillRect(px, py, cs, cs);
-        // Rock pattern
-        ctx.fillStyle = COLORS.coverStroke;
-        ctx.fillRect(px + 4, py + 4, cs - 8, cs - 8);
-        ctx.strokeStyle = COLORS.coverStroke;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(px + 1, py + 1, cs - 2, cs - 2);
-        // Cover icon
-        ctx.font = `${Math.floor(cs * 0.45)}px serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = '#88aa55';
-        ctx.fillText('🪨', px + cs / 2, py + cs / 2);
-        ctx.globalAlpha = 1;
+        this._drawCover(ctx, px, py, cs);
       }
     }
 
@@ -409,6 +392,155 @@ export class GameRenderer {
     
     // Restaurar alpha
     ctx.globalAlpha = 1;
+  }
+
+  // ── Pared de concreto táctica ─────────────────────────────────────────────
+  _drawWall(ctx, px, py, cs) {
+    const pad = 1;
+
+    // Fondo base — concreto oscuro
+    ctx.fillStyle = COLORS.wallBase;
+    ctx.fillRect(px + pad, py + pad, cs - pad * 2, cs - pad * 2);
+
+    // Patrón de ladrillos / bloques de hormigón
+    const brickH = Math.max(6, Math.floor(cs / 4));
+    const brickW = Math.max(10, Math.floor(cs / 2.2));
+    ctx.strokeStyle = COLORS.wallCrack;
+    ctx.lineWidth = 1;
+
+    for (let row = 0; row * brickH < cs; row++) {
+      const offsetX = (row % 2 === 0) ? 0 : Math.floor(brickW / 2);
+      const ry = py + pad + row * brickH;
+      // Línea horizontal de separación de fila
+      ctx.beginPath();
+      ctx.moveTo(px + pad, ry);
+      ctx.lineTo(px + cs - pad, ry);
+      ctx.stroke();
+      // Líneas verticales de separación de ladrillo
+      for (let col = offsetX; col < cs; col += brickW) {
+        ctx.beginPath();
+        ctx.moveTo(px + pad + col, ry);
+        ctx.lineTo(px + pad + col, Math.min(ry + brickH, py + cs - pad));
+        ctx.stroke();
+      }
+    }
+
+    // Borde biselado 3D — arista superior/izquierda clara
+    ctx.strokeStyle = COLORS.wallEdgeLight;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px + pad, py + cs - pad);
+    ctx.lineTo(px + pad, py + pad);
+    ctx.lineTo(px + cs - pad, py + pad);
+    ctx.stroke();
+
+    // Borde biselado 3D — arista inferior/derecha oscura
+    ctx.strokeStyle = COLORS.wallEdgeDark;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(px + cs - pad, py + pad);
+    ctx.lineTo(px + cs - pad, py + cs - pad);
+    ctx.lineTo(px + pad, py + cs - pad);
+    ctx.stroke();
+
+    // Icono central de pared (cerradura / bloqueo)
+    const iconSize = Math.floor(cs * 0.32);
+    ctx.font = `bold ${iconSize}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = COLORS.wallEdgeLight;
+    ctx.globalAlpha = 0.55;
+    ctx.fillText('▩', px + cs / 2, py + cs / 2);
+    ctx.globalAlpha = 1;
+
+    // Marco exterior de la celda
+    ctx.strokeStyle = COLORS.wallEdgeDark;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, cs - 1, cs - 1);
+  }
+
+  // ── Cobertura: sacos de arena tácticos ───────────────────────────────────
+  _drawCover(ctx, px, py, cs) {
+    const pad = 2;
+    const cx = px + cs / 2;
+    const cy = py + cs / 2;
+
+    // Fondo base — tierra/arena oscura
+    ctx.fillStyle = COLORS.coverBase;
+    ctx.fillRect(px + pad, py + pad, cs - pad * 2, cs - pad * 2);
+
+    // Fila inferior de sacos (2 sacos)
+    this._drawSandbag(ctx, px + pad + 1, py + Math.floor(cs * 0.55), Math.floor(cs * 0.44), Math.floor(cs * 0.3));
+    this._drawSandbag(ctx, px + Math.floor(cs * 0.5), py + Math.floor(cs * 0.55), Math.floor(cs * 0.44), Math.floor(cs * 0.3));
+
+    // Fila superior de sacos (1 saco centrado, desplazado)
+    this._drawSandbag(ctx, px + Math.floor(cs * 0.22), py + Math.floor(cs * 0.25), Math.floor(cs * 0.56), Math.floor(cs * 0.3));
+
+    // Borde verde militar
+    ctx.strokeStyle = COLORS.coverEdgeLight;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, cs - 1, cs - 1);
+
+    // Sombra interior en borde
+    ctx.strokeStyle = COLORS.coverEdgeDark;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(px + pad, py + pad, cs - pad * 2, cs - pad * 2);
+
+    // Etiqueta de cobertura (pequeño ícono arriba-derecha)
+    const iconSize = Math.floor(cs * 0.22);
+    ctx.font = `${iconSize}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.85;
+    ctx.fillText('🛡', px + cs - iconSize, py + iconSize);
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Saco de arena individual ──────────────────────────────────────────────
+  _drawSandbag(ctx, bx, by, bw, bh) {
+    const r = Math.floor(bh * 0.45); // radio de esquinas
+
+    // Sombra del saco
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.roundRect(bx + 2, by + 3, bw, bh, r);
+    ctx.fill();
+
+    // Cuerpo del saco — gradiente de arena/tierra
+    const grad = ctx.createLinearGradient(bx, by, bx, by + bh);
+    grad.addColorStop(0, COLORS.coverSandLight);
+    grad.addColorStop(0.5, COLORS.coverSand);
+    grad.addColorStop(1, '#4a3d1a');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, r);
+    ctx.fill();
+
+    // Costura central horizontal
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx + r, by + bh / 2);
+    ctx.lineTo(bx + bw - r, by + bh / 2);
+    ctx.stroke();
+
+    // Costuras verticales en extremos
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.moveTo(bx + r + 2, by + 2);
+    ctx.lineTo(bx + r + 2, by + bh - 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(bx + bw - r - 2, by + 2);
+    ctx.lineTo(bx + bw - r - 2, by + bh - 2);
+    ctx.stroke();
+
+    // Borde del saco
+    ctx.strokeStyle = COLORS.coverEdgeDark;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, r);
+    ctx.stroke();
   }
 
   _drawCoordLabels(cs, gridSize) {

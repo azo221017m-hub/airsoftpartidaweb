@@ -5,9 +5,10 @@ import { GameRenderer, coordToXY, xyToCoord, buildHpPips, getHpClass } from './g
 import {
   playShoot, playHit, playEliminate, playMove,
   playMiss, playTurnChange, playVictory, playTimerUrgent, playSelect,
-  playMysteriousAmbient
+  playMysteriousAmbient, playRoundCountdown, playGameOver
 } from './sounds.js';
-import { showDialog, closeDialog, nextDialog, demoDialog, creditsDialog } from './dialog.js';
+import { showDialog, closeDialog, nextDialog, demoDialog, creditsDialog,
+         matchSeriesInfoDialog, roundStartDialog, showCountdownOverlay, gameOverRoundDialog } from './dialog.js';
 import { initLaunchScreen } from './launch.js';
 
 // ── Pantalla de lanzamiento (se evalúa antes de cualquier otra cosa) ──
@@ -26,6 +27,30 @@ let timerInterval = null;
 let timerMax = 30;
 let isAIGame = false;
 let gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
+
+// ─── Estado de la serie de 3 rondas ─────────────────────────────────────────
+let seriesActive = false;          // true cuando hay una serie en curso
+let seriesScore = { alpha: 0, bravo: 0 }; // victorias por equipo
+let currentRound = 0;              // ronda actual (1-3)
+let seriesFirstTeam = null;        // equipo que inició la ronda 1 (al azar)
+let _lastRoundEndPS = { alpha: 0, bravo: 0 }; // PS al final de cada ronda
+// Regla de inicio por ronda:
+//   R1 = al azar   → seriesFirstTeam
+//   R2 = el otro   → el que NO inició en R1
+//   R3 = quien tenga más PS total
+
+function _updateSeriesScoreboard() {
+  const sb = $('series-scoreboard');
+  if (!sb) return;
+  if (seriesActive) {
+    sb.style.display = 'flex';
+    $('series-score-alpha').textContent = seriesScore.alpha;
+    $('series-score-bravo').textContent = seriesScore.bravo;
+    $('series-round-label').textContent = `Ronda ${currentRound}/3`;
+  } else {
+    sb.style.display = 'none';
+  }
+}
 
 // ─── Nivel 2: Estado de ventajas tácticas ───────────────────────────────────
 let expAccumulated = 0; // Segundos acumulados
@@ -95,6 +120,12 @@ function joinGame() {
   gameLevel = parseInt(selectedLevel);
   $('lobby-status').textContent = '';
 
+  // Reiniciar estado de la serie al entrar a nueva partida
+  currentRound = 0;
+  seriesScore = { alpha: 0, bravo: 0 };
+  seriesFirstTeam = null;
+  seriesActive = false;
+
   if (!socket) {
     socket = io({ transports: ['websocket', 'polling'] });
     setupSocket();
@@ -113,6 +144,12 @@ function joinAIGame() {
   gameLevel = parseInt(selectedLevel);
   $('lobby-status').textContent = '';
 
+  // Reiniciar estado de la serie al entrar a nueva partida
+  currentRound = 0;
+  seriesScore = { alpha: 0, bravo: 0 };
+  seriesFirstTeam = null;
+  seriesActive = false;
+
   if (!socket) {
     socket = io({ transports: ['websocket', 'polling'] });
     setupSocket();
@@ -121,7 +158,7 @@ function joinAIGame() {
   socket.emit('join_ai_game', { playerName: name, gameLevel });
   myName = name;
   
-  // Cerrar modal
+  // Cerrar modal y mostrar info de serie
   gameModal.classList.remove('active');
 }
 
@@ -157,12 +194,15 @@ function setupSocket() {
     myTeam = team;
     myName = playerName;
     if (isAIGame) {
-      // Skip waiting screen for AI games — game_start will follow immediately
+      // Mostrar info de serie antes del juego contra IA (el game_start llega justo después)
+      matchSeriesInfoDialog(null); // Se cierra solo; game_start llegará y arrancará
       $('waiting-room-info').textContent = `Sala: ${roomId}`;
     } else {
       showScreen('waiting-screen');
       $('waiting-room-info').textContent = `Sala: ${roomId}`;
       updateWaitingSlots([{ team, name: playerName }]);
+      // Mostrar info de serie en espera PvP
+      matchSeriesInfoDialog(null);
     }
   });
 
@@ -173,17 +213,50 @@ function setupSocket() {
   socket.on('game_start', ({ gameState: gs, players: pl }) => {
     gameState = gs;
     players = pl;
+
+    // ── Gestión de serie de 3 rondas ─────────────────────────
+    currentRound++;
+    if (currentRound === 1) {
+      seriesActive = true;
+      seriesScore = { alpha: 0, bravo: 0 };
+      // Ronda 1: inicio al azar
+      seriesFirstTeam = Math.random() < 0.5 ? 'alpha' : 'bravo';
+    }
+
+    // Mostrar UI de la serie
+    _updateSeriesScoreboard();
+
     initGame();
     showScreen('game-screen');
-    playMysteriousAmbient();
-    $('btn-codigo-negro').style.display = 'block';  // Mostrar solo en partida
-    if (isAIGame) {
-      showStatus(`¡Partida contra IA iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
-      addChat('SISTEMA', 'neutral', '🤖 ¡Partida contra IA iniciada! Equipo ALPHA comienza.');
-    } else {
-      showStatus(`¡Partida iniciada! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
-      addChat('SISTEMA', 'neutral', '🎮 ¡Partida iniciada! Equipo ALPHA comienza.');
+    $('btn-codigo-negro').style.display = 'block';
+
+    // ── Determinar razón de inicio ────────────────────────────
+    let startReason = '';
+    let startingTeam = gs.currentTeam;
+
+    if (currentRound === 1) {
+      startReason = `🎲 Ronda 1 — inicio al AZAR.\n¡El dado ha decidido!`;
+    } else if (currentRound === 2) {
+      startReason = `🔄 Ronda 2 — inicia el equipo contrario.\n¡El turno cambia de bando!`;
+    } else if (currentRound === 3) {
+      // Calcular PS total de cada equipo del gameState anterior (se calcula en game_over)
+      startReason = `💪 Ronda 3 — inicia quien tenga más PS total.\n¡La ventaja la ganaron con sus unidades!`;
     }
+
+    // ── Diálogo de inicio de ronda → cuenta regresiva → juego ─
+    roundStartDialog(currentRound, startingTeam, startReason, () => {
+      playRoundCountdown();
+      showCountdownOverlay(() => {
+        playMysteriousAmbient();
+        if (isAIGame) {
+          showStatus(`¡Ronda ${currentRound}! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
+          addChat('SISTEMA', 'neutral', `🤖 Ronda ${currentRound} — Partida contra IA. ALPHA comienza.`);
+        } else {
+          showStatus(`¡Ronda ${currentRound}! Eres el equipo ${myTeam.toUpperCase()}`, 'success');
+          addChat('SISTEMA', 'neutral', `🎮 Ronda ${currentRound} iniciada. ${startingTeam.toUpperCase()} comienza.`);
+        }
+      });
+    });
   });
 
   socket.on('state_update', ({ gameState: gs, players: pl, enemyCamouflage }) => {
@@ -273,15 +346,39 @@ function setupSocket() {
   });
 
   socket.on('game_over', ({ winner, message: msg }) => {
-    playVictory();
+    playGameOver();
+
+    // ── Actualizar marcador de la serie ───────────────────────
+    if (winner === 'alpha') seriesScore.alpha++;
+    else if (winner === 'bravo') seriesScore.bravo++;
+
+    // Guardar PS totales de fin de ronda (para decidir quién inicia R3)
+    _lastRoundEndPS = {
+      alpha: gameState ? gameState.units.alpha.reduce((s, u) => s + Math.max(0, u.hp), 0) : 0,
+      bravo: gameState ? gameState.units.bravo.reduce((s, u) => s + Math.max(0, u.hp), 0) : 0,
+    };
+
     const winnerName = players.find(p => p.team === winner)?.name || winner.toUpperCase();
-    $('gameover-title').textContent = 'VICTORIA';
+    const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
+
+    // Actualizar pantalla de game over
+    $('gameover-title').textContent = seriesWinner ? '¡¡SERIE GANADA!!' : `RONDA ${currentRound}`;
     $('gameover-team').textContent = `EQUIPO ${winner.toUpperCase()}: ${winnerName}`;
     $('gameover-team').className = `gameover-team ${winner}`;
     $('gameover-icon').textContent = winner === myTeam ? '🏆' : '💀';
     $('gameover-msg').textContent = msg || `El equipo ${winner.toUpperCase()} ha eliminado a todos los enemigos`;
-    $('btn-codigo-negro').style.display = 'none';  // Ocultar al terminar partida
+    $('btn-codigo-negro').style.display = 'none';
+
+    // Botón "Una partida más" visible solo si la serie no terminó
+    $('btn-restart').style.display = seriesWinner ? 'none' : 'inline-block';
+    // Botón "última partida" siempre visible
+    $('btn-last-game').style.display = 'inline-block';
+
+    _updateSeriesScoreboard();
     showScreen('gameover-screen');
+
+    // ── Diálogo fin de ronda con Spectrum ──────────────────────
+    gameOverRoundDialog(winner, winnerName, currentRound, seriesScore, null);
   });
 
   socket.on('player_left', ({ name, team }) => {
@@ -648,9 +745,11 @@ function renderHUD() {
       const el = document.createElement('div');
       el.className = `hud-unit ${unit.hp <= 0 ? 'dead' : ''}`;
       const hpClass = getHpClass(unit.hp, unit.maxHp);
+      // Abreviatura táctica: ART / EXP / FRA
+      const abbr = { HEAVY: 'ART', SCOUT: 'EXP', SNIPER: 'FRA' }[unit.type] || unit.type.slice(0,3);
       el.innerHTML = `
         <span class="hud-unit-icon">${getUnitIcon(unit.type)}</span>
-        <span class="hud-unit-name">${unit.name.slice(0, 4).toUpperCase()}</span>
+        <span class="hud-unit-name" title="${getUnitTypeName(unit.type)}">${abbr}</span>
         <span class="hud-unit-hp ${hpClass}">${unit.hp > 0 ? unit.hp + '♥' : '💀'}</span>
       `;
       container.appendChild(el);
@@ -660,6 +759,10 @@ function renderHUD() {
 
 function getUnitIcon(type) {
   return { HEAVY: '⚔', SCOUT: '🏃', SNIPER: '🎯' }[type] || '●';
+}
+
+function getUnitTypeName(type) {
+  return { HEAVY: 'Artillería', SCOUT: 'Explorador', SNIPER: 'Francotirador' }[type] || type;
 }
 
 function updateTimer(timeLeft) {
@@ -802,7 +905,7 @@ $('btn-restart').addEventListener('click', () => {
   // Limpiar selección y estado pendiente antes de reiniciar
   selectedUnitId = null;
   pendingAction = null;
-  // Resetear ventajas tácticas para la nueva partida
+  // Resetear ventajas tácticas para la nueva ronda
   expAccumulated = 0;
   tacticalAdvantages = {
     armor: { unlocked: false, active: false, turnsRemaining: 0 },
@@ -810,8 +913,47 @@ $('btn-restart').addEventListener('click', () => {
     camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
     radar: { unlocked: false, active: false, turnsRemaining: 0 }
   };
-  socket.emit('restart_game');
+
+  // Si la serie está completa (alguien ganó 2), reiniciar serie
+  const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
+  if (seriesWinner || currentRound >= 3) {
+    currentRound = 0;
+    seriesScore = { alpha: 0, bravo: 0 };
+    seriesFirstTeam = null;
+    seriesActive = false;
+    // Mostrar diálogo de nueva serie antes de empezar
+    matchSeriesInfoDialog(() => socket.emit('restart_game'));
+  } else {
+    socket.emit('restart_game');
+  }
   showScreen('game-screen');
+});
+
+// "¡Una última partida!" → siempre lanza partida contra IA
+$('btn-last-game').addEventListener('click', () => {
+  selectedUnitId = null;
+  pendingAction = null;
+  expAccumulated = 0;
+  tacticalAdvantages = {
+    armor: { unlocked: false, active: false, turnsRemaining: 0 },
+    scope: { unlocked: false, active: false, turnsRemaining: 0 },
+    camouflage: { unlocked: false, active: false, turnsRemaining: 0 },
+    radar: { unlocked: false, active: false, turnsRemaining: 0 }
+  };
+  // Reiniciar serie para la nueva partida IA
+  currentRound = 0;
+  seriesScore = { alpha: 0, bravo: 0 };
+  seriesFirstTeam = null;
+  seriesActive = false;
+  // Desconectar socket actual si existía y crear uno nuevo contra IA
+  if (socket) { socket.disconnect(); socket = null; }
+  renderer = null;
+  _gameButtonsInitialized = false;
+  isAIGame = true;
+  // Reconectar y lanzar contra IA
+  socket = io({ transports: ['websocket', 'polling'] });
+  setupSocket();
+  socket.emit('join_ai_game', { playerName: myName || 'Operador', gameLevel });
 });
 
 $('btn-lobby').addEventListener('click', () => {

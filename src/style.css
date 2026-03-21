@@ -986,8 +986,51 @@ html, body {
 .gameover-team { font-size: 24px; letter-spacing: 4px; margin: 12px 0; }
 .gameover-team.alpha { color: var(--alpha-color); text-shadow: 0 0 20px var(--alpha-glow); }
 .gameover-team.bravo { color: var(--bravo-color); text-shadow: 0 0 20px var(--bravo-glow); }
-.gameover-msg { color: var(--text-dim); font-size: 13px; letter-spacing: 1px; margin-bottom: 30px; }
-.gameover-buttons { display: flex; gap: 16px; justify-content: center; }
+.gameover-msg { color: var(--text-dim); font-size: 13px; letter-spacing: 1px; margin-bottom: 16px; }
+.gameover-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ─── MARCADOR DE SERIE ─── */
+.series-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 20px;
+  padding: 10px 22px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(170,255,0,0.25);
+  border-radius: 8px;
+  font-family: 'Orbitron', monospace;
+}
+.series-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(200,220,255,0.5);
+  text-transform: uppercase;
+}
+.series-alpha {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--alpha-color);
+  text-shadow: 0 0 12px var(--alpha-glow);
+}
+.series-bravo {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--bravo-color);
+  text-shadow: 0 0 12px var(--bravo-glow);
+}
+.series-dash {
+  font-size: 20px;
+  color: rgba(200,220,255,0.4);
+  margin: 0 4px;
+}
+.series-round {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(200,220,255,0.45);
+  margin-left: 6px;
+}
 
 /* ─── BOTÓN CÓDIGO NEGRO ─── */
 .btn-codigo-negro-fixed {

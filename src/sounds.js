@@ -110,6 +110,83 @@ export function playSelect() {
   playTone(700, 'sine', 0.05, 0.1);
 }
 
+// ── Musiquita de cuenta regresiva de ronda (3, 2, 1, ¡JUEGO!) ─────────────
+export function playRoundCountdown() {
+  try {
+    const ac = getCtx();
+    // Tres pitidos ascendentes (3, 2, 1)
+    const countNotes = [440, 554, 659];
+    countNotes.forEach((freq, i) => {
+      const osc = ac.createOscillator();
+      const g   = ac.createGain();
+      osc.connect(g); g.connect(ac.destination);
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      const t = ac.currentTime + i * 0.75;
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t); osc.stop(t + 0.6);
+    });
+    // ¡JUEGO! — fanfarria de 3 notas ascendentes rápidas
+    const goNotes = [523, 784, 1047, 1319];
+    goNotes.forEach((freq, i) => {
+      const osc = ac.createOscillator();
+      const g   = ac.createGain();
+      osc.connect(g); g.connect(ac.destination);
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      const t = ac.currentTime + 2.25 + i * 0.13;
+      g.gain.setValueAtTime(0.28, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+      osc.start(t); osc.stop(t + 0.4);
+    });
+    // Tambor de inicio al ¡Juego!
+    [2.25, 2.38, 2.50].forEach((dt) => {
+      const osc = ac.createOscillator();
+      const g   = ac.createGain();
+      osc.connect(g); g.connect(ac.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, ac.currentTime + dt);
+      osc.frequency.exponentialRampToValueAtTime(40, ac.currentTime + dt + 0.15);
+      g.gain.setValueAtTime(0.18, ac.currentTime + dt);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dt + 0.18);
+      osc.start(ac.currentTime + dt); osc.stop(ac.currentTime + dt + 0.2);
+    });
+  } catch(e) {}
+}
+
+// ── ¡Juego! ¡Juego! — fin de partida ─────────────────────────────────────
+export function playGameOver() {
+  try {
+    const ac = getCtx();
+    // Dos fanfarrias de victoria separadas ("¡Juego! ¡Juego!")
+    [0, 1.4].forEach((offset) => {
+      const fanfare = [523, 659, 784, 1047];
+      fanfare.forEach((freq, i) => {
+        const osc = ac.createOscillator();
+        const g   = ac.createGain();
+        osc.connect(g); g.connect(ac.destination);
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        const t = ac.currentTime + offset + i * 0.14;
+        g.gain.setValueAtTime(0.25, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+        osc.start(t); osc.stop(t + 0.45);
+      });
+      // Tambor de cierre
+      const osc = ac.createOscillator();
+      const g   = ac.createGain();
+      osc.connect(g); g.connect(ac.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(80, ac.currentTime + offset + 0.6);
+      osc.frequency.exponentialRampToValueAtTime(30, ac.currentTime + offset + 0.85);
+      g.gain.setValueAtTime(0.2, ac.currentTime + offset + 0.6);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + offset + 0.9);
+      osc.start(ac.currentTime + offset + 0.6); osc.stop(ac.currentTime + offset + 0.95);
+    });
+  } catch(e) {}
+}
+
 // ── MÚSICA DE DIÁLOGOS — Épica / aventura táctica ────────────
 let _dialogMusicNodes = [];
 let _dialogMusicPlaying = false;

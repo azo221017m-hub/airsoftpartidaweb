@@ -436,3 +436,204 @@ export function creditsDialog() {
     },
   ]);
 }
+
+// ════════════════════════════════════════════════════════════
+//  INFORMACIÓN DE SERIE DE 3 RONDAS
+// ════════════════════════════════════════════════════════════
+/**
+ * Muestra las reglas de la serie al comenzar.
+ * @param {Function} onClose - Callback al cerrar
+ */
+export function matchSeriesInfoDialog(onClose) {
+  showDialog([
+    {
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  '⚔️ FORMATO DE PARTIDA ⚔️\n¡Bienvenidos al campo de batalla!\nSe disputarán 3 RONDAS. Gana la serie quien conquiste 2 rondas.',
+    },
+    {
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'neutral',
+      text:  '📋 REGLAS DE INICIO:\n• Ronda 1 — inicia al AZAR\n• Ronda 2 — inicia el otro equipo\n• Ronda 3 — inicia quien tenga más PS total en sus unidades',
+    },
+    {
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  '🏆 Gana la SERIE quien gane 2 de 3 rondas.\n\n¡Estrategia, trabajo en equipo y puntería!\n¡Prepárense, operadores!',
+    },
+  ], { onClose });
+}
+
+// ════════════════════════════════════════════════════════════
+//  INICIO DE RONDA — quién empieza
+// ════════════════════════════════════════════════════════════
+/**
+ * @param {number} roundNum - 1, 2 o 3
+ * @param {string} startingTeam - 'alpha' | 'bravo'
+ * @param {string} reason - texto explicando por qué inicia ese equipo
+ * @param {Function} onClose
+ */
+export function roundStartDialog(roundNum, startingTeam, reason, onClose) {
+  const teamLabel = startingTeam === 'alpha' ? 'EQUIPO ALPHA ⚡' : 'EQUIPO BRAVO 🔴';
+  const teamTheme = startingTeam === 'alpha' ? 'alpha' : 'bravo';
+
+  showDialog([
+    {
+      name:  `SPECTRUM AIRSOFT · ÁRBITRO`,
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  `🎯 RONDA ${roundNum} DE 3\n\n${reason}`,
+    },
+    {
+      name:  `SPECTRUM AIRSOFT · ÁRBITRO`,
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: teamTheme,
+      text:  `▶ INICIA: ${teamLabel}\n\n¡Preparen sus unidades!\nLa cuenta regresiva está por comenzar...`,
+    },
+  ], { onClose });
+}
+
+// ════════════════════════════════════════════════════════════
+//  CUENTA REGRESIVA 3, 2, 1… ¡JUEGO!
+//  (sin diálogo — overlay numérico directo)
+// ════════════════════════════════════════════════════════════
+/**
+ * Muestra overlay 3 → 2 → 1 → ¡JUEGO! y llama onDone al terminar.
+ * @param {Function} onDone
+ */
+export function showCountdownOverlay(onDone) {
+  // Crear overlay de cuenta regresiva
+  const existing = document.getElementById('countdown-overlay');
+  if (existing) existing.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'countdown-overlay';
+  ov.style.cssText = `
+    position: fixed; inset: 0; z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.82);
+    flex-direction: column; gap: 12px;
+    pointer-events: none;
+  `;
+
+  const numEl = document.createElement('div');
+  numEl.style.cssText = `
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(80px, 18vw, 180px);
+    font-weight: 900;
+    color: #AAFF00;
+    text-shadow: 0 0 40px rgba(170,255,0,0.9), 0 0 80px rgba(170,255,0,0.5);
+    letter-spacing: 4px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  `;
+
+  const lblEl = document.createElement('div');
+  lblEl.style.cssText = `
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(14px, 3vw, 22px);
+    color: rgba(170,255,0,0.7);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+  `;
+  lblEl.textContent = 'RONDA EN CURSO';
+
+  ov.appendChild(numEl);
+  ov.appendChild(lblEl);
+  document.body.appendChild(ov);
+
+  const steps = [
+    { text: '3', color: '#AAFF00', shadow: 'rgba(170,255,0,0.9)' },
+    { text: '2', color: '#c8ff00', shadow: 'rgba(200,255,0,0.9)' },
+    { text: '1', color: '#ff4e4e', shadow: 'rgba(255,78,78,0.9)'  },
+    { text: '¡JUEGO!', color: '#ffffff', shadow: 'rgba(255,255,255,0.9)', small: true },
+  ];
+
+  let i = 0;
+  function next() {
+    if (i >= steps.length) {
+      ov.style.transition = 'opacity 0.5s ease';
+      ov.style.opacity = '0';
+      setTimeout(() => { ov.remove(); if (onDone) onDone(); }, 500);
+      return;
+    }
+    const s = steps[i++];
+    numEl.style.color = s.color;
+    numEl.style.textShadow = `0 0 40px ${s.shadow}, 0 0 80px ${s.shadow.replace('0.9', '0.4')}`;
+    numEl.style.fontSize = s.small ? 'clamp(40px, 9vw, 90px)' : 'clamp(80px, 18vw, 180px)';
+    numEl.textContent = s.text;
+    // Animación de escala
+    numEl.style.transform = 'scale(1.3)';
+    numEl.style.opacity = '0';
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        numEl.style.transition = 'transform 0.25s cubic-bezier(.2,1.4,.5,1), opacity 0.2s ease';
+        numEl.style.transform = 'scale(1)';
+        numEl.style.opacity = '1';
+      }, 20);
+    });
+    setTimeout(next, s.small ? 900 : 800);
+  }
+  next();
+}
+
+// ════════════════════════════════════════════════════════════
+//  FIN DE PARTIDA — ¡Juego! ¡Juego!
+// ════════════════════════════════════════════════════════════
+/**
+ * @param {string} winnerTeam - 'alpha' | 'bravo'
+ * @param {string} winnerName - nombre del jugador ganador
+ * @param {number} roundNum   - ronda que acaba de terminar (1-3)
+ * @param {object} seriesScore - { alpha: n, bravo: n }
+ * @param {Function} onClose
+ */
+export function gameOverRoundDialog(winnerTeam, winnerName, roundNum, seriesScore, onClose) {
+  const teamLabel  = winnerTeam === 'alpha' ? 'ALPHA ⚡' : 'BRAVO 🔴';
+  const teamTheme  = winnerTeam === 'alpha' ? 'alpha' : 'bravo';
+  const seriesWinner = seriesScore.alpha >= 2 ? 'alpha' : seriesScore.bravo >= 2 ? 'bravo' : null;
+
+  const lines = [
+    {
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: teamTheme,
+      text:  `🏁 ¡JUEGO!  ¡JUEGO!\n\nRonda ${roundNum} terminada.\n${teamLabel} ha ganado esta ronda.`,
+    },
+    {
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'right',
+      theme: 'neutral',
+      text:  `📊 MARCADOR DE LA SERIE:\n   ALPHA ⚡ ${seriesScore.alpha} — ${seriesScore.bravo} 🔴 BRAVO`,
+    },
+  ];
+
+  if (seriesWinner) {
+    const sLabel = seriesWinner === 'alpha' ? 'EQUIPO ALPHA ⚡' : 'EQUIPO BRAVO 🔴';
+    lines.push({
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: seriesWinner === 'alpha' ? 'alpha' : 'bravo',
+      text:  `🏆 ¡¡¡${sLabel} GANA LA SERIE!!!\n\n¡Felicidades ${winnerName}!\n¡Gran combate, operadores!`,
+    });
+  } else {
+    lines.push({
+      name:  'SPECTRUM AIRSOFT · ÁRBITRO',
+      img:   '/spectrumTexcoco.png',
+      side:  'left',
+      theme: 'neutral',
+      text:  `⚔️ ¡La serie continúa!\nPrepárense para la Ronda ${roundNum + 1}.\n¡No hay descanso en el campo de batalla!`,
+    });
+  }
+
+  showDialog(lines, { onClose });
+}
