@@ -842,12 +842,22 @@ function renderUnitList() {
         <span class="unit-card-name">${getUnitTypeName(unit.type)}</span>
         <span class="unit-card-coord">${xyToCoord(unit.x, unit.y)}</span>
       </div>
+      <div class="unit-card-avatar-actions">
+        <button class="btn btn-action btn-move btn-action-mini" title="Mover" data-action="move">⇄</button>
+        <button class="btn btn-action btn-shoot btn-action-mini" title="Disparar" data-action="shoot">🎯</button>
+      </div>
       <div class="unit-card-avatar-img"><img src="${avatarSrc}" alt="${avatarName}" class="unit-avatar-img" /></div>
       <div class="unit-card-avatar-name">Lider: ${avatarName}</div>
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
       ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
       ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">En cobertura</div>' : ''}
     `;
+
+    // Listeners para los botones mini de acción
+    const moveBtn = card.querySelector('.btn-action-mini.btn-move');
+    const shootBtn = card.querySelector('.btn-action-mini.btn-shoot');
+    if (moveBtn) moveBtn.addEventListener('click', (e) => { e.stopPropagation(); selectUnit(unit.id); setAction('move'); });
+    if (shootBtn) shootBtn.addEventListener('click', (e) => { e.stopPropagation(); selectUnit(unit.id); setAction('shoot'); });
 
     if (unit.hp > 0 && !unit.acted && isMyTurn) {
       card.addEventListener('click', () => selectUnit(unit.id));
