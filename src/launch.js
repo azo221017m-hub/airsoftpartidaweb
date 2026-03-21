@@ -20,7 +20,7 @@ const TARGET_HOUR   = 12; // PRUEBA: mediodía   → producción: 22
 const TARGET_MINUTE = 0;
 
 // ── Hora de expiración definitiva (pantalla desaparece para siempre) ──
-const EXPIRE_HOUR   = 22; // 22:01 CDMX — nunca más se muestra
+const EXPIRE_HOUR   = 12; // 12:01 CDMX — nunca más se muestra
 const EXPIRE_MINUTE = 1;
 
 // ── Fecha de inicio (la pantalla solo aparece desde este día) ──
