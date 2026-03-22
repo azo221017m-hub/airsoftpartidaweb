@@ -750,6 +750,25 @@ function renderHUD() {
 
   $('hud-turn').textContent = `TURNO ${turnNumber}`;
 
+  // Mostrar avatar del líder en el HUD (si existe selectedLeader lo usamos para el equipo del jugador)
+  try {
+    const alphaAvatarEl = document.getElementById('hud-alpha-leader-avatar');
+    const bravoAvatarEl = document.getElementById('hud-bravo-leader-avatar');
+    const defaultAlpha = 'ocelot';
+    const defaultBravo = 'finer';
+    let alphaLeaderKey = defaultAlpha;
+    let bravoLeaderKey = defaultBravo;
+    if (selectedLeader) {
+      // Asumir que el jugador eligió un líder para su equipo
+      if (myTeam === 'alpha') alphaLeaderKey = selectedLeader;
+      if (myTeam === 'bravo') bravoLeaderKey = selectedLeader;
+    }
+    if (alphaAvatarEl) alphaAvatarEl.src = getLeaderAvatar(alphaLeaderKey);
+    if (bravoAvatarEl) bravoAvatarEl.src = getLeaderAvatar(bravoLeaderKey);
+  } catch (e) {
+    console.warn('No se pudo setear avatars de líderes en HUD', e);
+  }
+
   const ct = $('hud-current-team');
   ct.textContent = teamDisplayName(currentTeam);
   ct.className = `hud-current-team team-${currentTeam}`;
@@ -801,6 +820,16 @@ function getUnitTypeName(type) {
   return { HEAVY: 'Artillería', SCOUT: 'Explorador', SNIPER: 'Francotirador' }[type] || type;
 }
 
+// Obtener URL de avatar del líder por clave
+function getLeaderAvatar(leaderKey) {
+  if (!leaderKey) return '/avatar-ocelot.svg';
+  switch (leaderKey) {
+    case 'ocelot': return '/avatar-ocelot.svg';
+    case 'finer': return '/avatar-finer.svg';
+    default: return '/avatar-ocelot.svg';
+  }
+}
+
 function updateTimer(timeLeft) {
   timerMax = 30;
   const el = $('hud-timer');
@@ -826,12 +855,23 @@ function renderUnitList() {
 
 
   // Avatares aleatorios por personaje (nombre)
+  // Avatares aleatorios: SVGs y emojis de personas
   const avatarList = [
     '/avatar-artilleria.svg',
     '/avatar-explorador.svg',
     '/avatar-finer.svg',
     '/avatar-francotirador.svg',
-    '/avatar-ocelot.svg'
+    '/avatar-ocelot.svg',
+    // Emojis de personas para variedad
+    'https://api.dicebear.com/7.x/personas/svg?seed=Yul',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Yayo',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Snip3r',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Aniquilador',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Alpha',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Bravo',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Player',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Airsoft',
+    'https://api.dicebear.com/7.x/personas/svg?seed=Random',
   ];
   // Mapa para mantener el avatar asignado a cada personaje
   if (!window._personajeAvatarMap) window._personajeAvatarMap = {};
@@ -846,29 +886,35 @@ function renderUnitList() {
     return personajeAvatarMap[nombre];
   }
 
-  for (const unit of myUnits) {
+  // Nombres de batallón por líder/equipo
+  const battalionByTeam = {
+    alpha: ['Snip3r', 'Aniquilador'], // MONTANA (Ocelot)
+    bravo: ['Yul', 'Yayo']             // ASALTO (Finer)
+  };
+
+  for (let i = 0; i < myUnits.length; i++) {
+    const unit = myUnits[i];
     const card = document.createElement('div');
     card.className = `unit-card ${unit.hp <= 0 ? 'dead' : ''} ${unit.acted && unit.hp > 0 ? 'acted' : ''} ${!isMyTurn ? 'not-my-turn' : ''}`;
     card.dataset.unitId = unit.id;
     if (unit.id === selectedUnitId) card.classList.add('selected');
 
-    // Avatar aleatorio por personaje
-    const personajeAvatar = getRandomAvatar(unit.name);
+    // Nombre del personaje según batallón (si existe), por posición
+    const battalion = battalionByTeam[myTeam] || [];
+    const displayCharacterName = battalion[i] || unit.name;
 
-    // Habilidades de la unidad (ejemplo: mostrar tipo y daño)
-    let habilidadesHtml = `<div class="unit-card-habilidades">
-      <b>Habilidades:</b> ${getUnitTypeName(unit.type)} | FPS: ${unit.damage ?? 1}
-    </div>`;
+    // Avatar aleatorio por personaje (usando el nombre mostrado para persistencia)
+    const personajeAvatar = getRandomAvatar(displayCharacterName);
+
+    // Construir HTML del card: nombre de unidad, habilidades, avatar y nombre del personaje
+    const unidadNombreHtml = `<div class="unit-card-unidad-nombre">${getUnitTypeName(unit.type)}</div>`;
+    const habilidadesHtml = `<div class="unit-card-habilidades">Habilidades: ${getUnitTypeName(unit.type)} | FPS:${unit.damage ?? 1} | MOV:${unit.moveRange ?? 0}</div>`;
 
     card.innerHTML = `
-      <div class="unit-card-header">
-        <span class="unit-card-icon">${getUnitIcon(unit.type)}</span>
-        <span class="unit-card-name">${getUnitTypeName(unit.type)}</span>
-        <span class="unit-card-coord">${xyToCoord(unit.x, unit.y)}</span>
-      </div>
-      <div class="unit-card-avatar-img"><img src="${personajeAvatar}" alt="Avatar de ${unit.name}" class="unit-avatar-img" /></div>
-      <div class="unit-card-personaje-nombre"><b>${unit.name}</b></div>
+      ${unidadNombreHtml}
       ${habilidadesHtml}
+      <div class="unit-card-avatar-img"><img src="${personajeAvatar}" alt="Avatar de ${displayCharacterName}" class="unit-avatar-img" /></div>
+      <div class="unit-card-personaje-nombre"><b>${displayCharacterName}</b></div>
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
       ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
       ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">En cobertura</div>' : ''}

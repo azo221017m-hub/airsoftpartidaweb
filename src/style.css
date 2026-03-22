@@ -107,7 +107,7 @@ html, body {
   width: 100%; margin-top: 12px; padding: 12px;
   background: rgba(200,255,0,0.1); color: var(--neutral);
   border: 1px solid var(--neutral);
-  font-size: 13px;
+  font-size: 11px;
 }
 .btn-end-turn:hover { background: var(--neutral); color: #000; box-shadow: 0 0 15px var(--neutral-glow); }
 .btn-end-turn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -549,6 +549,96 @@ html, body {
   box-shadow: 0 2px 20px rgba(0,0,0,0.5);
   flex-wrap: wrap;
 }
+
+/* ─── BOTONES DE ACCIÓN FIJOS EN HEADER ─── */
+.hud-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  position: absolute;
+  right: 24px;
+  top: 18px;
+  z-index: 20;
+}
+
+/* Botón redondo y destacado para terminar turno */
+.hud-header-actions .btn-end-turn {
+  background: var(--alpha-color) !important;
+  color: #000 !important;
+  border: 2px solid var(--alpha-color) !important;
+  border-radius: 50% !important;
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 28px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: 0 0 14px var(--alpha-glow);
+  opacity: 0.92;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s, transform 0.12s;
+  cursor: pointer;
+  outline: none;
+}
+.hud-header-actions .btn-end-turn:active {
+  transform: scale(0.93);
+  box-shadow: 0 0 8px 1px var(--alpha-glow);
+}
+.hud-header-actions .btn-end-turn:hover {
+  background: #fff !important;
+  color: var(--alpha-color) !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 28px 4px var(--alpha-glow);
+}
+.hud-header-actions .btn-codigo-negro-fixed {
+  background: var(--bravo-color) !important;
+  color: #fff !important;
+  border: 2px solid var(--bravo-color) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 14px var(--bravo-glow);
+  font-size: 22px !important;
+  min-width: 38px !important;
+  max-width: 44px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0.92;
+  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+}
+.hud-header-actions .btn-codigo-negro-fixed:hover {
+  background: #fff !important;
+  color: var(--bravo-color) !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 24px var(--bravo-glow);
+  opacity: 1;
+/* (fin de corrección de sintaxis) */
+}
+.hud-header-actions .btn-end-turn:hover {
+  background: var(--neutral) !important;
+  color: #000 !important;
+  border-color: #fff !important;
+}
+@media (max-width: 900px) {
+  .hud-header-actions {
+    flex-direction: column;
+    right: 8px;
+    top: 8px;
+    gap: 8px;
+  }
+  .hud-header-actions .btn {
+    min-width: 32px !important;
+    max-width: 38px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+    padding: 0 !important;
+  }
+}
+/* (fin de corrección de sintaxis) */
 .hud-team { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
 .hud-team-name {
   font-size: 11px; letter-spacing: 3px; font-weight: bold;
@@ -788,6 +878,38 @@ html, body {
   }
 }
 
+/* Forzar tamaño fijo en botones 'Terminar turno' y 'Código negro' */
+#btn-end-turn, .btn-codigo-negro-fixed {
+  width: 180px !important;
+  height: 44px !important;
+  max-width: none !important;
+  flex: none !important;
+  padding: 10px 12px !important;
+}
+
+@media (max-width: 600px) {
+  /* Mantener tamaño fijo también en pantallas pequeñas */
+  #btn-end-turn, .btn-codigo-negro-fixed {
+    width: 160px !important;
+    height: 40px !important;
+  }
+}
+
+/* Fijar tamaño de botones MOVER y DISPARAR para que no se estiren */
+#btn-move, #btn-shoot {
+  width: 120px !important;
+  flex: none !important;
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  max-width: none !important;
+}
+
+@media (max-width: 900px) {
+  #btn-move, #btn-shoot {
+    width: 110px !important;
+  }
+}
+
 .side-panel.panel-left {
   min-width: 220px;
 }
@@ -818,6 +940,29 @@ html, body {
 .unit-cover-badge {
   font-size: 9px; color: var(--neutral); margin-top: 3px;
 }
+
+/* Nuevo estilo para cards de personaje */
+.unit-card-unidad-nombre {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-bright);
+  text-align: left;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.unit-card-habilidades {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.unit-card-avatar-img { display: flex; justify-content: center; margin: 6px 0; }
+.unit-card-avatar-img img.unit-avatar-img {
+  width: 56px; height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);
+  object-fit: cover; background: #070709;
+}
+.unit-card-personaje-nombre { text-align: center; font-size: 13px; margin-top: 6px; color: var(--text-bright); }
+.unit-card-stats { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
+.unit-card-stats .stat { font-size: 11px; color: var(--text-dim); background: rgba(0,0,0,0.15); padding: 2px 6px; border-radius: 4px; }
 
 /* ─── ACTION PANEL ─── */
 .action-panel {
@@ -1189,6 +1334,16 @@ html, body {
   image-rendering: pixelated;
   border-radius: 4px;
   border: 1px solid rgba(255,255,255,0.15);
+  background: #0a0a0a;
+}
+/* HUD leader avatar (header) */
+.hud-leader-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-right: 8px;
+  vertical-align: middle;
   background: #0a0a0a;
 }
 .leader-info {

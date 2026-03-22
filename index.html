@@ -230,12 +230,14 @@
     <!-- TOP HUD -->
     <div class="hud-top">
       <div class="hud-team hud-alpha" id="hud-alpha">
+        <img id="hud-alpha-leader-avatar" class="hud-leader-avatar" src="/avatar-ocelot.svg" alt="Líder Alpha" />
         <div class="hud-team-name">⚡ MONTANA</div>
         <div class="hud-round-flags" id="hud-round-flags-alpha"></div>
         <div class="hud-units" id="hud-alpha-units"></div>
       </div>
       
       <div class="hud-center">
+        <div class="hud-tactical-title" style="display:inline-block;margin-right:18px;font-size:1.1em;font-weight:bold;vertical-align:middle;">🎖 DESARROLLO TÁCTICO</div>
         <div class="hud-turn" id="hud-turn">TURNO 1</div>
         <div class="hud-timer-wrap">
           <div class="hud-timer" id="hud-timer">30</div>
@@ -248,11 +250,17 @@
       </div>
       
       <div class="hud-team hud-bravo" id="hud-bravo">
+        <img id="hud-bravo-leader-avatar" class="hud-leader-avatar" src="/avatar-finer.svg" alt="Líder Bravo" />
         <div class="hud-team-name">� ASALTO</div>
         <div class="hud-round-flags" id="hud-round-flags-bravo"></div>
         <div class="hud-units" id="hud-bravo-units"></div>
       </div>
       
+      <!-- Botones fijos de acción principal en el header -->
+      <div class="hud-header-actions">
+  <button id="btn-end-turn" class="btn btn-end-turn" style="display:none" title="Terminar turno">⏭</button>
+  <button id="btn-codigo-negro" class="btn btn-codigo-negro-fixed" style="display:none" title="Código negro">☠️</button>
+      </div>
       <!-- Panel de Ventajas Tácticas en HUD (Nivel 2) - A la derecha de avatares -->
       <div id="tactical-hud-panel" class="tactical-hud-panel" style="display:none">
         <div class="exp-indicator">
@@ -294,11 +302,9 @@
           </div>
         </div>
         <div class="board-action-buttons">
-          <button id="btn-end-turn" class="btn btn-end-turn" style="display:none">⏭ TERMINAR TURNO</button>
-          <button id="btn-codigo-negro" class="btn btn-codigo-negro-fixed" style="display:none">☠️ CÓDIGO NEGRO</button>
+          <!-- Botones movidos al header -->
         </div>
         <div class="tactical-dev-panel">
-          <h3 class="panel-title">🎖 DESARROLLO TÁCTICO</h3>
           <div class="exp-bar-container">
             <div class="exp-label">EXP: <span id="exp-current">0</span>/200s</div>
             <div class="exp-bar">
