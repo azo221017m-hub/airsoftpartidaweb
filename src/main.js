@@ -824,22 +824,41 @@ function renderUnitList() {
   const myUnits = gameState.units[myTeam] || [];
   const isMyTurn = gameState.currentTeam === myTeam;
 
+
+  // Avatares aleatorios por personaje (nombre)
+  const avatarList = [
+    '/avatar-artilleria.svg',
+    '/avatar-explorador.svg',
+    '/avatar-finer.svg',
+    '/avatar-francotirador.svg',
+    '/avatar-ocelot.svg'
+  ];
+  // Mapa para mantener el avatar asignado a cada personaje
+  if (!window._personajeAvatarMap) window._personajeAvatarMap = {};
+  const personajeAvatarMap = window._personajeAvatarMap;
+
+  function getRandomAvatar(nombre) {
+    if (!personajeAvatarMap[nombre]) {
+      // Elegir avatar al azar de la lista
+      const idx = Math.floor(Math.random() * avatarList.length);
+      personajeAvatarMap[nombre] = avatarList[idx];
+    }
+    return personajeAvatarMap[nombre];
+  }
+
   for (const unit of myUnits) {
     const card = document.createElement('div');
     card.className = `unit-card ${unit.hp <= 0 ? 'dead' : ''} ${unit.acted && unit.hp > 0 ? 'acted' : ''} ${!isMyTurn ? 'not-my-turn' : ''}`;
     card.dataset.unitId = unit.id;
     if (unit.id === selectedUnitId) card.classList.add('selected');
 
+    // Avatar aleatorio por personaje
+    const personajeAvatar = getRandomAvatar(unit.name);
 
-
-    // Avatar único por tipo de unidad
-    let unitAvatarSrc = '';
-    switch (unit.type) {
-      case 'HEAVY': unitAvatarSrc = '/avatar-artilleria.svg'; break;
-      case 'SCOUT': unitAvatarSrc = '/avatar-explorador.svg'; break;
-      case 'SNIPER': unitAvatarSrc = '/avatar-francotirador.svg'; break;
-      default: unitAvatarSrc = '';
-    }
+    // Habilidades de la unidad (ejemplo: mostrar tipo y daño)
+    let habilidadesHtml = `<div class="unit-card-habilidades">
+      <b>Habilidades:</b> ${getUnitTypeName(unit.type)} | FPS: ${unit.damage ?? 1}
+    </div>`;
 
     card.innerHTML = `
       <div class="unit-card-header">
@@ -847,21 +866,13 @@ function renderUnitList() {
         <span class="unit-card-name">${getUnitTypeName(unit.type)}</span>
         <span class="unit-card-coord">${xyToCoord(unit.x, unit.y)}</span>
       </div>
-      <div class="unit-card-avatar-actions">
-        <button class="btn btn-action btn-move btn-action-mini" title="Mover" data-action="move">⇄</button>
-        <button class="btn btn-action btn-shoot btn-action-mini" title="Disparar" data-action="shoot">🎯</button>
-      </div>
-      ${unitAvatarSrc ? `<div class=\"unit-card-avatar-img\"><img src=\"${unitAvatarSrc}\" alt=\"${getUnitTypeName(unit.type)}\" class=\"unit-avatar-img\" /></div>` : ''}
+      <div class="unit-card-avatar-img"><img src="${personajeAvatar}" alt="Avatar de ${unit.name}" class="unit-avatar-img" /></div>
+      <div class="unit-card-personaje-nombre"><b>${unit.name}</b></div>
+      ${habilidadesHtml}
       <div class="unit-card-hp">${buildHpPips(unit.hp, unit.maxHp)}</div>
       ${unit.acted && unit.hp > 0 ? '<div class="unit-acted-badge">✓ ACTUO</div>' : ''}
       ${unit.inCover && unit.hp > 0 ? '<div class="unit-cover-badge">En cobertura</div>' : ''}
     `;
-
-    // Listeners para los botones mini de acción
-    const moveBtn = card.querySelector('.btn-action-mini.btn-move');
-    const shootBtn = card.querySelector('.btn-action-mini.btn-shoot');
-    if (moveBtn) moveBtn.addEventListener('click', (e) => { e.stopPropagation(); selectUnit(unit.id); setAction('move'); });
-    if (shootBtn) shootBtn.addEventListener('click', (e) => { e.stopPropagation(); selectUnit(unit.id); setAction('shoot'); });
 
     if (unit.hp > 0 && !unit.acted && isMyTurn) {
       card.addEventListener('click', () => selectUnit(unit.id));
