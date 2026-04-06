@@ -74,7 +74,7 @@
       Hecho por soldado.420 - SpectrumAirsoft
     </div>
     <!-- Versión — esquina inferior izquierda -->
-    <div class="lobby-version">v26-IA.03.420</div>
+    <div class="lobby-version">v26-IA.04.420</div>
 
     <!-- Modal con información del juego -->
     <div id="game-modal" class="game-modal">
@@ -276,52 +276,30 @@
 
     <!-- MAIN GAME AREA -->
     <div class="game-main">
-      <!-- COLUMNA 1: Unidades -->
-      <div class="side-panel panel-left">
-        <h3 class="panel-title">🎮 UNIDADES</h3>
-        <div id="unit-list" class="unit-list"></div>
-        <div id="tactical-panel" class="tactical-panel" style="display:none"></div>
+      <!-- Contenedores ocultos para JS -->
+      <div style="display:none">
+        <div id="action-panel"></div>
+        <div id="selected-unit-info"></div>
+        <button id="btn-move"></button>
+        <button id="btn-shoot"></button>
+        <div id="coord-input-group"></div>
+        <input type="text" id="coord-input" />
+        <button id="btn-confirm"></button>
+        <div id="coord-hint"></div>
+        <div id="tactical-panel"></div>
+        <div id="unit-list"></div>
+        <div id="exp-current">0</div>
+        <div id="exp-bar-fill"></div>
+        <div id="tactical-advantages"></div>
+        <div id="action-status"></div>
       </div>
 
-      <!-- COLUMNA 2: Panel Central (Acción, Botones, Desarrollo) -->
-      <div class="center-panel">
-        <div class="action-panel" id="action-panel" style="display:none">
-          <h3 class="panel-title">⚡ ACCIÓN</h3>
-          <div class="selected-unit-info" id="selected-unit-info"></div>
-          <div class="action-buttons">
-            <button id="btn-move" class="btn btn-action btn-move">🚶 MOVER</button>
-            <button id="btn-shoot" class="btn btn-action btn-shoot">💥 DISPARAR</button>
-          </div>
-          <div class="coord-input-group" id="coord-input-group" style="display:none">
-            <label id="coord-label">DESTINO (ej: A1):</label>
-            <div class="coord-input-row">
-              <input type="text" id="coord-input" placeholder="A1..." maxlength="3" autocomplete="off" />
-              <button id="btn-confirm" class="btn btn-confirm">✓</button>
-            </div>
-            <div class="coord-hint" id="coord-hint"></div>
-          </div>
-        </div>
-        <div class="board-action-buttons">
-          <!-- Botones movidos al header -->
-        </div>
-        <div class="tactical-dev-panel">
-          <div class="exp-bar-container">
-            <div class="exp-label">EXP: <span id="exp-current">0</span>/200s</div>
-            <div class="exp-bar">
-              <div class="exp-bar-fill" id="exp-bar-fill"></div>
-            </div>
-          </div>
-          <div id="tactical-advantages" class="tactical-advantages"></div>
-        </div>
-        <div id="action-status" class="action-status"></div>
-      </div>
-
-      <!-- COLUMNA 3: Tablero -->
+      <!-- TABLERO PRINCIPAL -->
       <div class="grid-area">
         <div class="grid-header" id="grid-header"></div>
         <div class="grid-wrapper">
           <div class="grid-row-labels" id="grid-row-labels"></div>
-          <canvas id="game-canvas" width="780" height="780"></canvas>
+          <canvas id="game-canvas" width="1500" height="750"></canvas>
         </div>
         <div class="coord-display" id="coord-display">Hover sobre la cuadrícula</div>
       </div>

@@ -483,14 +483,15 @@ function initGame() {
 
 // ─── Grid labels ─────────────────────────────────────────────────────────────
 function renderGridLabels() {
-  const gs = gameState.gridSize;
+  const gW = gameState.gridWidth || 30;
+  const gH = gameState.gridHeight || 18;
   const cs = renderer.cellSize;
 
-  // Column labels (1..15)
+  // Column labels (1..30)
   const header = $('grid-header');
   header.innerHTML = '';
-  header.style.width = `${gs * cs}px`;
-  for (let x = 0; x < gs; x++) {
+  header.style.width = `${gW * cs}px`;
+  for (let x = 0; x < gW; x++) {
     const lbl = document.createElement('div');
     lbl.className = 'grid-col-label';
     lbl.style.width = `${cs}px`;
@@ -498,10 +499,10 @@ function renderGridLabels() {
     header.appendChild(lbl);
   }
 
-  // Row labels (A..O)
+  // Row labels (A..R)
   const rowLabels = $('grid-row-labels');
   rowLabels.innerHTML = '';
-  for (let y = 0; y < gs; y++) {
+  for (let y = 0; y < gH; y++) {
     const lbl = document.createElement('div');
     lbl.className = 'grid-label';
     lbl.style.height = `${cs}px`;
@@ -520,7 +521,9 @@ function setupCanvasEvents(canvas) {
     const cx = (e.clientX - rect.left) * scaleX;
     const cy = (e.clientY - rect.top) * scaleY;
     const { x, y } = renderer.canvasToGrid(cx, cy);
-    if (x >= 0 && x < gameState.gridSize && y >= 0 && y < gameState.gridSize) {
+    const gW = gameState.gridWidth || 30;
+    const gH = gameState.gridHeight || 18;
+    if (x >= 0 && x < gW && y >= 0 && y < gH) {
       renderer.setHoveredCell(x, y);
       const coord = xyToCoord(x, y);
       const unit = getUnitAtXY(x, y);
@@ -539,6 +542,7 @@ function setupCanvasEvents(canvas) {
     $('coord-display').textContent = 'Hover sobre la cuadrícula';
   });
 
+  // Clic izquierdo: Seleccionar unidad y activar MOVIMIENTO
   canvas.addEventListener('click', e => {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -546,11 +550,23 @@ function setupCanvasEvents(canvas) {
     const cx = (e.clientX - rect.left) * scaleX;
     const cy = (e.clientY - rect.top) * scaleY;
     const { x, y } = renderer.canvasToGrid(cx, cy);
-    handleGridClick(x, y);
+    handleGridClick(x, y, 'left');
+  });
+
+  // Clic derecho: Seleccionar unidad y activar DISPARO
+  canvas.addEventListener('contextmenu', e => {
+    e.preventDefault(); // Evitar menú contextual del navegador
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * scaleX;
+    const cy = (e.clientY - rect.top) * scaleY;
+    const { x, y } = renderer.canvasToGrid(cx, cy);
+    handleGridClick(x, y, 'right');
   });
 }
 
-function handleGridClick(x, y) {
+function handleGridClick(x, y, clickType = 'left') {
   if (!gameState || gameState.phase !== 'playing') return;
 
   if (pendingAction) {
@@ -570,7 +586,17 @@ function handleGridClick(x, y) {
       showStatus(`${unit.name} ya actuó este turno`, 'error');
       return;
     }
+    // Seleccionar la unidad
     selectUnit(unit.id);
+    
+    // Activar acción según el tipo de clic
+    if (clickType === 'left') {
+      // Clic izquierdo: Activar MOVIMIENTO
+      setAction('move');
+    } else if (clickType === 'right') {
+      // Clic derecho: Activar DISPARO
+      setAction('shoot');
+    }
   } else {
     clearSelection();
   }

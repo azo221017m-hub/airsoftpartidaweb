@@ -103,15 +103,6 @@ html, body {
 }
 .btn-confirm:hover { background: #fff; }
 
-.btn-end-turn {
-  width: 100%; margin-top: 12px; padding: 12px;
-  background: rgba(200,255,0,0.1); color: var(--neutral);
-  border: 1px solid var(--neutral);
-  font-size: 11px;
-}
-.btn-end-turn:hover { background: var(--neutral); color: #000; box-shadow: 0 0 15px var(--neutral-glow); }
-.btn-end-turn:disabled { opacity: 0.3; cursor: not-allowed; }
-
 .btn-chat {
   background: var(--alpha-color); color: #000;
   padding: 8px 12px; font-size: 14px;
@@ -120,11 +111,13 @@ html, body {
 
 /* ─── LOBBY ─── */
 #lobby-screen {
-  align-items: center; justify-content: center;
-  background: url('/spectrumTexcoco.png') no-repeat center center;
-  background-size: cover;
-  background-attachment: fixed;
-  overflow-y: auto; flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: url('/spectrumTexcoco.png') no-repeat top center;
+  background-size: contain;
+  /* background-attachment: fixed;  Puedes comentar o quitar esta línea si causa problemas */
+  overflow-y: auto;
+  flex-direction: column;
   min-height: 100vh;
   position: relative;
 }
@@ -175,32 +168,186 @@ html, body {
   display: flex; flex-direction: column; align-items: center; gap: 24px;
   padding: 40px 20px; max-width: 960px; width: 100%;
 }
-.lobby-content {
-  display: flex; gap: 24px; width: 100%; align-items: center;
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BOTONES ARCADE: TERMINAR TURNO Y CÓDIGO NEGRO
+   Diseño retro arcade con efectos de neón y animaciones
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Base común para ambos botones */
+.btn-end-turn,
+.btn-codigo-negro-fixed {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
+  gap: 8px;
+  font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  outline: none;
+  white-space: nowrap;
 }
 
-/* ─── BOTÓN JUEGO ─── */
-.btn-game {
-  background: linear-gradient(135deg, var(--alpha-color), var(--neutral));
-  color: #000;
-  font-size: 28px;
-  padding: 20px 50px;
-  box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow);
-  border: 2px solid var(--neutral);
-  animation: pulse-game-btn 2s ease-in-out infinite;
+/* Efecto de scanlines arcade */
+.btn-end-turn::before,
+.btn-codigo-negro-fixed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
 }
-.btn-game:hover {
-  background: linear-gradient(135deg, #fff, var(--neutral));
-  box-shadow: 0 0 50px var(--alpha-glow), 0 0 80px var(--neutral-glow);
+
+/* Efecto de brillo que se mueve */
+.btn-end-turn::after,
+.btn-codigo-negro-fixed::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.btn-end-turn:hover::after,
+.btn-codigo-negro-fixed:hover::after {
+  transform: rotate(45deg) translateX(100%);
+}
+
+/* ─── BOTÓN TERMINAR TURNO (Verde neón) ─── */
+.btn-end-turn {
+  background: linear-gradient(180deg, #1a2a1a 0%, #0a150a 100%);
+  color: var(--alpha-color);
+  border: 2px solid var(--alpha-color);
+  box-shadow: 
+    0 0 10px var(--alpha-glow),
+    0 0 20px var(--alpha-glow),
+    inset 0 0 15px rgba(170, 255, 0, 0.1);
+  text-shadow: 0 0 8px var(--alpha-glow), 0 0 16px var(--alpha-glow);
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.btn-end-turn:hover {
+  background: linear-gradient(180deg, var(--alpha-color) 0%, #6B8E23 100%);
+  color: #000;
+  border-color: #fff;
+  box-shadow: 
+    0 0 20px var(--alpha-glow),
+    0 0 40px var(--alpha-glow),
+    0 0 60px var(--alpha-glow);
+  text-shadow: none;
   transform: scale(1.05);
 }
-@keyframes pulse-game-btn {
-  0%, 100% { box-shadow: 0 0 30px var(--alpha-glow), 0 0 60px var(--neutral-glow); }
-  50% { box-shadow: 0 0 40px var(--alpha-glow), 0 0 80px var(--neutral-glow); }
+
+.btn-end-turn:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 5px var(--alpha-glow);
 }
 
-/* ─── MODAL CON EFECTO VIDRIO ─── */
+.btn-end-turn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  animation: none;
+  filter: grayscale(0.5);
+}
+
+@keyframes pulse-green {
+  0%, 100% { 
+    box-shadow: 0 0 10px var(--alpha-glow), 0 0 20px var(--alpha-glow), inset 0 0 15px rgba(170, 255, 0, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 15px var(--alpha-glow), 0 0 30px var(--alpha-glow), inset 0 0 20px rgba(170, 255, 0, 0.15);
+  }
+}
+
+/* ─── BOTÓN CÓDIGO NEGRO (Rojo peligro) ─── */
+.btn-codigo-negro-fixed {
+  background: linear-gradient(180deg, #2a0a0a 0%, #150505 100%);
+  color: var(--bravo-color);
+  border: 2px solid var(--bravo-color);
+  box-shadow: 
+    0 0 10px var(--bravo-glow),
+    0 0 20px var(--bravo-glow),
+    inset 0 0 15px rgba(255, 78, 78, 0.1);
+  text-shadow: 0 0 8px var(--bravo-glow), 0 0 16px var(--bravo-glow);
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+.btn-codigo-negro-fixed:hover {
+  background: linear-gradient(180deg, var(--bravo-color) 0%, #cc1f1f 100%);
+  color: #fff;
+  border-color: #fff;
+  box-shadow: 
+    0 0 20px var(--bravo-glow),
+    0 0 40px var(--bravo-glow),
+    0 0 60px var(--bravo-glow);
+  text-shadow: 0 0 4px #fff;
+  transform: scale(1.05);
+}
+
+.btn-codigo-negro-fixed:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 5px var(--bravo-glow);
+}
+
+@keyframes pulse-red {
+  0%, 100% { 
+    box-shadow: 0 0 10px var(--bravo-glow), 0 0 20px var(--bravo-glow), inset 0 0 15px rgba(255, 78, 78, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 15px var(--bravo-glow), 0 0 30px var(--bravo-glow), inset 0 0 20px rgba(255, 78, 78, 0.15);
+  }
+}
+
+/* ─── RESPONSIVE MÓVIL ─── */
+@media (max-width: 900px) {
+  .btn-end-turn,
+  .btn-codigo-negro-fixed {
+    font-size: 9px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .btn-end-turn,
+  .btn-codigo-negro-fixed {
+    font-size: 8px;
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════ */
+
 .game-modal {
   display: none;
   position: fixed;
@@ -562,67 +709,23 @@ html, body {
   z-index: 20;
 }
 
-/* Botón redondo y destacado para terminar turno */
-.hud-header-actions .btn-end-turn {
-  background: var(--alpha-color) !important;
-  color: #000 !important;
-  border: 2px solid var(--alpha-color) !important;
-  border-radius: 50% !important;
-  width: 44px !important;
-  height: 44px !important;
-  font-size: 28px !important;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  box-shadow: 0 0 14px var(--alpha-glow);
-  opacity: 0.92;
-  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s, transform 0.12s;
-  cursor: pointer;
-  outline: none;
-}
-.hud-header-actions .btn-end-turn:active {
-  transform: scale(0.93);
-  box-shadow: 0 0 8px 1px var(--alpha-glow);
-}
-.hud-header-actions .btn-end-turn:hover {
-  background: #fff !important;
-  color: var(--alpha-color) !important;
-  border-color: #fff !important;
-  box-shadow: 0 0 28px 4px var(--alpha-glow);
-}
+/* Estilos arcade para botones en el HUD */
+.hud-header-actions .btn-end-turn,
 .hud-header-actions .btn-codigo-negro-fixed {
-  background: var(--bravo-color) !important;
-  color: #fff !important;
-  border: 2px solid var(--bravo-color) !important;
-  border-radius: 50% !important;
-  box-shadow: 0 0 14px var(--bravo-glow);
-  font-size: 22px !important;
-  min-width: 38px !important;
-  max-width: 44px !important;
-  height: 38px !important;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  opacity: 0.92;
-  transition: background 0.18s, color 0.18s, border 0.18s, box-shadow 0.18s;
+  border-radius: 8px !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 44px !important;
+  padding: 8px 12px !important;
+  font-size: 10px !important;
+  animation: none !important;
 }
-.hud-header-actions .btn-codigo-negro-fixed:hover {
-  background: #fff !important;
-  color: var(--bravo-color) !important;
-  border-color: #fff !important;
-  box-shadow: 0 0 24px var(--bravo-glow);
-  opacity: 1;
-/* (fin de corrección de sintaxis) */
+
+.hud-header-actions .btn-end-turn::before,
+.hud-header-actions .btn-codigo-negro-fixed::before {
+  display: none;
 }
-.hud-header-actions .btn-end-turn:hover {
-  background: var(--neutral) !important;
-  color: #000 !important;
-  border-color: #fff !important;
-}
+
 @media (max-width: 900px) {
   .hud-header-actions {
     flex-direction: column;
@@ -630,15 +733,14 @@ html, body {
     top: 8px;
     gap: 8px;
   }
-  .hud-header-actions .btn {
-    min-width: 32px !important;
-    max-width: 38px !important;
-    height: 32px !important;
-    font-size: 16px !important;
-    padding: 0 !important;
+  .hud-header-actions .btn-end-turn,
+  .hud-header-actions .btn-codigo-negro-fixed {
+    min-width: 36px !important;
+    padding: 6px 10px !important;
+    font-size: 8px !important;
   }
 }
-/* (fin de corrección de sintaxis) */
+
 .hud-team { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
 .hud-team-name {
   font-size: 11px; letter-spacing: 3px; font-weight: bold;
@@ -785,20 +887,46 @@ html, body {
 
 /* ─── GAME MAIN ─── */
 .game-main {
-  display: flex; flex: 1; overflow: hidden; min-height: 0;
+  display: flex; 
+  flex: 1; 
+  overflow: hidden; 
+  min-height: 0;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  padding-right: 0px; /* Espacio para panel derecho fijo */
+  position: relative;
 }
 
 /* ─── SIDE PANELS ─── */
 .side-panel {
-  width: 230px; flex-shrink: 0; background: var(--bg-panel);
+  width: 220px; flex-shrink: 0; background: var(--bg-panel);
   border-color: var(--border-dim); display: flex; flex-direction: column;
-  padding: 12px; gap: 10px; overflow-y: auto; overflow-x: hidden;
+  padding: 1px; gap: 1px; overflow-y: auto; overflow-x: hidden; 
 }
 .panel-left {
-  border-right: 1px solid var(--border-dim);
-  overflow-y: hidden;
+  border-right: 10px solid var(--border-dim);
+  overflow-y: auto;
+  padding-top: 0; /* Espacio para el header */
+  min-width: 200px;
+  max-width: 240px;
+  display: none;
 }
-.panel-right { border-left: 1px solid var(--border-dim); }
+.panel-right { 
+  border: 0px solid var(--border-bright); 
+  width: 100%;
+  max-width: 280px;
+  position: static; /* Cambiar a posición estática en el flujo normal */
+  margin: 165px auto 0 auto; /* 5 espacios arriba, centrado horizontalmente */
+  height: auto;
+  min-height: 200px;
+  padding: 10px;
+  z-index: 45;
+  background: var(--bg-panel);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  display: block; /* Mostrar el cuadro de mensaje/comunicaciones */
+}
 
 .panel-title {
   font-size: 11px; letter-spacing: 2px; color: var(--text-dim);
@@ -837,10 +965,17 @@ html, body {
   justify-content: flex-start;
 }
 
-/* Ajuste para que el panel izquierdo no sea tan ancho */
+/* Ajuste para el panel izquierdo con cuadro de acción */
 .side-panel.panel-left {
-  min-width: 180px;
-  max-width: 240px;
+  min-width: 240px;
+  max-width: 300px;
+}
+
+/* Panel de acción dentro del panel izquierdo */
+.panel-left .action-panel {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 12px;
 }
 
 /* ─── BOTONES PRINCIPALES ENTRE PANEL Y TABLERO ─── */
@@ -878,23 +1013,6 @@ html, body {
   }
 }
 
-/* Forzar tamaño fijo en botones 'Terminar turno' y 'Código negro' */
-#btn-end-turn, .btn-codigo-negro-fixed {
-  width: 180px !important;
-  height: 44px !important;
-  max-width: none !important;
-  flex: none !important;
-  padding: 10px 12px !important;
-}
-
-@media (max-width: 600px) {
-  /* Mantener tamaño fijo también en pantallas pequeñas */
-  #btn-end-turn, .btn-codigo-negro-fixed {
-    width: 160px !important;
-    height: 40px !important;
-  }
-}
-
 /* Fijar tamaño de botones MOVER y DISPARAR para que no se estiren */
 #btn-move, #btn-shoot {
   width: 120px !important;
@@ -908,10 +1026,6 @@ html, body {
   #btn-move, #btn-shoot {
     width: 110px !important;
   }
-}
-
-.side-panel.panel-left {
-  min-width: 220px;
 }
 
 /* ─── UNIT LIST ─── */
@@ -1116,8 +1230,13 @@ html, body {
 
 /* ─── GRID AREA ─── */
 .grid-area {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 10px; min-width: 0; overflow: hidden; position: relative;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center;
+  padding: 10px; 
+  overflow: hidden; 
+  position: relative;
 }
 .grid-wrapper { display: flex; }
 .grid-row-labels {
@@ -1130,15 +1249,18 @@ html, body {
 }
 .grid-header { display: flex; margin-left: 20px; margin-bottom: 4px; }
 .grid-col-label {
-  font-size: 10px; color: var(--text-dim); text-align: center;
-  letter-spacing: 1px; flex: 1;
+  font-size: 9px; color: var(--text-dim); text-align: center;
+  letter-spacing: 0.5px; flex: 1;
 }
 
 #game-canvas {
-  display: block; cursor: crosshair;
-  border: 1px solid var(--border-bright);
-  box-shadow: 0 0 20px rgba(100,150,0,0.3), inset 0 0 40px rgba(0,0,0,0.5);
+  display: block; 
+  cursor: crosshair;
+  border: 2px solid var(--border-bright);
+  box-shadow: 0 0 30px rgba(100,150,0,0.4), inset 0 0 50px rgba(0,0,0,0.5);
   image-rendering: pixelated;
+  max-width: calc(100vw - 280px); /* Resta el ancho del panel derecho */
+  max-height: calc(100vh - 160px); /* Resta header y margen */
 }
 
 .coord-display {
@@ -1387,29 +1509,6 @@ html, body {
   margin-top: 1px;
 }
 
-/* ─── BOTÓN CÓDIGO NEGRO ─── */
-.btn-codigo-negro-fixed {
-  margin-top: auto;
-  width: 100%;
-  background: rgba(20, 0, 0, 0.93);
-  color: var(--bravo-color);
-  border: 1px solid var(--bravo-color);
-  box-shadow: 0 0 14px var(--bravo-glow);
-  font-size: 11px;
-  padding: 9px 12px;
-  letter-spacing: 2px;
-  opacity: 0.65;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.btn-codigo-negro-fixed:hover {
-  opacity: 1;
-  background: var(--bravo-color);
-  color: #fff;
-  box-shadow: 0 0 28px var(--bravo-glow);
-}
-
 /* ─── HIGHLIGHT ANIMATIONS ─── */
 @keyframes cell-flash {
   0% { opacity: 1; }
@@ -1476,30 +1575,40 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  min-width: 500px;
-  max-width: 900px;
-  margin: 0 18px 0 0;
+  justify-content: center;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
 }
 
 .side-panel.panel-right {
-  min-width: 260px;
-  max-width: 340px;
-  margin-left: 0;
+  width: 230px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  padding-top: 80px;
+  overflow-y: auto;
+  z-index: 50;
+  background: var(--bg-panel);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+  border-left: 2px solid var(--border-bright);
 }
 
 @media (max-width: 1200px) {
   .grid-area {
     min-width: 320px;
     max-width: 98vw;
-    margin-right: 6px;
+    margin-right: 0;
   }
   .side-panel.panel-right {
-    min-width: 140px;
-    max-width: 98vw;
+    width: 200px;
+    position: fixed;
+    right: 0;
   }
 }
 

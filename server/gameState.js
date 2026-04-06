@@ -1,6 +1,7 @@
 'use strict';
 
-const GRID_SIZE = 15;
+const GRID_WIDTH = 30;
+const GRID_HEIGHT = 15;
 const MAX_PLACEMENT_ATTEMPTS = 200;
 
 const UNIT_TYPES = {
@@ -10,38 +11,132 @@ const UNIT_TYPES = {
 };
 
 const OBSTACLES = [
-  // Central vertical wall
-  { x: 7, y: 3, type: 'wall' }, { x: 7, y: 4, type: 'wall' }, { x: 7, y: 5, type: 'wall' },
-  { x: 7, y: 9, type: 'wall' }, { x: 7, y: 10, type: 'wall' }, { x: 7, y: 11, type: 'wall' },
-  // Left cover positions
-  { x: 3, y: 6, type: 'cover' }, { x: 3, y: 8, type: 'cover' },
-  { x: 4, y: 3, type: 'cover' }, { x: 4, y: 11, type: 'cover' },
-  // Right cover positions
-  { x: 11, y: 6, type: 'cover' }, { x: 11, y: 8, type: 'cover' },
-  { x: 10, y: 3, type: 'cover' }, { x: 10, y: 11, type: 'cover' },
-  // Mid horizontal wall
-  { x: 5, y: 7, type: 'wall' }, { x: 6, y: 7, type: 'wall' },
-  { x: 8, y: 7, type: 'wall' }, { x: 9, y: 7, type: 'wall' },
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONA IZQUIERDA (ALPHA - columnas 0-9)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Muros de spawn Alpha
+  { x: 2, y: 2, type: 'wall' }, { x: 2, y: 3, type: 'wall' },
+  { x: 2, y: 11, type: 'wall' }, { x: 2, y: 12, type: 'wall' },
+  
+  // Coberturas zona Alpha
+  { x: 1, y: 6, type: 'cover' }, { x: 1, y: 7, type: 'cover' },
+  { x: 3, y: 4, type: 'cover' }, { x: 3, y: 10, type: 'cover' },
+  { x: 4, y: 6, type: 'cover' }, { x: 4, y: 7, type: 'cover' },
+  
+  // Muros laterales izquierdos
+  { x: 5, y: 1, type: 'wall' }, { x: 5, y: 2, type: 'wall' }, { x: 5, y: 3, type: 'wall' },
+  { x: 5, y: 11, type: 'wall' }, { x: 5, y: 12, type: 'wall' }, { x: 5, y: 13, type: 'wall' },
+  
+  // Corredor izquierdo
+  { x: 6, y: 5, type: 'cover' }, { x: 6, y: 9, type: 'cover' },
+  { x: 7, y: 6, type: 'wall' }, { x: 7, y: 7, type: 'wall' },
+  { x: 8, y: 4, type: 'cover' }, { x: 8, y: 10, type: 'cover' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONA CENTRAL IZQUIERDA (columnas 10-14)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Muro vertical divisor 1
+  { x: 10, y: 0, type: 'wall' }, { x: 10, y: 1, type: 'wall' }, { x: 10, y: 2, type: 'wall' },
+  { x: 10, y: 12, type: 'wall' }, { x: 10, y: 13, type: 'wall' }, { x: 10, y: 14, type: 'wall' },
+  
+  // Coberturas centrales izquierda
+  { x: 11, y: 5, type: 'cover' }, { x: 11, y: 9, type: 'cover' },
+  { x: 12, y: 6, type: 'cover' }, { x: 12, y: 7, type: 'cover' },
+  { x: 13, y: 3, type: 'wall' }, { x: 13, y: 4, type: 'wall' },
+  { x: 13, y: 10, type: 'wall' }, { x: 13, y: 11, type: 'wall' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONA CENTRAL (columnas 14-16) - EL CRUCE
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Muro central principal
+  { x: 14, y: 0, type: 'wall' }, { x: 14, y: 1, type: 'wall' },
+  { x: 14, y: 13, type: 'wall' }, { x: 14, y: 14, type: 'wall' },
+  
+  { x: 15, y: 2, type: 'wall' }, { x: 15, y: 3, type: 'wall' }, { x: 15, y: 4, type: 'wall' },
+  { x: 15, y: 10, type: 'wall' }, { x: 15, y: 11, type: 'wall' }, { x: 15, y: 12, type: 'wall' },
+  
+  // Coberturas del cruce central
+  { x: 14, y: 6, type: 'cover' }, { x: 14, y: 7, type: 'cover' }, { x: 14, y: 8, type: 'cover' },
+  { x: 15, y: 6, type: 'cover' }, { x: 15, y: 7, type: 'cover' },
+  { x: 16, y: 5, type: 'cover' }, { x: 16, y: 8, type: 'cover' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONA CENTRAL DERECHA (columnas 16-20)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Muro vertical divisor 2
+  { x: 17, y: 3, type: 'wall' }, { x: 17, y: 4, type: 'wall' },
+  { x: 17, y: 10, type: 'wall' }, { x: 17, y: 11, type: 'wall' },
+  
+  { x: 18, y: 5, type: 'cover' }, { x: 18, y: 9, type: 'cover' },
+  { x: 19, y: 6, type: 'cover' }, { x: 19, y: 7, type: 'cover' },
+  
+  // Muro vertical divisor 3
+  { x: 20, y: 0, type: 'wall' }, { x: 20, y: 1, type: 'wall' }, { x: 20, y: 2, type: 'wall' },
+  { x: 20, y: 12, type: 'wall' }, { x: 20, y: 13, type: 'wall' }, { x: 20, y: 14, type: 'wall' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ZONA DERECHA (BRAVO - columnas 20-29)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Corredor derecho
+  { x: 21, y: 4, type: 'cover' }, { x: 21, y: 10, type: 'cover' },
+  { x: 22, y: 6, type: 'wall' }, { x: 22, y: 7, type: 'wall' },
+  { x: 23, y: 5, type: 'cover' }, { x: 23, y: 9, type: 'cover' },
+  
+  // Muros laterales derechos
+  { x: 24, y: 1, type: 'wall' }, { x: 24, y: 2, type: 'wall' }, { x: 24, y: 3, type: 'wall' },
+  { x: 24, y: 11, type: 'wall' }, { x: 24, y: 12, type: 'wall' }, { x: 24, y: 13, type: 'wall' },
+  
+  // Coberturas zona Bravo
+  { x: 25, y: 6, type: 'cover' }, { x: 25, y: 7, type: 'cover' },
+  { x: 26, y: 4, type: 'cover' }, { x: 26, y: 10, type: 'cover' },
+  { x: 28, y: 6, type: 'cover' }, { x: 28, y: 7, type: 'cover' },
+  
+  // Muros de spawn Bravo
+  { x: 27, y: 2, type: 'wall' }, { x: 27, y: 3, type: 'wall' },
+  { x: 27, y: 11, type: 'wall' }, { x: 27, y: 12, type: 'wall' },
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MUROS DE BORDE (arriba y abajo)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  // Esquinas
+  { x: 0, y: 0, type: 'wall' }, { x: 29, y: 0, type: 'wall' },
+  { x: 0, y: 14, type: 'wall' }, { x: 29, y: 14, type: 'wall' },
+  
+  // Muros superiores adicionales
+  { x: 7, y: 0, type: 'wall' }, { x: 8, y: 0, type: 'wall' },
+  { x: 21, y: 0, type: 'wall' }, { x: 22, y: 0, type: 'wall' },
+  
+  // Muros inferiores adicionales
+  { x: 7, y: 14, type: 'wall' }, { x: 8, y: 14, type: 'wall' },
+  { x: 21, y: 14, type: 'wall' }, { x: 22, y: 14, type: 'wall' },
 ];
 
 function createUnits() {
   return {
     alpha: [
-      { id: 'a1', team: 'alpha', type: 'HEAVY',  x: 1,  y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
-      { id: 'a2', team: 'alpha', type: 'SCOUT',  x: 2,  y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
-      { id: 'a3', team: 'alpha', type: 'SNIPER', x: 2,  y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
+      { id: 'a1', team: 'alpha', type: 'HEAVY',  x: 2,  y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
+      { id: 'a2', team: 'alpha', type: 'SCOUT',  x: 3,  y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
+      { id: 'a3', team: 'alpha', type: 'SNIPER', x: 3,  y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
     ],
     bravo: [
-      { id: 'b1', team: 'bravo', type: 'HEAVY',  x: 13, y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
-      { id: 'b2', team: 'bravo', type: 'SCOUT',  x: 12, y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
-      { id: 'b3', team: 'bravo', type: 'SNIPER', x: 12, y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
+      { id: 'b1', team: 'bravo', type: 'HEAVY',  x: 27, y: 7,  hp: 3, maxHp: 3, moveRange: 2, shootRange: 4, damage: 1, name: 'Artillería', inCover: false, acted: false },
+      { id: 'b2', team: 'bravo', type: 'SCOUT',  x: 26, y: 3,  hp: 2, maxHp: 2, moveRange: 4, shootRange: 3, damage: 1, name: 'Explorador', inCover: false, acted: false },
+      { id: 'b3', team: 'bravo', type: 'SNIPER', x: 26, y: 11, hp: 2, maxHp: 2, moveRange: 1, shootRange: 9, damage: 2, name: 'Francotirador', inCover: false, acted: false },
     ],
   };
 }
 
 function createGameState() {
   return {
-    gridSize: GRID_SIZE,
+    gridWidth: GRID_WIDTH,
+    gridHeight: GRID_HEIGHT,
+    gridSize: GRID_HEIGHT, // Para compatibilidad con código existente
     obstacles: OBSTACLES,
     units: createUnits(),
     currentTeam: 'alpha',
@@ -90,7 +185,7 @@ function hasLineOfSight(state, x1, y1, x2, y2) {
 }
 
 function isValidMove(state, unit, tx, ty) {
-  if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE) return false;
+  if (tx < 0 || tx >= GRID_WIDTH || ty < 0 || ty >= GRID_HEIGHT) return false;
   const dist = getDistance(unit.x, unit.y, tx, ty);
   if (dist > unit.moveRange || dist === 0) return false;
   const obs = getObstacleAt(state, tx, ty);
@@ -117,7 +212,7 @@ function applyMove(state, unit, tx, ty) {
 }
 
 function applyShoot(state, unit, tx, ty) {
-  if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE) {
+  if (tx < 0 || tx >= GRID_WIDTH || ty < 0 || ty >= GRID_HEIGHT) {
     return { success: false, message: 'Target out of bounds' };
   }
   const dist = getDistance(unit.x, unit.y, tx, ty);
@@ -174,13 +269,13 @@ function endTurn(state) {
 
 /**
  * Create a game state for AI games with randomized unit positions.
- * Alpha units are placed randomly on the left half (x: 0-6),
- * Bravo units are placed randomly on the right half (x: 8-14).
+ * Alpha units are placed randomly on the left third (x: 0-9),
+ * Bravo units are placed randomly on the right third (x: 20-29).
  */
 function createGameStateForAI() {
   const state = createGameState();
-  randomizeTeamPositions(state, 'alpha', 0, 6);
-  randomizeTeamPositions(state, 'bravo', 8, 14);
+  randomizeTeamPositions(state, 'alpha', 0, 9);
+  randomizeTeamPositions(state, 'bravo', 20, 29);
   return state;
 }
 
@@ -203,7 +298,7 @@ function randomizeTeamPositions(state, team, minX, maxX) {
     let placed = false;
     for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
       const x = minX + Math.floor(Math.random() * (maxX - minX + 1));
-      const y = Math.floor(Math.random() * GRID_SIZE);
+      const y = Math.floor(Math.random() * GRID_HEIGHT);
       const key = `${x},${y}`;
 
       if (!walls.has(key) && !usedPositions.has(key)) {

@@ -57,8 +57,9 @@ export class GameRenderer {
     this.hoveredCell = null;
     this.validCells = [];
     this.flashCells = []; // [{x,y,color,until}]
-    this.cellSize = 52; // Aumentado 30% desde 40
-    this.gridSize = 15;
+    this.cellSize = 50;
+    this.gridWidth = 30;
+    this.gridHeight = 15;
     this.gameLevel = 1; // 1 = Recluta, 2 = Ya sé poner BBs
     this.tacticalAdvantages = null; // Para nivel 2
     this.enemyCamouflage = false; // Estado de camuflaje del enemigo
@@ -66,14 +67,14 @@ export class GameRenderer {
   }
 
   _setupCanvas() {
-    const size = this.gridSize * this.cellSize;
-    this.canvas.width = size;
-    this.canvas.height = size;
+    this.canvas.width = this.gridWidth * this.cellSize;
+    this.canvas.height = this.gridHeight * this.cellSize;
   }
 
   updateState(gameState) {
     this.gameState = gameState;
-    this.gridSize = gameState.gridSize;
+    this.gridWidth = gameState.gridWidth || 30;
+    this.gridHeight = gameState.gridHeight || 18;
     this._updateCellSize();
     this.render();
   }
@@ -81,12 +82,13 @@ export class GameRenderer {
   _updateCellSize() {
     const container = this.canvas.parentElement;
     if (!container) return;
-    const available = Math.min(container.clientWidth - 24, container.clientHeight - 60);
-    const cs = Math.floor(available / this.gridSize);
-    this.cellSize = Math.max(31, Math.min(cs, 57)); // Aumentado 30%: de 24-44 a 31-57
-    const size = this.gridSize * this.cellSize;
-    this.canvas.width = size;
-    this.canvas.height = size;
+    const availableW = container.clientWidth - 24;
+    const availableH = container.clientHeight - 60;
+    const csW = Math.floor(availableW / this.gridWidth);
+    const csH = Math.floor(availableH / this.gridHeight);
+    this.cellSize = Math.max(28, Math.min(Math.min(csW, csH), 50));
+    this.canvas.width = this.gridWidth * this.cellSize;
+    this.canvas.height = this.gridHeight * this.cellSize;
   }
 
   selectUnit(unit) {
@@ -106,11 +108,13 @@ export class GameRenderer {
     if (!this.selectedUnit || !this.gameState) return [];
     const unit = this.selectedUnit;
     const cells = [];
-    const { gridSize, obstacles, units } = this.gameState;
+    const { gridWidth, gridHeight, obstacles, units } = this.gameState;
+    const gW = gridWidth || 30;
+    const gH = gridHeight || 18;
 
     if (action === 'move') {
-      for (let x = 0; x < gridSize; x++) {
-        for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gW; x++) {
+        for (let y = 0; y < gH; y++) {
           const dist = Math.abs(x - unit.x) + Math.abs(y - unit.y);
           if (dist === 0 || dist > unit.moveRange) continue;
           const obs = obstacles.find(o => o.x === x && o.y === y);
@@ -123,8 +127,8 @@ export class GameRenderer {
         }
       }
     } else if (action === 'shoot') {
-      for (let x = 0; x < gridSize; x++) {
-        for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gW; x++) {
+        for (let y = 0; y < gH; y++) {
           const dist = Math.abs(x - unit.x) + Math.abs(y - unit.y);
           if (dist === 0 || dist > unit.shootRange) continue;
           if (this._hasLOS(unit.x, unit.y, x, y)) cells.push({ x, y });
@@ -176,7 +180,7 @@ export class GameRenderer {
 
   render() {
     if (!this.gameState) return;
-    const { ctx, cellSize: cs, gridSize } = this;
+    const { ctx, cellSize: cs, gridWidth: gW, gridHeight: gH } = this;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Background
@@ -184,8 +188,8 @@ export class GameRenderer {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw cells
-    for (let x = 0; x < gridSize; x++) {
-      for (let y = 0; y < gridSize; y++) {
+    for (let x = 0; x < gW; x++) {
+      for (let y = 0; y < gH; y++) {
         this._drawCell(x, y, cs);
       }
     }
@@ -193,12 +197,14 @@ export class GameRenderer {
     // Draw grid lines
     ctx.strokeStyle = COLORS.gridLine;
     ctx.lineWidth = 0.5;
-    for (let i = 0; i <= gridSize; i++) {
+    for (let i = 0; i <= gW; i++) {
       ctx.beginPath();
-      ctx.moveTo(i * cs, 0); ctx.lineTo(i * cs, gridSize * cs);
+      ctx.moveTo(i * cs, 0); ctx.lineTo(i * cs, gH * cs);
       ctx.stroke();
+    }
+    for (let i = 0; i <= gH; i++) {
       ctx.beginPath();
-      ctx.moveTo(0, i * cs); ctx.lineTo(gridSize * cs, i * cs);
+      ctx.moveTo(0, i * cs); ctx.lineTo(gW * cs, i * cs);
       ctx.stroke();
     }
 
@@ -237,7 +243,7 @@ export class GameRenderer {
     }
 
     // Coordinate labels on border
-    this._drawCoordLabels(cs, gridSize);
+    this._drawCoordLabels(cs, gW, gH);
   }
 
   _drawCell(x, y, cs) {
@@ -543,7 +549,7 @@ export class GameRenderer {
     ctx.stroke();
   }
 
-  _drawCoordLabels(cs, gridSize) {
+  _drawCoordLabels(cs, gridWidth, gridHeight) {
     // Labels are drawn outside canvas in HTML, skip
   }
 }
